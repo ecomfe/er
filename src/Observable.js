@@ -1,4 +1,11 @@
-define(
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file 提供事件相关操作的基类
+ * @author otakustay
+ */
+ define(
     'Observable',
     function() {
         /**

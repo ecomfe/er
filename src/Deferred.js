@@ -1,4 +1,11 @@
-define(
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file Deferred类实现
+ * @author otakustay
+ */
+ define(
     'Deferred',
     function(require) {
         var util = require('./util');

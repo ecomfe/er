@@ -1,4 +1,11 @@
-define(
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file URL封闭类
+ * @author otakustay
+ */
+ define(
     'URL',
     function(require) {
         var util = require('./util');

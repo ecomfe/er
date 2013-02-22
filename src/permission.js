@@ -1,4 +1,11 @@
-define(
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file 权限管理对象
+ * @author otakustay
+ */
+ define(
     'permission',
     function() {
         var authorities = {};

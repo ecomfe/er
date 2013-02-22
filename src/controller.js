@@ -1,4 +1,11 @@
-define(
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file 控制器实现
+ * @author otakustay, erik
+ */
+ define(
     'controller',
     function(require) {
         var actionPathMapping = {}; // 用于根据URL找Action配置

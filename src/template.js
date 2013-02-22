@@ -1,34 +1,32 @@
-/*
-* ER (Enterprise RIA)
-* Copyright 2012 Baidu Inc. All rights reserved.
-* 
-* path: er/template.js
-* desc: 简易的、基于html注释的模板支持
-* author: erik, mytharcher
-* 
-* example:
-* <!-- target: targetName -->
-* <div>html fragment</div>
-* 
-* <!-- target: targetName2( master = masterName ) -->
-* <!-- content: header -->
-* title
-* <!-- content: content -->
-* <ul>
-* <!-- for: ${list} as ${item} -->
-* <li>${item} 
-* <!-- /for -->
-* </ul>
-*
-* <!-- master: masterName -->
-* <div class="header">
-* <!-- contentplaceholder: header -->
-* </div>
-* <div class="content">
-* <!-- contentplaceholder: content -->
-* </div>
-* 
-*/
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file 简易的、基于html注释的模板支持
+ * @author erik, mytharcher, otakustay
+ * 
+ * @example
+ *     <!-- target: targetName -->
+ *     <div>html fragment</div>
+ *     
+ *     <!-- target: targetName2( master = masterName ) -->
+ *     <!-- content: header -->
+ *     title
+ *     <!-- content: content -->
+ *     <ul>
+ *         <!-- for: ${list} as ${item} -->
+ *         <li>${item} 
+ *         <!-- /for -->
+ *     </ul>
+ *     
+ *     <!-- master: masterName -->
+ *     <div class="header">
+ *         <!-- contentplaceholder: header -->
+ *     </div>
+ *     <div class="content">
+ *         <!-- contentplaceholder: content -->
+ *     </div>
+ */
 
 
 // 这货是个状态机，所以特别放开一些限制

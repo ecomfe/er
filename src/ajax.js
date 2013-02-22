@@ -1,4 +1,11 @@
-define(
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file ajax相关方法
+ * @author otakustay
+ */
+ define(
     'ajax',
     function(require, module, exports) {
         function resolveURL(url, data) {

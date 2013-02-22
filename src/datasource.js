@@ -1,4 +1,11 @@
-define(
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file 获取数据相关的函数生产工厂
+ * @author otakustay
+ */
+ define(
     'datasource',
     function(require) {
         /**

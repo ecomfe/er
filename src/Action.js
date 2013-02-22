@@ -1,3 +1,10 @@
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file Action类声明
+ * @author otakustay
+ */
 define(
     'Action',
     function(require) {

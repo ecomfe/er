@@ -1,4 +1,11 @@
-define(
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file 路由器对象
+ * @author otakustay
+ */
+ define(
     'router',
     function(require) {
         var routes = [];

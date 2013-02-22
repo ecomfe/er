@@ -1,4 +1,11 @@
-define(
+/**
+ * ER (Enterprise RIA)
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ * 
+ * @file 地址监听器对象
+ * @author otakustay, erik
+ */
+ define(
     'locator',
     function(require) {
         /**
