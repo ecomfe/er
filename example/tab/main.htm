@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>标签页示例</title>
+    <link rel="stylesheet" href="css/all.css">
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.min.js"></script>
+    <script src="js/loader.js"></script>
+</head>
+<body>
+    <script src="../../src/config.js"></script>
+    <script src="../../src/Observable.js"></script>
+    <script src="../../src/locator.js"></script>
+    <h1>标签页示例</h1>
+    <p>本示例展示如何使用<code>router</code>组件，完成一个简单的<em>标签页切换</em>功能。</p>
+    <h2>示例</h2>
+    <div id="example">
+        <nav id="tabs">
+            <ul>
+                <li class="active"><a href="#intro">什么是 HTML5</a></li>
+                <li><a href="#born">HTML5 是如何起步的</a></li>
+                <li><a href="#feature">新特性</a></li>
+                <li><a href="#support">浏览器支持</a></li>
+            </ul>
+        </nav>
+        <section id="intro" class="active">
+            <p>HTML5 将成为 HTML、XHTML 以及 HTML DOM 的新标准。</p>
+            <p>HTML 的上一个版本诞生于 1999 年。自从那以后，Web 世界已经经历了巨变。</p>
+            <p>HTML5 仍处于完善之中。然而，大部分现代浏览器已经具备了某些 HTML5 支持。</p>
+        </section>
+        <section id="born">
+            <p>HTML5 是 W3C 与 WHATWG 合作的结果。</p>
+            <p><em>编者注：</em>W3C 指 World Wide Web Consortium，万维网联盟。</p>
+            <p><em>编者注：</em>WHATWG 指 Web Hypertext Application Technology Working Group。</p>
+            <p>WHATWG 致力于 web 表单和应用程序，而 W3C 专注于 XHTML 2.0。在 2006 年，双方决定进行合作，来创建一个新版本的 HTML。</p>
+            <p>为 HTML5 建立的一些规则：</p>
+            <ul>
+                <li>新特性应该基于 HTML、CSS、DOM 以及 JavaScript。</li>
+                <li>减少对外部插件的需求（比如 Flash）</li>
+                <li>更优秀的错误处理</li>
+                <li>更多取代脚本的标记</li>
+                <li>HTML5 应该独立于设备</li>
+                <li>开发进程应对公众透明</li>
+            </ul>
+        </section>
+        <section id="feature">
+            <p>HTML5 中的一些有趣的新特性：</p>
+            <ul>
+                <li>用于绘画的 canvas 元素</li>
+                <li>用于媒介回放的 video 和 audio 元素</li>
+                <li>对本地离线存储的更好的支持</li>
+                <li>新的特殊内容元素，比如 article、footer、header、nav、section</li>
+                <li>新的表单控件，比如 calendar、date、time、email、url、search</li>
+            </ul>
+        </section>
+        <section id="support">
+            <p>最新版本的 Safari、Chrome、Firefox 以及 Opera 支持某些 HTML5 特性。Internet Explorer 9 将支持某些 HTML5 特性。</p>
+        </section>
+    </div>
+    <script>
+        var locator = require('locator');
+        locator.on(
+            'redirect',
+            function(e) {
+                var target = e.url;
+                $('#tabs li').removeClass('active');
+                $('#tabs a[href="#' + target + '"]').parent().addClass('active');
+
+                $('#example > section').hide();
+                $('#' + target).show();
+            }
+        );
+    </script>
+</body>
+</html>

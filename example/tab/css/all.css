@@ -1,0 +1,11 @@
+section {
+    display: none;
+}
+section.active {
+    display: block;
+}
+
+li.active, 
+li.active > a {
+    color: #f00;
+}
