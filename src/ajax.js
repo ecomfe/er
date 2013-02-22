@@ -5,7 +5,7 @@
  * @file ajax相关方法
  * @author otakustay
  */
- define(
+define(
     'ajax',
     function(require, module, exports) {
         function resolveURL(url, data) {

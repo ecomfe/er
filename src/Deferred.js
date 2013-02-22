@@ -5,7 +5,7 @@
  * @file Deferred类实现
  * @author otakustay
  */
- define(
+define(
     'Deferred',
     function(require) {
         var util = require('./util');

@@ -5,7 +5,7 @@
  * @file Model类声明
  * @author otakustay
  */
- define(
+define(
     'Model',
     function(require) {
         /**

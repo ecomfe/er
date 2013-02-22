@@ -5,7 +5,7 @@
  * @file 路由器对象
  * @author otakustay
  */
- define(
+define(
     'router',
     function(require) {
         var routes = [];

@@ -5,7 +5,7 @@
  * @file View类声明
  * @author otakustay
  */
- define(
+define(
     'View',
     function(require) {
         var Observable = require('./Observable');

@@ -5,7 +5,7 @@
  * @file 系统相关配置
  * @author otakustay
  */
- define(
+define(
     'config',
     {
         iframeId: 'er-locator-iframe',

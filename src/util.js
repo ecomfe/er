@@ -5,7 +5,7 @@
  * @file 杂而乱的工具对象
  * @author otakustay
  */
- define(
+define(
     'util',
     function(require, module, exports) {
         /**
