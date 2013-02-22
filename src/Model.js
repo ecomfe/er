@@ -296,11 +296,14 @@
          * @param {Any=} value 对应的值，如果`key`是对象，则没有此参数
          */
         Model.prototype.set = function(key, value) {
-            if (typeof key === 'object') {
-                require('./util').mix(this._store, key);
+            if (arguments.length >= 2) {
+                this._store[key] = value;
             }
             else {
-                this._store[key] = value;
+                var extension = key;
+                for (var name in extension) {
+                    this.set(name, extension[name]);
+                }
             }
         };
 
