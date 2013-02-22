@@ -308,13 +308,16 @@
          * 
          * - 如果给定参数只有一个，使用这一个参数
          * - 如果给定多个参数，则提供一个数组包含这些参数
+         * 
+         * 本方法对参数的方法与`Array.prototyp.concat`相同，如果任意一个参数是数组则会展开
          *
-         * @param {Promise...} 需要组合的`Promise`对象
+         * @param {Promise|Array.<Promise>...} 需要组合的`Promise`对象或`Promise`对象数组
          * @return {Promise} 一个新的`Promise`对象
          */
         Deferred.join = function() {
             // 典型的异步并发归并问题，使用计数器来解决
-            var workingCount = arguments.length;
+            var workingUnits = [].concat.apply([], arguments);
+            var workingCount = workingUnits.length;
             var actionType = 'resolve';
             var result = [];
 
@@ -344,8 +347,8 @@
                 resolveOne.apply(this, arguments);
             }
 
-            for (var i = 0; i < arguments.length; i++) {
-                var unit = arguments[i];
+            for (var i = 0; i < workingUnits.length; i++) {
+                var unit = workingUnits[i];
                 unit.then(
                     util.bindFn(resolveOne, unit, i),
                     util.bindFn(rejectOne, unit, i)
