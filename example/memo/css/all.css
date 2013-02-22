@@ -1,0 +1,41 @@
+#list a {
+    display: inline-block;
+    margin: 0 10px;
+    text-decoration: none;
+    color: #069;
+}
+#list a:hover {
+    text-decoration: underline;
+}
+#list > li.complete {
+    text-decoration: line-through;
+}
+#submit {
+    cursor: default;
+    color: #069;
+}
+#submit:hover {
+    text-decoration: underline;
+}
+
+#color-red {
+    background-color: red;
+    text-indent: -500px;
+    display: inline-block;
+    margin: 0 10px;
+    width: 30px;
+}
+#color-green {
+    background-color: green;
+    text-indent: -500px;
+    display: inline-block;
+    margin: 0 10px;
+    width: 30px;
+}
+#color-blue {
+    background-color: blue;
+    text-indent: -500px;
+    display: inline-block;
+    margin: 0 10px;
+    width: 30px;
+}

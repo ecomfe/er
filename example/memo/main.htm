@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>备忘录示例</title>
+    <link rel="stylesheet" href="css/all.css">
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.min.js"></script>
+    <script src="js/loader.js"></script>
+</head>
+<body>
+    <script src="../../src/config.js"></script>
+    <script src="../../src/util.js"></script>
+    <script src="../../src/Observable.js"></script>
+    <script src="../../src/URL.js"></script>
+    <script src="../../src/locator.js"></script>
+    <script src="../../src/router.js"></script>
+    <h1>备忘录示例</h1>
+    <p>本示例展示如何使用<code>router</code>组件，完成一个简单的<em>标签页切换</em>功能。</p>
+    <h2>示例</h2>
+    <div id="example">
+        <ul id="list">
+        </ul>
+        <div id="command">
+            <div id="add-memo">
+                <input id="content" /><span id="submit">添加条目</span>
+            </div>
+            <div id="change-color">
+                <span>更换背景：</span>
+                <a id="color-red" href="#config~color=red">红色</a>
+                <a id="color-green" href="#config~color=green">绿色</a>
+                <a id="color-blue" href="#config~color=blue">蓝色</a>
+            </div>
+        </div>
+        <script>
+            var router = require('router');
+            var util = require('util');
+
+            var uid = 1024;
+
+            function addEntry(content) {
+                var id = uid++;
+                var html = [
+                    '<li data-id="' + id + '">',
+                        '<span>' + util.encodeHTML(content) + '</span>',
+                        '<a href="#complete~id=' + id + '">设置完成</a>',
+                        '<a href="#remove~id=' + id + '">删除</a>',
+                    '</li>'
+                ];
+                $('#list').append(html.join(''));
+            }
+
+            var routes = {
+                'add': function(url) {
+                    var content = url.getQuery('content');
+                    addEntry(content);
+                },
+                config: function(url) {
+                    var color = url.getQuery('color');
+                    $('#list').css('background-color', color);
+                },
+                complete: function(url) {
+                    var id = url.getQuery('id');
+                    $('#list li[data-id="' + id + '"]').addClass('complete');
+                },
+                remove: function(url) {
+                    var id = url.getQuery('id');
+                    $('#list li[data-id="' + id + '"]').remove();
+                }
+            };
+
+            for (var key in routes) {
+                router.add(key, routes[key]);
+            }
+            router.setBackup(function() { alert('Who\'s your daddy?'); });
+
+            $('#submit').on(
+                'click',
+                function() {
+                    var URL = require('URL');
+                    var url = URL.withQuery(
+                        'add', 
+                        { content: $('#content').val() }
+                    );
+                    var locator = require('locator');
+                    locator.redirect(url);
+                }
+            );
+
+            addEntry('回家路上打酱油');
+            addEntry('晚上10点一定要睡觉！');
+        </script>
+    </div>
+</body>
+</html>
