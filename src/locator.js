@@ -32,7 +32,9 @@
             // 在Firefox下获取会成为**abc=def**
             // 为了避免这一情况，需要从location.href中分解
             var index = location.href.indexOf('#');
-            var url = location.href.slice(index);
+            var url = index === -1 
+                ? ''
+                : location.href.slice(index);
 
             return url;
         }
