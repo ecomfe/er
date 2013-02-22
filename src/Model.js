@@ -50,6 +50,7 @@ define(
          */ 
         function loadSequence(model, datasource) {
             // 第一个Promise是直接成功的，以便开始第一块的加载
+            var Deferred = require('./Deferred');
             var loading = Deferred.resolved();
             for (var i = 0; i < datasource.length; i++) {
                 var unit = datasource[i];
@@ -87,6 +88,7 @@ define(
                 }
             }
 
+            var Deferred = require('./Deferred');
             return Deferred.join(workers);
         }
 
