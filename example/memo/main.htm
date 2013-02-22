@@ -71,7 +71,12 @@
             for (var key in routes) {
                 router.add(key, routes[key]);
             }
-            router.setBackup(function() { alert('Who\'s your daddy?'); });
+            function taunt(url) {
+                if (url.getPath() && url.getPath() !== '/') {
+                    alert('Who\'s your daddy?');
+                }
+            }
+            router.setBackup(taunt);
 
             $('#submit').on(
                 'click',
