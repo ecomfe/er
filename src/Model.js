@@ -87,7 +87,7 @@ define(
                 }
             }
 
-            return Deferred.join.apply(Deferred, workers);
+            return Deferred.join(workers);
         }
 
         /**
