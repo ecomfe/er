@@ -5,7 +5,7 @@
  * @file 地址监听器对象
  * @author otakustay, erik
  */
- define(
+define(
     'locator',
     function(require) {
         /**

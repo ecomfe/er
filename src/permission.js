@@ -5,7 +5,7 @@
  * @file 权限管理对象
  * @author otakustay
  */
- define(
+define(
     'permission',
     function() {
         var authorities = {};

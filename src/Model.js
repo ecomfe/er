@@ -5,7 +5,7 @@
  * @file Model类声明
  * @author otakustay
  */
- define(
+define(
     'Model',
     function(require) {
         /**
@@ -50,6 +50,7 @@
          */ 
         function loadSequence(model, datasource) {
             // 第一个Promise是直接成功的，以便开始第一块的加载
+            var Deferred = require('./Deferred');
             var loading = Deferred.resolved();
             for (var i = 0; i < datasource.length; i++) {
                 var unit = datasource[i];
@@ -87,7 +88,8 @@
                 }
             }
 
-            return Deferred.join.apply(Deferred, workers);
+            var Deferred = require('./Deferred');
+            return Deferred.join(workers);
         }
 
         /**

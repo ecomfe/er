@@ -30,11 +30,11 @@
 
 
 // 这货是个状态机，所以特别放开一些限制
-/*jshint maxdepth: 10 unused: false */
+/*jshint maxdepth: 10, unused: false */
 
 /**
-* 简易的模板解析器
-*/
+ * 简易的模板解析器
+ */
 define(
     'template',
     function(require) {

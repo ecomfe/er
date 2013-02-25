@@ -5,7 +5,7 @@
  * @file 获取数据相关的函数生产工厂
  * @author otakustay
  */
- define(
+define(
     'datasource',
     function(require) {
         /**

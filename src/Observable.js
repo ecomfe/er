@@ -5,7 +5,7 @@
  * @file 提供事件相关操作的基类
  * @author otakustay
  */
- define(
+define(
     'Observable',
     function() {
         /**

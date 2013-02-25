@@ -5,7 +5,7 @@
  * @file URL封闭类
  * @author otakustay
  */
- define(
+define(
     'URL',
     function(require) {
         var util = require('./util');

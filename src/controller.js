@@ -5,7 +5,7 @@
  * @file 控制器实现
  * @author otakustay, erik
  */
- define(
+define(
     'controller',
     function(require) {
         var actionPathMapping = {}; // 用于根据URL找Action配置

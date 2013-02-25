@@ -5,7 +5,7 @@
  * @file 简单的，仅调试期有效的断言库
  * @author otakustay
  */
- define(
+define(
     'assert',
     function() {
         if (window.DEBUG) {
