@@ -114,7 +114,8 @@
                 then: util.bindFn(this.then, this),
                 state: util.bindFn(this.state, this),
                 isRejected: util.bindFn(this.isRejected, this),
-                isResolved: util.bindFn(this.isResolved, this)
+                isResolved: util.bindFn(this.isResolved, this),
+                promise: util.bindFn(this.promise, this)
             };
         }
         
