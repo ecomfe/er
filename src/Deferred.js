@@ -169,7 +169,7 @@
          * 本方法相当于`.then(callback, null)，具体参考`then`方法的说明
          *
          * @param {function} callback 需要添加的回调函数
-         * @return {Deferred} 新的`Deferred`对象
+         * @return {Promise} 新的`Promise`对象
          */
         Deferred.prototype.done = function(callback) {
             return this.then(callback);
@@ -181,7 +181,7 @@
          * 本方法相当于`.then(null, callback)，具体参考`then`方法的说明
          *
          * @param {function} callback 需要添加的回调函数
-         * @return {Deferred} 新的`Deferred`对象
+         * @return {Promise} 新的`Promise`对象
          */
         Deferred.prototype.fail = function(callback) {
             return this.then(null, callback);
@@ -194,7 +194,7 @@
          * 本方法相当于`.then(callback, callback)，具体参考`then`方法的说明
          *
          * @param {function} callback 需要添加的回调函数
-         * @return {Deferred} 新的`Deferred`对象
+         * @return {Promise} 新的`Promise`对象
          */
         Deferred.prototype.always = function(callback) {
             return this.then(callback, callback);
@@ -203,7 +203,7 @@
         /**
          * 添加成功回调函数及可选的失败回调函数
          * 
-         * 该函数会返回一个新的`Deferred`对象，新`Deferred`对象将有以下行为：
+         * 该函数会返回一个新的`Promise`对象，新`Promise`对象将有以下行为：
          * 
          * - 当原有`Deferred`对象进入**resolved**状态时，执行`done`回调函数，
          *   并根据函数的返回值进行逻辑
@@ -223,7 +223,7 @@
          *
          * @param {function} done 成功时执行的回调函数
          * @param {function=} fail 失败时执行的回调函数，可选参数
-         * @return {Deferred} 新的`Deferred`对象
+         * @return {Promise} 新的`Promise`对象
          */
         Deferred.prototype.then = function(done, fail) {
             var deferred = new Deferred();
