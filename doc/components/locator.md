@@ -6,7 +6,7 @@ locator对象是框架逻辑的起点，用于实现针对URL的导航，管理�
 
 ![URL结构示意](../asset/url-structure.png)
 
-在er框架中，导航由其中的**hash**部分实现。locator的职责如下：
+在er框架中，导航由其中的 **hash** 部分实现。locator的职责如下：
 
 - 监听hash部分的变化，当发生变化时，触发相应事件。
 - 提供方法修改hash部分的值。
@@ -26,7 +26,7 @@ locator对象是框架逻辑的起点，用于实现针对URL的导航，管理�
 
 其中`options`参数可包含以下属性：
 
-- `{boolean} fource`：当该值为**true**时，假设给定的**url**与当前的地址相同，也会强制刷新从而触发**redirect**事件。
+- `{boolean} fource`：当该值为 **true** 时，假设给定的 **url** 与当前的地址相同，也会强制刷新从而触发 **redirect** 事件。
 
 ### reload方法
 
