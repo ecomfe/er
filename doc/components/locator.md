@@ -4,7 +4,7 @@ locator对象是框架逻辑的起点，用于实现针对URL的导航，管理�
 
 一个标准的URL串的结构如下：
 
-![../asset/url-structure.png](URL结构示意)
+![URL结构示意](../asset/url-structure.png)
 
 在er框架中，导航由其中的**hash**部分实现。locator的职责如下：
 
