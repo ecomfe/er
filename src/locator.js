@@ -58,7 +58,7 @@ define(
          * @param {string} url 需要进行更新的hash值
          * @return {boolean} 如果地址有过变更则返回true
          */
-        locator.updateURL = function(url) {
+        function updateURL(url) {
             var changed = currentLocation !== url;
 
             // 存储当前信息
@@ -71,7 +71,7 @@ define(
 
             currentLocation = url;
             return changed;
-        };
+        }
 
         /**
          * 执行重定向逻辑
@@ -95,7 +95,7 @@ define(
                 url = require('./config').indexURL;
             }
 
-            var isLocationChanged = locator.updateURL(url);
+            var isLocationChanged = updateURL(url);
             if (isLocationChanged || options.force) {
                 locator.fire('redirect', { url: url });
             }
