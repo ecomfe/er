@@ -114,8 +114,7 @@
                 then: util.bindFn(this.then, this),
                 state: util.bindFn(this.state, this),
                 isRejected: util.bindFn(this.isRejected, this),
-                isResolved: util.bindFn(this.isResolved, this),
-                isPromise: true
+                isResolved: util.bindFn(this.isResolved, this)
             };
         }
         
@@ -262,13 +261,6 @@
         Deferred.prototype.isRejected = function() {
             return this._state === 'rejected';
         };
-
-        /**
-         * 表示当前对象为Promise
-         *
-         * @type {boolean}
-         */
-        Deferred.prototype.isPromise = true;
 
         /**
          * 返回与当前对象关联的`Promise`对象
