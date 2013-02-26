@@ -177,6 +177,11 @@ define(
             return search.slice(1);
         };
 
+        /**
+         * 空的URL实例，用于减少对`new URL()`的调用
+         *
+         * @type {URL}
+         */
         URL.empty = new URL();
 
         return URL;
