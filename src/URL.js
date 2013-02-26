@@ -173,9 +173,11 @@ define(
                         + '=' + encodeURIComponent(value);
                 }
             }
-            return search.slice(1);
 
+            return search.slice(1);
         };
+
+        URL.empty = new URL();
 
         return URL;
     }
