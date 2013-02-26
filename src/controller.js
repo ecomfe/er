@@ -215,7 +215,7 @@ define(
             getPathByAction: function(actionType, query) {
                 var actionConfig = actionTypeMapping[actionType];
                 if (!actionConfig) {
-                    return '';
+                    return URL.empty;
                 }
 
                 return URL.withQuery(actionConfig.path, query);
