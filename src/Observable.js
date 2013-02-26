@@ -66,8 +66,8 @@ define(
          * 2. 按照事件注册时的先后顺序，依次执行类型为`type`的处理函数
          * 3. 按照事件注册时的先后顺序，依次执行类型为`*`的处理函数
          *
-         * @param {string} 事件类型
-         * @param {Object} 事件对象
+         * @param {string} type 事件类型
+         * @param {Object} event 事件对象
          */
         Observable.prototype.fire = function(type, event) {
             event = event || {};
