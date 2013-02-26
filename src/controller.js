@@ -15,7 +15,6 @@ define(
 
         var Deferred = require('./Deferred');
         var URL = require('./URL');
-        var util = require('./util');
         var config = require('./config');
         var assert = require('./assert');
 
@@ -106,9 +105,6 @@ define(
                 return loadAction(args);
             }
 
-            // TODO: 跳转逻辑是否合适放在`loadAction`中，
-            //       是否应当返回特定值供`enterAction`控制
-
             var loading = new Deferred();
             require(
                 actionConfig.type,
@@ -127,8 +123,6 @@ define(
                     var action = typeof SpecificAction === 'function'
                         ? new SpecificAction()
                         : SpecificAction;
-                    // TODO: 如果`SpecificAction`是对象，这里用`mix`是否合适
-                    util.mix(action, args);
                     loading.resolve(action, args);
                 }
             );
