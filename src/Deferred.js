@@ -214,7 +214,6 @@ define(
          * 
          * - 当函数返回非`null`或`undefined`时，使用返回值进入**resolved**状态
          * - 当函数抛出异常时，使用异常对象进入**rejected**状态
-         * - 当函数返回`null`或`undefined`时，使用原有的值进入**resolved**状态
          * 
          * 另如果当前`Deferred`对象不处在**pending**状态，则：
          * 
@@ -271,7 +270,6 @@ define(
          * 
          * - `done` / `fail` / `always` / `then`
          * - `state` / `isRejected` / `isResolved`
-         * - `isPromise`
          * 
          * 但`Promise`对象并不包改变`Deferred`对象的方法，包括：
          * 
