@@ -33,13 +33,6 @@ define(
         Action.prototype.context = null;
 
         /**
-         * 指定渲染当前Action的DOM容器的id
-         *
-         * @type {string}
-         */
-        Action.prototype.container = null;
-
-        /**
          * 指定对应的Model类型
          *
          * @type {function|null}
