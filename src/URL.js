@@ -146,6 +146,9 @@ define(
                 // 考虑到有可能因为未处理转义问题，
                 // 导致value中存在**=**字符，因此不使用`split`函数
                 var pair = pairs[i];
+                if (!pair) {
+                    continue;
+                }
                 var index = pair.indexOf('=');
                 // 没有**=**字符则认为值是**true**
                 if (index < 0) {
