@@ -106,7 +106,9 @@ define(
             }
 
             var loading = new Deferred();
-            require(
+            // local require有可能不支持`callback`参数，
+            // 这里强制使用global require
+            window.require(
                 actionConfig.type,
                 function(SpecificAction) {
                     // 未防止在加载Action模块的时候，用户的操作导致进入其它模块，
