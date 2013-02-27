@@ -38,7 +38,7 @@
 define(
     'template',
     function(require) {
-        var util = require('util');
+        var util = require('./util');
 
         /**
          * 随手写了个栈
@@ -1183,7 +1183,7 @@ define(
                 len = packs.length - 1,
                 topPackageName = packs.shift(),
                 win = window,
-                objOnDef = require('config').defaultModule,
+                objOnDef = require('./config').defaultModule,
                 variable,
                 objOnSelf,
                 objOnBase;
