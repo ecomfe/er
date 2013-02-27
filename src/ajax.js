@@ -25,7 +25,7 @@ define(
          * ajax模块
          */
         var ajax = {};
-        require('Observable').enable(ajax);
+        require('./Observable').enable(ajax);
 
         /**
          * 发起XMLHttpRequest请求
@@ -42,7 +42,7 @@ define(
          * 无论成功与否均会触发，且在`done`和`fail`之后
          * @param {number=} options.timeout 超时时间
          * @param {boolean=} options.cache 决定是否允许缓存
-         * @return {Object} 一个`FakeXHR`对象，
+         * @return {FakeXHR} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及`XMLHTTPRequest`对象的相应方法
          */
         ajax.request = function(options) {
@@ -73,6 +73,8 @@ define(
                      * 任意一个XMLHttpRequest请求失败时触发
                      *
                      * @event fail
+                     * @param {Object} e 事件对象
+                     * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
                      */
                     ajax.on('fail', { xhr: fakeXHR });
                 },
@@ -110,16 +112,13 @@ define(
                          * 任意一个XMLHttpRequest请求失败时触发
                          *
                          * @event fail
+                         * @param {Object} e 事件对象
+                         * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
                          */
                         ajax.on('done', { xhr: fakeXHR });
                     }
                     else {
                         requesting.reject(data, fakeXHR);
-                        /**
-                         * 任意一个XMLHttpRequest请求失败时触发
-                         *
-                         * @event fail
-                         */
                         ajax.on('fail', { xhr: fakeXHR });
                     }
                 }
