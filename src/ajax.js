@@ -7,7 +7,7 @@
  */
 define(
     'ajax',
-    function(require, module, exports) {
+    function(require, module, ajax) {
         /**
          * 生成XMLHttpRequest请求的最终URL
          *
@@ -20,6 +20,12 @@ define(
             var delimiter = (url.indexOf('?') >= 0 ? '&' : '?');
             return url + delimiter + query;
         }
+
+        /**
+         * ajax模块
+         */
+        var ajax = {};
+        require('Observable').enable(ajax);
 
         /**
          * 发起XMLHttpRequest请求
@@ -39,7 +45,7 @@ define(
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及`XMLHTTPRequest`对象的相应方法
          */
-        exports.request = function(options) {
+        ajax.request = function(options) {
             var assert = require('./assert');
             assert.hasProperty(options, url, 'url property is required');
 
@@ -63,6 +69,12 @@ define(
                 abort: function() {
                     xhr.abort();
                     requesting.reject(fakeXHR);
+                    /**
+                     * 任意一个XMLHttpRequest请求失败时触发
+                     *
+                     * @event fail
+                     */
+                    ajax.on('fail', { xhr: fakeXHR });
                 },
                 setRequestHeader: function(name, value) {
                     xhr.setRequestHeader(name, value);
@@ -94,9 +106,21 @@ define(
 
                     if (status >= 200 && status < 300 || status === 304) {
                         requesting.resolve(data, fakeXHR);
+                        /**
+                         * 任意一个XMLHttpRequest请求失败时触发
+                         *
+                         * @event fail
+                         */
+                        ajax.on('done', { xhr: fakeXHR });
                     }
                     else {
                         requesting.reject(data, fakeXHR);
+                        /**
+                         * 任意一个XMLHttpRequest请求失败时触发
+                         *
+                         * @event fail
+                         */
+                        ajax.on('fail', { xhr: fakeXHR });
                     }
                 }
             };
@@ -149,7 +173,7 @@ define(
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        exports.get = function(url, data, done, cache) {
+        ajax.get = function(url, data, done, cache) {
             var options = {
                 method: 'GET',
                 url: url,
@@ -170,7 +194,7 @@ define(
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        exports.post = function(url, data, done) {
+        ajax.post = function(url, data, done) {
             var options = {
                 method: 'POST',
                 url: url, 
@@ -188,7 +212,7 @@ define(
          * @param {string} url 发送的目标URL
          * @param {Object=} data 额外添加的参数
          */
-        exports.log = function(url, data) {
+        ajax.log = function(url, data) {
             var img = new Image();
             var pool = window.ER_LOG_POOL || (window.ER_LOG_POOL = {});
             var id = +new Date();
@@ -214,5 +238,7 @@ define(
             // 同时服务器也配合一下传递`Cache-Control: no-cache;`
             img.src = resolveURL(url, data);
         };
+
+        return ajax;
     }
 );
