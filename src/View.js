@@ -59,8 +59,6 @@ define(
             container && (container.innerHTML = '');
         };
 
-        // TODO: 是否需要repaint
-
         require('./util').inherits(View, Observable);
         return View;
     }

@@ -158,8 +158,8 @@ define(
          * @parma {URL} url 当前的URL对象
          */
         function forward(url) {
-            // TODO: 是否需要判断URL与currentURL是否相同（`locator`层有判断）
-
+            // 如果想要把这个方法暴露出去的话，
+            // 需要判断URL与currentURL是否相同（正常情况下`locator`层有判断）
             var context = {
                 referrer: currentURL,
                 url: url,
@@ -218,7 +218,5 @@ define(
                 require('./router').setBackup(forward);
             }
         };
-
-        // TODO: `loadSub`如何实现
     }
 );

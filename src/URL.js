@@ -29,7 +29,6 @@ define(
          * @param {string=} searchSeparator 分隔path与search的分隔符，默认为`~`
          */
         function URL(path, search, searchSeparator) {
-            // TODO: 是否真的有必要用闭包+函数实现，直接暴露属性是不是也合理
             path = path || '/';
             search = search || '';
             searchSeparator = searchSeparator || '~';
