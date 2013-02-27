@@ -109,7 +109,7 @@ define(
             // local require有可能不支持`callback`参数，
             // 这里强制使用global require
             window.require(
-                actionConfig.type,
+                [actionConfig.type],
                 function(SpecificAction) {
                     // 未防止在加载Action模块的时候，用户的操作导致进入其它模块，
                     // 这里需要判断当前的URL是否依旧是加载时指定的URL。

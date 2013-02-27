@@ -15,6 +15,10 @@
     }
 
     window.require = function(id, callback) {
+        if (id instanceof Array) {
+            id = id[0];
+        }
+
         if (id.indexOf('./') === 0) {
             id = id.substring(2);
         }
