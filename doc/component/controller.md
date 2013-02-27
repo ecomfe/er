@@ -6,6 +6,12 @@ controller对象同时还负责根据Action和访问参数反向生成URL，以�
 
 ## 方法
 
+### start方法
+
+`start`方法指定controller对象开始工作。
+
+如果一个系统同时使用locator、router和controller对象，则其启动顺序应当是 **controller -> router -> locator** 。
+
 ### registerAction方法
 
 `registerAction`方法向controller对象注册一个Action的配置，其签名如下：

@@ -13,6 +13,12 @@ locator对象是框架逻辑的起点，用于实现针对URL的导航，管理�
 
 ## 方法
 
+### start方法
+
+`start`方法指定locator对象开始工作。
+
+如果一个系统同时使用locator、router和controller对象，则其启动顺序应当是 **controller -> router -> locator** 。
+
 ### redirect方法
 
 `redirect`方法用于跳转到指定的URL，其签名如下：

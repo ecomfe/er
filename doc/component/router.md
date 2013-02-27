@@ -8,6 +8,12 @@ router对象称为路由器，但与普通的MVC框架中的路由器有着显�
 
 ## 方法
 
+### start方法
+
+`start`方法指定router对象开始工作。
+
+如果一个系统同时使用locator、router和controller对象，则其启动顺序应当是 **controller -> router -> locator** 。
+
 ### add方法
 
 `add`方法用于添加一个路由规则，其签名如下：
