@@ -174,17 +174,6 @@ define(
             loading.done(enterAction);
         }
 
-        /**
-         * 开始`controller`对象的工作
-         */
-        function start() {
-            // 干脆接管所有路由
-            require('./router').setBackup(forward);
-        }
-
-        start(); 
-        // TODO: 是否由用户决定调用
-
         return {
             /**
              * 注册一个Action
@@ -219,6 +208,14 @@ define(
                 }
 
                 return URL.withQuery(actionConfig.path, query);
+            },
+
+            /**
+             * 开始`controller`对象的工作
+             */
+            start: function() {
+                // 干脆接管所有路由
+                require('./router').setBackup(forward);
             }
         };
 

@@ -113,14 +113,7 @@ define(
         /**
          * 开始`locator`对象的工作
          */
-        function start() {
-            // 处理初次进入的hash
-            // TODO: 这里这么做不合适，
-            //       因为不知道这里开始执行到`router`等加载完要多久，
-            //       因此可能还是必须让用户调用各对象的`start`函数
-            //       这样保证`controller`、`router`、`locator`依次开始即可
-            setTimeout(forwardHash, 0);
-
+        locator.start = function() {
             // 如果有hashchange事件则使用事件，否则定时监听
             if (window.addEventListener) {
                 window.addEventListener('hashchange', forwardHash);
@@ -131,11 +124,12 @@ define(
             else {
                 setInterval(forwardHash, 100);
             }
-        }
+
+            // 处理初次进入的hash
+            setTimeout(forwardHash, 0);
+        };
 
         require('./Observable').enable(locator);
-        // TODO: 是立即开始还是由用户主动调用，如果主动调用，是否只能调用一次
-        start();
         return locator;
     }
 );

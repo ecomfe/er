@@ -12,6 +12,31 @@ define(
         var backup = null;
 
         /**
+         * 在`locator`的`redirect`事件中，执行路由逻辑
+         *
+         * @param {Object} e 事件对象
+         */
+        function executeRoute(e) {
+            var url = require('./URL').parse(e.url);
+            var path = url.getPath();
+            for (var i = 0; i < routes.length; i++) {
+                var route = routes[i];
+
+                if ((route.rule instanceof RegExp 
+                    && route.rule.test(path))
+                    || route.rule === path
+                ) {
+                    route.handler.call(null, url);
+                    return;
+                }
+            }
+
+            if (backup) {
+                backup.call(null, url);
+            }
+        }
+
+        /**
          * 路由器对象
          * 
          * 路由用于将特定的URL对应到特定的函数上，
@@ -41,43 +66,15 @@ define(
              */
             setBackup: function(handler) {
                 backup = handler;
+            },
+
+            /**
+             * 开始`router`对象的工作
+             */
+            start: function() {
+                require('./locator').on('redirect', executeRoute);
             }
         };
-
-        /**
-         * 在`locator`的`redirect`事件中，执行路由逻辑
-         *
-         * @param {Object} e 事件对象
-         */
-        function executeRoute(e) {
-            var url = require('./URL').parse(e.url);
-            var path = url.getPath();
-            for (var i = 0; i < routes.length; i++) {
-                var route = routes[i];
-
-                if ((route.rule instanceof RegExp 
-                    && route.rule.test(path))
-                    || route.rule === path
-                ) {
-                    route.handler.call(null, url);
-                    return;
-                }
-            }
-
-            if (backup) {
-                backup.call(null, url);
-            }
-        }
-
-        /**
-         * 开始`router`对象的工作
-         */
-        function start() {
-            require('./locator').on('redirect', executeRoute);
-        }
-
-        // TODO: 是否由用户主动调用
-        start();
 
         return router;
     }
