@@ -100,6 +100,8 @@ define(
          * Deferred类
          * 
          * 类似于jQuery的Deferred对象，是对异步操作的一种封装
+         *
+         * @constructor
          */
         function Deferred() {
             this._state = 'pending';
@@ -120,11 +122,11 @@ define(
         }
         
         /**
-         * 判断一个对象是否是一个`Promise`
+         * 判断一个对象是否是一个`Promise`对象
          * 
          * 该方法采用灵活的判断方式，并非要求`value`为`Deferred`的实例
          *
-         * @param {Any} value 需要判断的对象
+         * @param {*} value 需要判断的对象
          * @return {boolean} 如果`value`是`Promise`对象，则返回true
          */
         Deferred.isPromise = function(value) {
@@ -134,7 +136,8 @@ define(
         /**
          * 将当前对象状态设置为**resolved**，并执行所有成功回调函数
          *
-         * @param {Any...} args 执行回调时的参数
+         * @param {...*} args 执行回调时的参数
+         * @public
          */
         Deferred.prototype.resolve = function() {
             if (this._state !== 'pending') {
@@ -150,7 +153,8 @@ define(
         /**
          * 将当前对象状态设置为**rejected**，并执行所有失败回调函数
          *
-         * @param {Any...} args 执行回调时的参数
+         * @param {...*} args 执行回调时的参数
+         * @public
          */
         Deferred.prototype.reject = function() {
             if (this._state !== 'pending') {
@@ -170,6 +174,7 @@ define(
          *
          * @param {function} callback 需要添加的回调函数
          * @return {Promise} 新的`Promise`对象
+         * @public
          */
         Deferred.prototype.done = function(callback) {
             return this.then(callback);
@@ -182,6 +187,7 @@ define(
          *
          * @param {function} callback 需要添加的回调函数
          * @return {Promise} 新的`Promise`对象
+         * @public
          */
         Deferred.prototype.fail = function(callback) {
             return this.then(null, callback);
@@ -195,6 +201,7 @@ define(
          *
          * @param {function} callback 需要添加的回调函数
          * @return {Promise} 新的`Promise`对象
+         * @public
          */
         Deferred.prototype.always = function(callback) {
             return this.then(callback, callback);
@@ -220,9 +227,10 @@ define(
          * - 如果处在**resolved**状态，则成功回调函数会被立即异步执行
          * - 如果处在**rejected**状态，则失败回调函数会被立即异步执行
          *
-         * @param {function} done 成功时执行的回调函数
+         * @param {?function} done 成功时执行的回调函数
          * @param {function=} fail 失败时执行的回调函数，可选参数
          * @return {Promise} 新的`Promise`对象
+         * @public
          */
         Deferred.prototype.then = function(done, fail) {
             var deferred = new Deferred();
@@ -239,6 +247,7 @@ define(
          * 获取当前对象的状态
          *
          * @return {string} 返回**pending**、**resolved**或**rejected**
+         * @public
          */
         Deferred.prototype.state = function() {
             return this._state;
@@ -248,6 +257,7 @@ define(
          * 判断当前对象是否处在**resolved**状态
          *
          * @return {boolean} 表示当前对象是否处在**resolved**状态
+         * @public
          */
         Deferred.prototype.isResolved = function() {
             return this._state === 'resolved';
@@ -257,6 +267,7 @@ define(
          * 判断当前对象是否处在**rejected**状态
          *
          * @return {boolean} 表示当前对象是否处在**rejected**状态
+         * @public
          */
         Deferred.prototype.isRejected = function() {
             return this._state === 'rejected';
@@ -277,6 +288,7 @@ define(
          * - `reject`
          *
          * @return {Promise} 一个Promise对象
+         * @public
          */
         Deferred.prototype.promise = function() {
             return this._promise;
@@ -300,9 +312,10 @@ define(
          * - 如果给定参数只有一个，使用这一个参数
          * - 如果给定多个参数，则提供一个数组包含这些参数
          * 
-         * 本方法对参数的方法与`Array.prototyp.concat`相同，如果任意一个参数是数组则会展开
+         * 本方法对参数的方法与`Array.prototyp.concat`相同，
+         * 如果任意一个参数是数组则会展开
          *
-         * @param {Promise|Array.<Promise>...} 需要组合的`Promise`对象或`Promise`对象数组
+         * @param {...Promise | ...Array.<Promise>} 需要组合的`Promise`对象
          * @return {Promise} 一个新的`Promise`对象
          */
         Deferred.join = function() {
@@ -352,7 +365,7 @@ define(
         /**
          * 返回一个已经处于**resolved**状态的`Promise`对象
          *
-         * @param {Any...} 用于调用`resolve`方法的参数
+         * @param {...*} 用于调用`resolve`方法的参数
          * @return {Promise} 一个已经处于**resolved**状态的`Promise`对象
          */
         Deferred.resolved = function() {
@@ -364,7 +377,7 @@ define(
         /**
          * 返回一个已经处于**rejected**状态的`Promise`对象
          *
-         * @param {Any...} 用于调用`reject`方法的参数
+         * @param {...*} 用于调用`reject`方法的参数
          * @return {Promise} 一个已经处于**rejected**状态的`Promise`对象
          */
         Deferred.rejected = function() {

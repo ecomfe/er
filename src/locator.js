@@ -25,12 +25,14 @@ define(
 
         /**
          * 获取URL中的hash值
+         *
+         * @return {string} 当前URL中的hash值
          */
         function getLocation() {
             // Firefox下`location.hash`存在自动解码的情况，
             // 比如hash的值是**abc%3def**，
             // 在Firefox下获取会成为**abc=def**
-            // 为了避免这一情况，需要从location.href中分解
+            // 为了避免这一情况，需要从`location.href`中分解
             var index = location.href.indexOf('#');
             var url = index === -1 
                 ? ''
@@ -76,9 +78,9 @@ define(
         /**
          * 执行重定向逻辑
          *
-         * @param {string|URL} url 重定向的地址
+         * @param {string | URL} url 重定向的地址
          * @param {Object=} options 额外附加的参数对象
-         * @param {boolean} options.force 确定当跳转地址不变时是否强制刷新
+         * @param {boolean=} options.force 确定当跳转地址不变时是否强制刷新
          */
         locator.redirect = function(url, options) {
             options = options || {};
@@ -97,6 +99,13 @@ define(
 
             var isLocationChanged = updateURL(url);
             if (isLocationChanged || options.force) {
+                /**
+                 * URL跳转时触发
+                 *
+                 * @event redirect
+                 * @param {Object} e 事件对象
+                 * @param {string} e.url 当前的URL
+                 */
                 locator.fire('redirect', { url: url });
             }
         };

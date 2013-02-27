@@ -8,6 +8,12 @@
 define(
     'ajax',
     function(require, module, exports) {
+        /**
+         * 生成XMLHttpRequest请求的最终URL
+         *
+         * @param {string} url 请求的目标URL
+         * @param {Object=} data 需要添加的参数
+         */
         function resolveURL(url, data) {
             var URL = require('./URL');
             var query = URL.serialize(data);
@@ -23,15 +29,15 @@ define(
          * @param {string=} options.method 请求的类型
          * @param {Object=} options.data 请求的数据
          * @param {string=} options.dataType 返回数据的类型，
-         *     可以为**json**或**text**，默认为**json**
+         * 可以为**json**或**text**，默认为**json**
          * @param {function=} options.done 请求成功后的回调函数
          * @param {function=} options.fail 请求失败后的回调函数
          * @param {function=} options.complete 请求完成时的回调函数，
-         *     无论成功与否均会触发，且在`done`和`fail`之后
+         * 无论成功与否均会触发，且在`done`和`fail`之后
          * @param {number=} options.timeout 超时时间
          * @param {boolean=} options.cache 决定是否允许缓存
          * @return {Object} 一个`FakeXHR`对象，
-         *     该对象有Promise的所有方法，以及`XMLHTTPRequest`对象的相应方法
+         * 该对象有Promise的所有方法，以及`XMLHTTPRequest`对象的相应方法
          */
         exports.request = function(options) {
             var assert = require('./assert');
@@ -141,7 +147,7 @@ define(
          * @param {function=} done 请求成功后的回调函数
          * @param {boolean=} cache 决定是否允许缓存
          * @return {Object} 一个`FakeXHR`对象，
-         *     该对象有Promise的所有方法，以及一个`abort`方法
+         * 该对象有Promise的所有方法，以及一个`abort`方法
          */
         exports.get = function(url, data, done, cache) {
             var options = {
@@ -162,7 +168,7 @@ define(
          * @param {Object=} data 请求的数据
          * @param {function=} done 请求成功后的回调函数
          * @return {Object} 一个`FakeXHR`对象，
-         *     该对象有Promise的所有方法，以及一个`abort`方法
+         * 该对象有Promise的所有方法，以及一个`abort`方法
          */
         exports.post = function(url, data, done) {
             var options = {
@@ -176,6 +182,12 @@ define(
 
         // TODO: 实现个jsonp
 
+        /**
+         * 发送一个日志请求，该请求只负责发出，不负责保证送达，且不支持回调函数
+         *
+         * @param {string} url 发送的目标URL
+         * @param {Object=} data 额外添加的参数
+         */
         exports.log = function(url, data) {
             var img = new Image();
             var pool = window.ER_LOG_POOL || (window.ER_LOG_POOL = {});
@@ -189,8 +201,9 @@ define(
 
                 pool[id] = null;
 
-                // 下面这句非常重要
-                // new Image创建的是DOM，DOM的事件中形成闭包环引用DOM是典型的内存泄露
+                // 下面这句非常重要，
+                // new Image创建的是DOM，
+                // DOM的事件中形成闭包环引用DOM是典型的内存泄露，
                 // 因此这里一定要置为null
                 img = null;
             };

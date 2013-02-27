@@ -147,6 +147,7 @@ define(
          * 该Model类为一个通用的可配置的基类，提供了数据加载的相关方法
          *
          * @constructor
+         * @extends Observable
          * @param {Object=} context 初始化的数据
          */
         function Model(context) {
@@ -249,6 +250,9 @@ define(
          * 
          * - 普通的函数，映射为`{ retrieve: {fn}, dump: true }`
          * - 对象中的一个属性，映射为`{ retrieve: {fn}, key: {key} }`
+         *
+         * @type {?Object | ?Array | ?function}
+         * @protected
          */
         Model.prototype.datasource = null;
 
@@ -256,6 +260,7 @@ define(
          * 加载当前Model
          * 
          * @return {Promise} `Promise`对象，在数据加载且`prepare`方法执行后触发
+         * @public
          */
         Model.prototype.load = function() {
             var loading = load(this, this.datasource);
@@ -277,6 +282,10 @@ define(
          * 该方法默认不执行任何逻辑
          * 
          * 如果在`prepare`方法中有异步的操作，可以让方法返回一个`Promise`对象
+         *
+         * @return {?Promise} 如果`prepare`的逻辑中有异步操作，
+         * 则返回一个`Promise`对象，通知调用者等待
+         * @protected
          */
         Model.prototype.prepare = function() {
         };
@@ -285,7 +294,8 @@ define(
          * 获取对应键的值
          *
          * @param {string} key 键名
-         * @return {Any} `key`对应的值
+         * @return {*} `key`对应的值
+         * @public
          */
         Model.prototype.get = function(key) {
             return this._store[key];
@@ -294,8 +304,9 @@ define(
         /**
          * 设置值
          *
-         * @param {string|Object} key 键名，如果是对象，则把对象里的每个键加入
-         * @param {Any=} value 对应的值，如果`key`是对象，则没有此参数
+         * @param {string | Object} key 键名，如果是对象，则把对象里的每个键加入
+         * @param {*=} value 对应的值，如果`key`是对象，则没有此参数
+         * @public
          */
         Model.prototype.set = function(key, value) {
             if (arguments.length >= 2) {
@@ -313,7 +324,8 @@ define(
          * 删除对应键的值
          *
          * @param {string} key 键名
-         * @return {Any} 在删除前`key`对应的值
+         * @return {*} 在删除前`key`对应的值
+         * @public
          */
         Model.prototype.remove = function(key) {
             var value = this._store[key];
@@ -326,6 +338,7 @@ define(
          *
          * @param {string} key 键名
          * @return {Model} `key`对应的值组装成的新的`Model`对象
+         * @public
          */
         Model.prototype.getAsModel = function(key) {
             var value = this.get(key);
@@ -336,6 +349,8 @@ define(
          * 将当前`Model`对象展出为一个普通的对象
          *
          * @return {Object} 一个普通的对象，修改该对象不会影响到当前`Model`对象
+         * @public
+         * @override
          */
         Model.prototype.valueOf = function() {
             // 为保证`valueOf`获取对象后修改不会影响到当前`Model`对象，
@@ -348,6 +363,7 @@ define(
          * 克隆当前`Model`对象，产生一个新的`Model`对象
          *
          * @return {Model} 克隆后的新`Model`对象
+         * @public
          */
         Model.prototype.clone = function() {
             return new Model(this._store);

@@ -10,16 +10,19 @@ define(
     function() {
         /**
          * 提供与事件相关的操作的基类
+         *
+         * @constructor
          */
-        var Observable = function() {
+        function Observable() {
             this._events = {};
-        };
+        }
 
         /**
          * 注册一个事件处理函数
          *
          * @param {string} type 事件的类型，如果类型为`*`则在所有事件触发时执行
          * @param {function} handler 事件的处理函数
+         * @public
          */
         Observable.prototype.on = function(type, handler) {
             var pool = this._events[type];
@@ -33,10 +36,10 @@ define(
         /**
          * 注销一个事件处理函数
          * @param {string} type 事件的类型，
-         *     如果值为`*`仅会注销通过`*`为类型注册的事件，
-         *     并不会将所有事件注销
+         * 如果值为`*`仅会注销通过`*`为类型注册的事件，并不会将所有事件注销
          * @param {function=} handler 事件的处理函数，
-         *     无此参数则注销`type`指定类型的所有事件处理函数
+         * 无此参数则注销`type`指定类型的所有事件处理函数
+         * @public
          */
         Observable.prototype.un = function(type, handler) {
             if (!handler) {
@@ -68,6 +71,7 @@ define(
          *
          * @param {string} type 事件类型
          * @param {Object} event 事件对象
+         * @public
          */
         Observable.prototype.fire = function(type, event) {
             event = event || {};
@@ -104,7 +108,7 @@ define(
         /**
          * 在无继承关系的情况下，使一个对象拥有事件处理的功能
          * 
-         * @param {Any} target 需要支持事件处理功能的对象
+         * @param {*} target 需要支持事件处理功能的对象
          */
         Observable.enable = function(target) {
             target._events = [];

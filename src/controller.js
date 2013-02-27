@@ -24,7 +24,7 @@ define(
          * - 权限可以是一个数组，此时用户拥有数组中任意一项权限即认为有权限
          * - 权限也可以是个字符串，将各权限通过**|**字符分割
          *
-         * @param {Array<string>|string} authority 权限配置
+         * @param {Array.<string> | string} authority 权限配置
          */
         function checkAuthority(authority) {
             if (!authority) {
@@ -49,8 +49,8 @@ define(
          * 根据URL加载对应的Action对象
          *
          * @param {Object} args 调用Action的初始化参数
-         * @return {Promise|null} 如果有相应的Action配置，返回一个Promise对象，
-         *     当Action实例创建完毕后会执行`resolve`操作。否则返回null
+         * @return {?Promise} 如果有相应的Action配置，返回一个Promise对象，
+         * 当Action实例创建完毕后会执行`resolve`操作。否则返回**null**
          */
         function loadAction(args) {
             var path = args.url.getPath();
@@ -183,6 +183,9 @@ define(
              * @param {Object} config Action的相关配置
              * @param {string} config.type Action对应模块的id
              * @param {string} config.path 对应的URL的path部分
+             * @param {string=} config.movedTo 设定Action跳转至其它路径
+             * @param {Array.<string>= | string=} config.authority 访问权限
+             * @param {string=} noAuthorityLocation 无权限时的跳转路径
              */
             registerAction: function(config) {
                 assert.hasProperty(

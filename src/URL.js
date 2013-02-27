@@ -35,6 +35,10 @@ define(
 
             /**
              * 获取完整URL字符串
+             *
+             * @return {string} 当前URL的完整字符串表示
+             * @public
+             * @override
              */
             this.toString = function() {
                 return search ? (path + searchSeparator + search) : path;
@@ -42,6 +46,9 @@ define(
 
             /**
              * 获取path部分
+             *
+             * @return {string} URL中的path部分
+             * @public
              */
             this.getPath = function() {
                 return path;
@@ -49,6 +56,9 @@ define(
 
             /**
              * 获取search部分
+             *
+             * @return {string} URL中的search部分
+             * @public
              */
             this.getSearch = function() {
                 return search;
@@ -59,7 +69,8 @@ define(
              * 获取参数对象或指定参数的值
              * 
              * @param {string=} key 指定参数的名称，不传该参数则返回整个参数对象
-             * @return {Any} 如果有`key`参数则返回对应值，否则返回参数对象的副本
+             * @return {string | Object} 如果有`key`参数则返回对应值，
+             * 否则返回参数对象的副本
              */
             this.getQuery = function(key) {
                 if (!query) {
@@ -76,8 +87,8 @@ define(
          *
          * @param {string} url 完整的URL
          * @param {Object=} options 控制解析行为的相关参数
-         * @param {string} options.querySeparator 用于分隔path和search的字符
-         * @return {Object} 一个URL对象
+         * @param {string=} options.querySeparator 用于分隔path和search的字符
+         * @return {URL} 一个URL对象
          */
         URL.parse = function(url, options) {
             var defaults = { querySeparator: '~' };
@@ -103,8 +114,8 @@ define(
          * @param {string} path URL的path部分
          * @param {Object} query URL的参数对象
          * @param {Object=} options 控制解析行为的相关参数
-         * @param {string} options.querySeparator 用于分隔path和search的字符
-         * @return {Object} 一个URL对象
+         * @param {string=} options.querySeparator 用于分隔path和search的字符
+         * @return {URL} 一个URL对象
          */
         URL.withQuery = function(path, query, options) {
             var defaults = { querySeparator: '~' };
@@ -180,6 +191,7 @@ define(
          * 空的URL实例，用于减少对`new URL()`的调用
          *
          * @type {URL}
+         * @const
          */
         URL.empty = new URL();
 

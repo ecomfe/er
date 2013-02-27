@@ -15,6 +15,7 @@ define(
          * 在`locator`的`redirect`事件中，执行路由逻辑
          *
          * @param {Object} e 事件对象
+         * @param {string} e.url 当前的URL
          */
         function executeRoute(e) {
             var url = require('./URL').parse(e.url);
@@ -48,11 +49,11 @@ define(
          * - 当使用正则表达式作为规则时，URL的path部分匹配该正则
          * - 当所有路由规则均不匹配某个URL时，会调用`backup`函数
          */
-        var router = {
+        return {
             /**
              * 添加一条路由规则
              *
-             * @param {string|RegExp} 匹配URL的path部分的字符串或正则表达式
+             * @param {string | RegExp} 匹配URL的path部分的字符串或正则表达式
              * @param {function} handler 匹配成功时执行的函数
              */
             add: function(rule, handler) {
@@ -75,7 +76,5 @@ define(
                 require('./locator').on('redirect', executeRoute);
             }
         };
-
-        return router;
     }
 );

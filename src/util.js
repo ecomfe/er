@@ -12,7 +12,7 @@ define(
          * 混合多个对象
          *
          * @param {Object} source 源对象
-         * @param {Object...} destinations 用于混合的对象
+         * @param {...Object} destinations 用于混合的对象
          * @return 返回混合了`destintions`属性的`source`对象
          */
         exports.mix = function(source) {
@@ -32,8 +32,8 @@ define(
          * 固定函数的`this`变量和若干参数
          *
          * @param {function} fn 操作的目标函数
-         * @param {Any} context 函数的`this`变量
-         * @param {Any...} args 固定的参数
+         * @param {*} context 函数的`this`变量
+         * @param {...*} args 固定的参数
          * @return {function} 固定了`this`变量和若干参数后的新函数对象
          */
         exports.bindFn = nativeBind
@@ -52,6 +52,7 @@ define(
          * 空函数
          *
          * @type {function}
+         * @const
          */
         exports.noop = function() {};
 
@@ -82,7 +83,7 @@ define(
          * 将一段文本变为JSON对象
          *
          * @param {string} text 文本内容
-         * @return {Any} 对应的JSON对象
+         * @return {*} 对应的JSON对象
          */
         exports.parseJSON = function(text) {
             if (window.JSON && typeof JSON.parse === 'function') {

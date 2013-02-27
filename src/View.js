@@ -9,6 +9,7 @@ define(
     'View',
     function(require) {
         var Observable = require('./Observable');
+
         /**
          * View类声明
          * 
@@ -16,6 +17,9 @@ define(
          * 任何有一个名为`render`的方法的对象均可作为View
          * 
          * 该类结合`template`对象，实现了一个通用的RIA视图方案
+         *
+         * @constructor
+         * @extends Observable
          */
         function View() {
             Observable.apply(this, arguments);
@@ -25,13 +29,15 @@ define(
          * 对应的模板
          *
          * @type {string}
+         * @public
          */
         View.prototype.template = '';
 
         /**
          * 对应的Model对象
          *
-         * @type {Any}
+         * @type {*}
+         * @public
          */
         View.prototype.model = null;
 
@@ -39,11 +45,14 @@ define(
          * 渲染容器的元素的id
          *
          * @type {string}
+         * @public
          */
         View.prototype.container = '';
 
         /**
          * 渲染当前视图
+         *
+         * @public
          */
         View.prototype.render = function() {
             var container = document.getElementById(this.container);
@@ -53,6 +62,8 @@ define(
 
         /**
          * 销毁当前视图
+         *
+         * @public
          */
         View.prototype.dispose = function() {
             var container = document.getElementById(this.container);
