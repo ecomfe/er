@@ -1,6 +1,6 @@
 /**
  * ER (Enterprise RIA)
- * Copyright 2012 Baidu Inc. All rights reserved.
+ * Copyright 2013 Baidu Inc. All rights reserved.
  * 
  * @file 简易的、基于html注释的模板支持
  * @author erik, mytharcher, otakustay

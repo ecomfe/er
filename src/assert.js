@@ -1,6 +1,6 @@
 /**
  * ER (Enterprise RIA)
- * Copyright 2012 Baidu Inc. All rights reserved.
+ * Copyright 2013 Baidu Inc. All rights reserved.
  * 
  * @file 简单的，仅调试期有效的断言库
  * @author otakustay
