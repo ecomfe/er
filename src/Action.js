@@ -69,15 +69,17 @@ define(
 
             this.context = context;
 
-            var args = util.mix({}, context, context.url.getQuery());
+            var urlQuery = context && context.url && context.url.getQuery();
+            var args = util.mix({}, context, urlQuery);
 
             this.model = this.createModel(args);
             if (this.model && typeof this.model.load === 'function') {
                 var loadingModel = this.model.load();
-                loadingModel.done(util.bindFn(this.forwardToView, this));
+                return loadingModel.done(util.bindFn(this.forwardToView, this));
             }
             else {
                 this.forwardToView();
+                return require('./Deferred').resolved();
             }
         };
 
@@ -111,7 +113,9 @@ define(
             this.view = this.createView();
             if (this.view) {
                 this.view.model = this.model;
-                this.view.container = this.context.container;
+                if (this.context) {
+                    this.view.container = this.context.container;
+                }
 
                 /**
                  * 视图开始渲染时触发
