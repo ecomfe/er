@@ -32,6 +32,12 @@ Action对象在MVC框架中，是一个承载着业务逻辑的角色。在一�
 
 - `{Object} context`：访问当前Action的上下文，具体内容参考`context`属性的描述。
 
+#### 返回值
+
+该方法返回一个Promise对象，在`enter`的执行完成后，会将该Promise对象置为 **resolved** 状态。
+
+通常在编程过程中，不需要关心这个Promise对象，仅在测试的时候，为了保证`enter`执行完毕再运行相关的测试用例，才会使用该方法的返回值。
+
 ### forwardToView方法
 
 `forwardToView`方法用于Action在加载了Model之后，进入到View相关的逻辑，默认不需要重写该方法。

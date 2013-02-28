@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Test</title>
+    <script src="../loader.js"></script>
+</head>
+<body>
+    <script src="../../../../src/config.js"></script>
+    <script src="../../../../src/util.js"></script>
+    <script src="../../../../src/assert.js"></script>
+    <script src="../../../../src/Observable.js"></script>
+    <script src="../../../../src/URL.js"></script>
+    <script src="../../../../src/Deferred.js"></script>
+    <script src="../../../../src/ajax.js"></script>
+    <script src="../../../../src/permission.js"></script>
+    <script src="../../../../src/datasource.js"></script>
+    <script src="../../../../src/locator.js"></script>
+    <script src="../../../../src/router.js"></script>
+    <script src="../../../../src/controller.js"></script>
+    <script src="../../../../src/Action.js"></script>
+    <script src="../../../../src/Model.js"></script>
+    <script src="../../../../src/View.js"></script>
+
+    <script src="../../src/common/Mustache.js"></script>
+    <script src="../../src/common/mockup.js"></script>
+    <script src="../../src/book/ListModel.js"></script>
+    <script src="../../src/book/ListView.js"></script>
+    <script src="../../src/book/List.js"></script>
+    <script src="../../src/book/ReadView.js"></script>
+    <script src="../../src/book/Read.js"></script>
+    <script src="../../src/book/init.js"></script>
+    <script src="../../src/cart/ListView.js"></script>
+    <script src="../../src/cart/List.js"></script>
+    <script src="../../src/cart/init.js"></script>
+
+    <script>
+        (function() {
+            var books = [];
+            for (var i = 0; i < 111; i++) {
+                var book = {
+                    isbn: 1024 + i + '',
+                    name: '图书' + i,
+                    author: 'Anonymous',
+                    price: parseFloat((Math.random() * 100 + 20).toFixed(2))
+                };
+                books.push(book);
+            }
+
+            function createModel() {
+                var Model = require('er/Model');
+                var model = new Model();
+                model.set('list', books);
+                model.set('recommend', []);
+                model.set('page', 1);
+                model.findBook = function() {
+                    return books[0];
+                };
+
+                return model;
+            }
+
+            function buyBookShouldCallShowBoughtTip() {
+                var view = {
+                    rendered: false,
+
+                    render: function() {
+                        this.rendered = true;
+                    },
+
+                    boughtBooks: [],
+
+                    showBoughtTip: function(isbn) {
+                        this.boughtBooks.push(isbn);
+                    }
+                };
+
+                require('er/Observable').enable(view);
+
+                var BookList = require('book/List');
+                var action = new BookList();
+
+                action.createModel = createModel;
+
+                action.createView = function() {
+                    return view;
+                };
+
+                var loading = action.enter();
+
+                loading.done(
+                    function() {
+                        if (!view.rendered) {
+                            throw new Error('View not rendered');
+                        }
+
+                        view.fire('buy', { isbn: books[0].isbn });
+
+                        if (view.boughtBooks[0] !== books[0].isbn) {
+                            throw new Error('showBoughtTip invocation error');
+                        }
+
+                        alert('OK!');
+                    }
+                );
+            }
+
+            buyBookShouldCallShowBoughtTip();
+        }());
+    </script>
+</body>
+</html>

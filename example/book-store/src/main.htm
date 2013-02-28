@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <title>Book Store</title>
     <script src="common/loader.js"></script>
+    <link rel="stylesheet" href="common/layout.css">
     <link rel="stylesheet" href="book/list.css">
 </head>
 <body>
@@ -31,7 +32,16 @@
     <script src="book/ReadView.js"></script>
     <script src="book/Read.js"></script>
     <script src="book/init.js"></script>
+    <script src="cart/ListView.js"></script>
+    <script src="cart/List.js"></script>
+    <script src="cart/init.js"></script>
     <h1>Book Store</h1>
+    <nav id="nav">
+        <ul>
+            <li><a href="#/book/list">图书列表</a></li>
+            <li><a href="#/cart/list">购物车</a></li>
+        </ul>
+    </nav>
     <div id="main"></div>
     <script>
         require('book/init');
