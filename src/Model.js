@@ -105,6 +105,7 @@ define(
             // 允许datasource是null或undefined，
             // 这样根据权限灵活的配置某个数据是否加载很方便
             if (!datasource) {
+                var Deferred = require('./Deferred');
                 return Deferred.resolved();
             }
 
