@@ -12,7 +12,9 @@
             value = module.exports;
         }
         cache[id] = value;
-    }
+    };
+
+    window.define.amd = true;
 
     window.require = function(id, callback) {
         if (id instanceof Array) {
@@ -22,6 +24,9 @@
         if (id.indexOf('./') === 0) {
             id = id.substring(2);
         }
+        if (id.indexOf('er/') === 0) {
+            id = id.substring(3);
+        }
         var module = cache[id];
         if (callback) {
             setTimeout(function() { callback(module); }, 0);
@@ -29,5 +34,5 @@
         else {
             return module;
         }
-    }
+    };
 }());

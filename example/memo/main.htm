@@ -32,8 +32,8 @@
             </div>
         </div>
         <script>
-            var router = require('router');
-            var util = require('util');
+            var router = require('er/router');
+            var util = require('er/util');
 
             var uid = 1024;
 
@@ -93,6 +93,9 @@
 
             addEntry('回家路上打酱油');
             addEntry('晚上10点一定要睡觉！');
+
+            router.start();
+            require('er/locator').start();
         </script>
     </div>
 </body>

@@ -58,7 +58,7 @@
         </section>
     </div>
     <script>
-        var locator = require('locator');
+        var locator = require('er/locator');
         locator.on(
             'redirect',
             function(e) {
@@ -70,6 +70,7 @@
                 $('#' + target).show();
             }
         );
+        locator.start();
     </script>
 </body>
 </html>
