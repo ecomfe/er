@@ -1,0 +1,20 @@
+span.interactive {
+    cursor: default;
+    color: #00f;
+}
+span.interactive:hover {
+    text-decoration: underline;
+}
+
+table {
+    width: 400px;
+    border-collapse: collapse;
+}
+tr:hover {
+    background-color: green;
+}
+th,
+td {
+    padding: 4px 6px;
+    border: 0;
+}

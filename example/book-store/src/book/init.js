@@ -17,7 +17,12 @@ define(
 
         var books = [];
         for (var i = 0; i < 111; i++) {
-            var book = { isbn: 1024 + i, name: '图书' + i, author: 'Anonymous' };
+            var book = {
+                isbn: 1024 + i + '',
+                name: '图书' + i,
+                author: 'Anonymous',
+                price: parseFloat((Math.random() * 100 + 20).toFixed(2))
+            };
             books.push(book);
         }
         var mockup = require('common/mockup');
@@ -52,7 +57,12 @@ define(
         mockup.add(
             '/book/read',
             function(options) {
-                return books.filter(function(b) { return b.isbn + '' === options.data.isbn; })[0];
+                var result = books.filter(
+                    function(b) {
+                        return b.isbn + '' === options.data.isbn;
+                    }
+                );
+                return result[0];
             }
         );
     }

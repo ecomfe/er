@@ -7,6 +7,24 @@ define(
             View.apply(this, arguments);
         }
 
+        function buyBook(e) {
+            var target = e.target;
+            if (target.getAttribute('data-command') === 'buy') {
+                var tr = target.parentNode;
+                while (tr.nodeName.toLowerCase() !== 'tr') {
+                    tr = tr.parentNode;
+                }
+                var isbn = tr.getAttribute('data-isbn');
+
+                this.fire('buy', { isbn: isbn });
+            }
+        }
+
+        function search() {
+            var keywords = document.getElementById('keywords').value;
+            this.fire('search', { keywords: keywords });
+        }
+
         var template = [
             '<div id="search">',
                 '<input id="keywords" value="{{keywords}}" />',
@@ -18,16 +36,21 @@ define(
                         '<th>书名</th>',
                         '<th>ISBN</th>',
                         '<th>作者</th>',
+                        '<th>价格</th>',
                         '<th>操作</th>',
                     '</tr>',
                 '</thead>',
                 '<tbody>',
                     '{{#list}}',
-                    '<tr' + '{{#recommend}} class="recommend"{{/recommend}}' + '>',
+                    '<tr data-isbn={{isbn}}' + '{{#recommend}} class="recommend"{{/recommend}}' + '>',
                         '<td>{{name}}</td>',
                         '<td>{{isbn}}</td>',
                         '<td>{{author}}</td>',
-                        '<td><a href="#/book/read~isbn={{isbn}}">查看</a></td>',
+                        '<td>{{price}}</td>',
+                        '<td>',
+                            '<a href="#/book/read~isbn={{isbn}}">查看</a>',
+                            '<span class="interactive" data-command="buy">购买</span>',
+                        '</td>',
                     '</tr>',
                     '{{/list}}',
                 '</tbody>',
@@ -44,19 +67,24 @@ define(
             var html = Mustache.render(template, this.model.valueOf());
             document.getElementById(this.container).innerHTML = html;
 
-            var page = this.model.get('page');
-            document.getElementById('submit').addEventListener(
-                'click',
-                function() {
-                    var keywords = document.getElementById('keywords').value;
-                    var locator = require('locator');
-                    var URL = require('er/URL');
-                    var query = { keywords: keywords };
-                    locator.redirect(URL.withQuery('/book/list', query));
-                },
-                false
-            );
-        }
+            document.getElementById('submit').
+                addEventListener('click', search.bind(this), false);
+
+            document.getElementById('book-list')
+                .addEventListener('click', buyBook.bind(this), false);
+        };
+
+        BookListView.prototype.showBoughtTip = function(isbn) {
+            var rows = document.getElementsByTagName('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                if (row.getAttribute('data-isbn') === isbn) {
+                    var command = row.getElementsByTagName('span')[0];
+                    command.innerText = '已购买';
+                    command.removeAttribute('data-command');
+                }
+            }
+        };
 
         require('er/util').inherits(BookListView, View);
 

@@ -19,9 +19,10 @@ define(
                         result.push(Math.floor(Math.random() * 10));
                     }
                     return result;
-                }
+                },
+                locator: datasource.constant(require('er/locator'))
             };
-        };
+        }
 
 
         BookListModel.prototype.prepare = function() {
@@ -44,6 +45,17 @@ define(
                 pages.push(i);
             }
             this.set('pages', pages);
+        };
+
+        BookListModel.prototype.findBook = function(isbn) {
+            var list = this.get('list');
+            for (var i = 0; i < list.length; i++) {
+                var book = list[i];
+                if (book.isbn === isbn) {
+                    return book;
+                }
+            }
+            return null;
         };
 
         require('er/util').inherits(BookListModel, Model);

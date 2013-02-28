@@ -20,6 +20,10 @@ define(
                 '<span class="field-name">作者</span>',
                 '<span class="field-value">{{author}}</span>',
             '</div>',
+            '<div class="row">',
+                '<span class="field-name">价格</span>',
+                '<span class="field-value">{{price}}</span>',
+            '</div>',
             '<a href="#/book/list">返回列表</a>'
         ];
         template = template.join('\n');
@@ -27,7 +31,7 @@ define(
             var Mustache = require('Mustache');
             var html = Mustache.render(template, this.model.valueOf());
             document.getElementById(this.container).innerHTML = html;
-        }
+        };
 
         require('er/util').inherits(BookReadView, View);
 
