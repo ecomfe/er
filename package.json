@@ -1,0 +1,11 @@
+{
+    "name": "er",
+    "version": "2.0",
+    "maintainers": [
+        { "name": "otakustay", "email": "otakustay@live.com" },
+        { "erik": "otakustay", "email": "errorrik@gmail.com" }
+    ],
+    "main": "main",
+    "description": "ER是一个富浏览器端web应用的框架，适用于并能很方便地构建一个整站式的AJAX web应用。",
+    "homepage": "https://github.com/ecomfe/er"
+}
