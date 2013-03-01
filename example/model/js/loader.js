@@ -12,7 +12,7 @@
             value = module.exports;
         }
         cache[id] = value;
-    }
+    };
 
     window.require = function(id, callback) {
         if (id instanceof Array) {
@@ -29,5 +29,5 @@
         else {
             return module;
         }
-    }
+    };
 }());

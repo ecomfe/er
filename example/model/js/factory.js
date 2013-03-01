@@ -1,3 +1,4 @@
+/*jshint unused: false */
 function delayed(time, value) {
     return function() {
         var Deferred = require('Deferred');
@@ -11,7 +12,7 @@ function delayed(time, value) {
             time
         );
         return loading.promise();
-    }
+    };
 }
 
 function relied(time, key) {
@@ -27,12 +28,12 @@ function relied(time, key) {
             time
         );
         return loading.promise();
-    }
+    };
 }
 
 function immediate(value) {
     return function() {
         log('直接获取值 ' + value);
         return value;
-    }
+    };
 }
