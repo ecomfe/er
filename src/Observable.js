@@ -32,7 +32,7 @@ define(
                 pool = this._events[type] = [];
             }
             if (!handler.hasOwnProperty(guidKey)) {
-                handler[guidKey] = require('util').guid();
+                handler[guidKey] = require('./util').guid();
             }
             pool.push(handler);
         };
