@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Book Store</title>
+    <script src="src/common/loader.js"></script>
+    <link rel="stylesheet" href="src/common/layout.css">
+    <link rel="stylesheet" href="src/book/list.css">
+</head>
+<body>
+    <script src="lib/er/config.js"></script>
+    <script src="lib/er/util.js"></script>
+    <script src="lib/er/assert.js"></script>
+    <script src="lib/er/Observable.js"></script>
+    <script src="lib/er/URL.js"></script>
+    <script src="lib/er/Deferred.js"></script>
+    <script src="lib/er/ajax.js"></script>
+    <script src="lib/er/permission.js"></script>
+    <script src="lib/er/datasource.js"></script>
+    <script src="lib/er/template.js"></script>
+    <script src="lib/er/locator.js"></script>
+    <script src="lib/er/router.js"></script>
+    <script src="lib/er/controller.js"></script>
+    <script src="lib/er/Action.js"></script>
+    <script src="lib/er/Model.js"></script>
+    <script src="lib/er/View.js"></script>
+    <script src="lib/er/main.js"></script>
+
+    <script src="src/common/database.js"></script>
+    <script src="src/book/ListModel.js"></script>
+    <script src="src/book/ListView.js"></script>
+    <script src="src/book/List.js"></script>
+    <script src="src/book/ReadView.js"></script>
+    <script src="src/book/Read.js"></script>
+    <script src="src/book/init.js"></script>
+    <script src="src/cart/ListView.js"></script>
+    <script src="src/cart/List.js"></script>
+    <script src="src/cart/init.js"></script>
+    <h1>Book Store</h1>
+    <nav id="nav">
+        <ul>
+            <li><a href="#/book/list">图书列表</a></li>
+            <li><a href="#/cart/list">购物车</a></li>
+        </ul>
+    </nav>
+    <div id="main"></div>
+    <script>
+        var ajax = require('er/ajax');
+        var loadingTemplate = ajax.request(
+            { url: 'src/book/list.tpl', dataType: 'text', method: 'GET' });
+        loadingTemplate.done(
+            function(bookList) {
+                require('er/template').parse(bookList);
+                require('book/init');
+
+                require('er/config').indexURL = '/book/list';
+
+                require('er/main').start();
+            }
+        );
+    </script>
+</body>
+</html>

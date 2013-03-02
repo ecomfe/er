@@ -25,54 +25,57 @@ define(
             this.fire('search', { keywords: keywords });
         }
 
-        var template = [
-            '<div id="search">',
-                '<input id="keywords" value="{{keywords}}" />',
-                '<span id="submit">检索</span>',
-            '</div>',
-            '<table id="book-list">',
-                '<thead>',
-                    '<tr>',
-                        '<th>书名</th>',
-                        '<th>ISBN</th>',
-                        '<th>作者</th>',
-                        '<th>价格</th>',
-                        '<th>操作</th>',
-                    '</tr>',
-                '</thead>',
-                '<tbody>',
-                    '{{#list}}',
-                    '<tr data-isbn={{isbn}}' + '{{#recommend}} class="recommend"{{/recommend}}' + '>',
-                        '<td>{{name}}</td>',
-                        '<td>{{isbn}}</td>',
-                        '<td>{{author}}</td>',
-                        '<td>{{price}}</td>',
-                        '<td>',
-                            '<a href="#/book/read~isbn={{isbn}}">查看</a>',
-                            '<span class="interactive" data-command="buy">购买</span>',
-                        '</td>',
-                    '</tr>',
-                    '{{/list}}',
-                '</tbody>',
-            '</table>',
-            '<div id="pager">',
-                '{{#pages}}',
-                '<a href="#/book/list~keywords={{keywords}}&page={{.}}">{{.}}</a>',
-                '{{/pages}}',
-            '</div>'
-        ];
-        template = template.join('\n');
-        BookListView.prototype.render = function() {
-            var Mustache = require('Mustache');
-            var html = Mustache.render(template, this.model.valueOf());
-            document.getElementById(this.container).innerHTML = html;
+        // var template = [
+        //     '<div id="search">',
+        //         '<input id="keywords" value="{{keywords}}" />',
+        //         '<span id="submit">检索</span>',
+        //     '</div>',
+        //     '<table id="book-list">',
+        //         '<thead>',
+        //             '<tr>',
+        //                 '<th>书名</th>',
+        //                 '<th>ISBN</th>',
+        //                 '<th>作者</th>',
+        //                 '<th>价格</th>',
+        //                 '<th>操作</th>',
+        //             '</tr>',
+        //         '</thead>',
+        //         '<tbody>',
+        //             '{{#list}}',
+        //             '<tr data-isbn={{isbn}}' + '{{#recommend}} class="recommend"{{/recommend}}' + '>',
+        //                 '<td>{{name}}</td>',
+        //                 '<td>{{isbn}}</td>',
+        //                 '<td>{{author}}</td>',
+        //                 '<td>{{price}}</td>',
+        //                 '<td>',
+        //                     '<a href="#/book/read~isbn={{isbn}}">查看</a>',
+        //                     '<span class="interactive" data-command="buy">购买</span>',
+        //                 '</td>',
+        //             '</tr>',
+        //             '{{/list}}',
+        //         '</tbody>',
+        //     '</table>',
+        //     '<div id="pager">',
+        //         '{{#pages}}',
+        //         '<a href="#/book/list~keywords={{keywords}}&page={{.}}">{{.}}</a>',
+        //         '{{/pages}}',
+        //     '</div>'
+        // ];
+        // template = template.join('\n');
 
-            document.getElementById('submit').
-                addEventListener('click', search.bind(this), false);
+        BookListView.prototype.template = 'bookList';
+        
+        // BookListView.prototype.render = function() {
+        //     var Mustache = require('Mustache');
+        //     var html = Mustache.render(template, this.model.valueOf());
+        //     document.getElementById(this.container).innerHTML = html;
 
-            document.getElementById('book-list')
-                .addEventListener('click', buyBook.bind(this), false);
-        };
+        //     document.getElementById('submit').
+        //         addEventListener('click', search.bind(this), false);
+
+        //     document.getElementById('book-list')
+        //         .addEventListener('click', buyBook.bind(this), false);
+        // };
 
         BookListView.prototype.showBoughtTip = function(isbn) {
             var rows = document.getElementsByTagName('tr');

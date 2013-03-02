@@ -6,20 +6,16 @@ define(
         function BookListModel() {
             Model.apply(this, arguments);
 
-            var listOptions = {
+            var queryArguments = {
                 page: this.get('page'),
-                keywords: this.get('keywords')
+                keywords: this.get('keywords'),
+                author: this.get('author'),
+                publisher: this.get('publisher')
             };
+
             var datasource = require('er/datasource');
             this.datasource = {
-                list: datasource.remote('/book/list', { data: listOptions }),
-                recommends: function() {
-                    var result = [];
-                    for (var i = 0; i < 4; i++) {
-                        result.push(Math.floor(Math.random() * 10));
-                    }
-                    return result;
-                },
+                list: datasource.queryDatabase(queryArguments),
                 locator: datasource.constant(require('er/locator'))
             };
         }
@@ -27,16 +23,6 @@ define(
 
         BookListModel.prototype.prepare = function() {
             var list = this.get('list');
-            var recommends = this.get('recommends');
-            recommends.forEach(
-                function(i) {
-                    if (list.result[i]) {
-                        list.result[i].recommend = true;
-                    }
-                }
-            );
-
-            this.remove('recommends');
             this.set('list', list.result);
             this.set('page', list.page);
 
