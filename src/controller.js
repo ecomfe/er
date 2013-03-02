@@ -70,8 +70,6 @@ define(
             // 此后使用浏览器的后退功能，又会进入重定向逻辑，变成死循环
             // 因此在此处保持路径不变，但加载另一个Action
 
-            // TODO: 这个死循环的问题是否有更好的方式解决
-
             // 同时，和跳转相关的逻辑均不能调用`forward`函数，
             // 一但调用`forward`函数，`currentURL`和`referrer`都会变化，
             // 这并不是希望实现的逻辑
@@ -146,12 +144,6 @@ define(
             }
             currentAction = action;
             action.enter(context);
-
-            // TODO: 这个`currentAction`是否应当暴露出来让开发者可以访问到，
-            //       类似`require('./controller').currentAction`的方式。
-            //       理论上，需要使用`currentAction`应该是业务设计上的缺陷，
-            //       应当可以用其它更好的方式进行弥补，但是考虑到便捷性，
-            //       是否真的存在用`currentAction`更好的场景？
         }
 
         /**
