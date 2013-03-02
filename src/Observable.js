@@ -8,6 +8,8 @@
 define(
     'Observable',
     function() {
+        var guidKey = '_erObservableGUID';
+
         /**
          * 提供与事件相关的操作的基类
          *
@@ -29,7 +31,9 @@ define(
             if (!pool) {
                 pool = this._events[type] = [];
             }
-            // TODO: 是否需要去重，在此处去重会和`*`的事件在fire时冲突
+            if (!handler.hasOwnProperty(guidKey)) {
+                handler[guidKey] = require('util').guid();
+            }
             pool.push(handler);
         };
 
@@ -52,8 +56,9 @@ define(
                 for (var i = 0; i < pool.length; i++) {
                     if (pool[i] === handler) {
                         pool.splice(i, 1);
-                        // 考虑到没有去重的情况下可能有多个相同的handler，
-                        // 因此继续循环，不作退出处理
+                        // 当前Observable实现去重是在`fire`阶段做的，
+                        // 因此可能通过`on`注册多个相同的handler，
+                        // 所以继续循环，不作退出处理
                         i--;
                     }
                 }
@@ -68,27 +73,41 @@ define(
          * 1. 如果对象上存在名称为`on{type}`的方法，执行该方法
          * 2. 按照事件注册时的先后顺序，依次执行类型为`type`的处理函数
          * 3. 按照事件注册时的先后顺序，依次执行类型为`*`的处理函数
+         * 
+         * 关于事件对象，分为以下2种情况：
+         * 
+         * - 如果`event`参数是个对象，则会添加`type`属性后传递给处理函数
+         * - 其它情况下，`event`参数的值将作为事件对象中的`data`属性
+         * 
+         * 事件处理函数有去重功能，同一个事件处理函数只会执行一次
          *
          * @param {string} type 事件类型
          * @param {Object} event 事件对象
          * @public
          */
         Observable.prototype.fire = function(type, event) {
-            event = event || {};
-            event.type = type;
+            if (Object.prototype.toString.call(event) === '[object Object]') {
+                event.type = type;
+            }
+            else {
+                event = { type: type, data: event };
+            }
 
             var inlineHandler = this['on' + type];
             if (typeof inlineHandler === 'function') {
                 inlineHandler.apply(this, args);
             }
 
+            var alreadyInvoked = {};
             var pool = this._events[type];
             if (!pool) {
                 return;
             }
             for (var i = 0; i < pool.length; i++) {
                 var handler = pool[i];
-                handler.call(this, event);
+                if (!alreadyInvoked.hasOwnProperty(handler[guidKey])) {
+                    handler.call(this, event);
+                }
             }
 
             // 类型为`*`的事件在所有事件触发时都要触发
@@ -100,7 +119,9 @@ define(
 
                 for (var i = 0; i < allPool.length; i++) {
                     var handler = allPool[i];
-                    handler.call(this, event);
+                    if (!alreadyInvoked.hasOwnProperty(handler[guidKey])) {
+                        handler.call(this, event);
+                    }
                 }
             }
         };

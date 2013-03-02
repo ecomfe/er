@@ -8,6 +8,17 @@
 define(
     'util',
     function(require, module, exports) {
+        var now = +new Date();
+
+        /**
+         * 获取一个唯一的ID
+         *
+         * @return {number} 一个唯一的ID
+         */
+        exports.guid = function() {
+            return now++;
+        };
+
         /**
          * 混合多个对象
          *
