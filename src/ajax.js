@@ -203,8 +203,6 @@ define(
             return ajax.request(options);
         };
 
-        // TODO: 实现个jsonp
-
         /**
          * 发送一个日志请求，该请求只负责发出，不负责保证送达，且不支持回调函数
          *

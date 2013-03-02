@@ -267,8 +267,6 @@ define(
             var loading = load(this, this.datasource);
             var util = require('./util');
             return loading.done(util.bindFn(this.prepare, this));
-
-            // TODO: 加载中有一个或多个失败的时候如何处理（可直接静默）？
         };
 
         /**
