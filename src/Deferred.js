@@ -294,7 +294,8 @@ define(
             return this._promise;
         };
 
-        // TODO: 支持`progress`
+        // 暂不支持`progress`，
+        // 社区对`progress`处理函数的返回值和异常的传递还在讨论中
 
         /**
          * 生成一个新的`Promise`对象，当所有给定的`Promise`对象完成后触发
