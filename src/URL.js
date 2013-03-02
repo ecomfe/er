@@ -128,9 +128,6 @@ define(
             var url = path + separator + search;
 
             return URL.parse(url, options);
-
-            // TODO: 这个方法在实际业务中可能经常使用，考虑提高效率
-            // TODO: `path`中原有的参数，`query`中也定义的，是否需要覆盖
         };
 
         /**
@@ -151,19 +148,24 @@ define(
                 }
                 var index = pair.indexOf('=');
                 // 没有**=**字符则认为值是**true**
-                if (index < 0) {
-                    query[decodeURIComponent(pair)] = true;
+                var key = index < 0
+                    ? decodeURIComponent(pair)
+                    : decodeURIComponent(pair.slice(0, index));
+                var value = index < 0
+                    ? true
+                    : decodeURIComponent(pair.slice(index + 1));
+
+                // 已经存在这个参数，且新的值不为空时，把原来的值变成数组
+                if (query.hasOwnProperty(key)) {
+                    if (value !== true) {
+                        query[key] = [].concat(query[key], value);
+                    }
                 }
                 else {
-                    var key = decodeURIComponent(pair.slice(0, index));
-                    var value = decodeURIComponent(pair.slice(index + 1));
                     query[key] = value;
                 }
             }
             return query;
-
-            // TODO: 是否需要处理一个key多次出现在字符串中的情况
-            // TODO: 是否需要将逗号分隔的value处理为字符串
         };
 
         /**
