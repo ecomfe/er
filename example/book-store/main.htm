@@ -36,21 +36,30 @@
     <script src="src/cart/ListView.js"></script>
     <script src="src/cart/List.js"></script>
     <script src="src/cart/init.js"></script>
-    <h1>Book Store</h1>
-    <nav id="nav">
-        <ul>
-            <li><a href="#/book/list">图书列表</a></li>
-            <li><a href="#/cart/list">购物车</a></li>
-        </ul>
-    </nav>
-    <div id="main"></div>
+    <div id="page">
+        <h1>Book Store</h1>
+        <nav id="nav">
+            <ul>
+                <li><a href="#/book/list">图书列表</a></li>
+                <li><a href="#/cart/list">购物车</a></li>
+            </ul>
+        </nav>
+        <div id="main"></div>
+    </div>
     <script>
         var ajax = require('er/ajax');
-        var loadingTemplate = ajax.request(
-            { url: 'src/book/list.tpl', dataType: 'text', method: 'GET' });
-        loadingTemplate.done(
-            function(bookList) {
-                require('er/template').parse(bookList);
+        var loadingTemplate = [
+            ajax.request(
+                { url: 'src/book/list.tpl', dataType: 'text', method: 'GET' }
+            ),
+            ajax.request(
+                { url: 'src/book/view.tpl', dataType: 'text', method: 'GET' }
+            )
+        ];
+        require('er/Deferred').join(loadingTemplate).done(
+            function(bookList, bookView) {
+                require('er/template').parse(bookList[0]);
+                require('er/template').parse(bookView[0]);
                 require('book/init');
 
                 require('er/config').indexURL = '/book/list';

@@ -7,7 +7,7 @@ define(
                 type: 'book/List'
             },
             {
-                path: '/book/read',
+                path: '/book/view',
                 type: 'book/Read'
             }
         ];

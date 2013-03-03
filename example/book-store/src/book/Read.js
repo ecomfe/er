@@ -10,13 +10,9 @@ define(
         BookRead.prototype.createModel = function(context) {
             var Model = require('er/Model');
             var model = new Model(context);
-            var options = {
-                data: {
-                    isbn: context.isbn
-                }
+            model.datasource = function(model) {
+                return require('common/database').find(model.get('isbn'));
             };
-            model.datasource = 
-                require('er/datasource').remote('/book/read', options);
             return model;
         };
 

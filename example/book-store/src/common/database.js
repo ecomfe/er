@@ -363,7 +363,7 @@ define(
                 }
 
                 var pageIndex = query.page || 1;
-                var pageSize = 10;
+                var pageSize = 6;
                 var pageCount = Math.ceil(result.length / pageSize);
 
                 result = result.slice((pageIndex - 1) * pageSize, pageSize);
