@@ -58,7 +58,17 @@ define(
             var container = document.getElementById(this.container);
             var template = require('./template');
             template.merge(container, this.template, this.model);
+
+            this.enterDocument();
         };
+
+
+        /**
+         * 当容器渲染完毕后触发，用于控制元素可见性及绑定事件等DOM操作
+         *
+         * @protected
+         */
+        View.prototype.enterDocument = require('./util').noop;
 
         /**
          * 销毁当前视图
