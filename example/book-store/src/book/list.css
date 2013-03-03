@@ -1,13 +1,6 @@
 #page {
     overflow: hidden;
 }
-#sidebar {
-    width: 240px;
-    float: left;
-}
-#book-list {
-    margin-left: 250px;
-}
 #book-list > li {
     overflow: hidden;
     margin: 30px 20px 30px 0;

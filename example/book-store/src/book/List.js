@@ -12,7 +12,7 @@ define(
         BookList.prototype.viewType = require('book/ListView');
 
         function buyBook(e) {
-            var book = this.model.findBook(e.isbn);
+            var book = this.model.find(e.isbn);
             var cart = require('cart/init');
             cart.add(book);
 

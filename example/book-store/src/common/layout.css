@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'FontAwesome';
+    src: url(../../asset/font/fontawesome-webfont.woff) format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 #page {
     width: 960px;
     margin: 0 auto;
@@ -6,4 +13,43 @@ ul, ol {
     list-style: none;
     padding: 0;
     margin: 0;
+}
+
+#nav {
+    overflow: hidden;
+    background-color: #fff;
+    padding: 10px 0;
+}
+#nav li {
+    float: left;
+    margin: 0 10px;
+}
+#nav a {
+    background-color: #ccc;
+    display: block;
+    width: 180px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 24px;
+    text-align: center;
+    text-decoration: none;
+    color: #000;
+}
+#nav a:hover {
+    background-color: #555;
+    color: #fff;
+}
+#link-to-book-list > a::before {
+    content: "\f03a";
+    font-family: FontAwesome;
+    padding-right: 10px;
+}
+#link-to-cart > a::before {
+    content: "\f07a";
+    font-family: FontAwesome;
+    padding-right: 10px;
+}
+.fix-on-top {
+    position: fixed;
+    top: 0;
 }

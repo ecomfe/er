@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="src/book/list.css">
 </head>
 <body>
+    <script src="src/common/jquery-1.9.1.js"></script>
+
     <script src="lib/er/config.js"></script>
     <script src="lib/er/util.js"></script>
     <script src="lib/er/assert.js"></script>
@@ -40,8 +42,8 @@
         <h1>Book Store</h1>
         <nav id="nav">
             <ul>
-                <li><a href="#/book/list">图书列表</a></li>
-                <li><a href="#/cart/list">购物车</a></li>
+                <li id="link-to-book-list"><a href="#/book/list">图书列表</a></li>
+                <li id="link-to-cart"><a href="#/cart/list">购物车</a></li>
             </ul>
         </nav>
         <div id="main"></div>
@@ -67,6 +69,27 @@
                 require('er/main').start();
             }
         );
+
+        var adjustNavigator = (function() {
+            var topEdge = $('#nav').offset().top;
+            var body = $('body');
+            var document = $('html');
+            var navigator = $('#nav');
+
+            return function() {
+                var top = 
+                    topEdge - Math.max(body.scrollTop(), document.scrollTop());
+                if (top <= 0) {
+                    navigator.addClass('fix-on-top');
+                }
+                else {
+                    navigator.removeClass('fix-on-top');
+                }
+            }
+        }());
+
+        $(window).on('scroll', adjustNavigator);
+        adjustNavigator();
     </script>
 </body>
 </html>

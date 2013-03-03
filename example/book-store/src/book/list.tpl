@@ -1,9 +1,7 @@
 <!-- target: bookList -->
-<aside id="sidebar">
-</aside>
 <ol id="book-list">
     <!-- for: ${list} as ${book} -->
-    <li>
+    <li class="book-info" data-isbn="${book.isbn}">
         <a href="#/book/view~isbn=${book.isbn}" class="image" title="点击查看《${book.name}》详细信息">
             <img src="asset/img/book/${book.isbn}.jpg" alt="图书图片" width="160" height="160" />
         </a>
@@ -27,7 +25,7 @@
             </li>
         </ul>
         <div class="action">
-            <span class="buy" data-isbn="${item.isbn}">加入购物车</span>
+            <span class="buy">加入购物车</span>
         </div>
     </li>
     <!-- /for -->

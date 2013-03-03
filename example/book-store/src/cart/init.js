@@ -12,27 +12,27 @@ define(
         actions.forEach(controller.registerAction);
 
         return {
-            boughtItems: [],
+            boughtBooks: [],
 
             add: function(book) {
-                this.boughtItems.push(book);
+                this.boughtBooks.push(book);
             },
 
             remove: function(isbn) {
-                for (var i = 0; i < this.boughtItems.length; i++) {
-                    if (this.boughtItems[i].isbn === isbn) {
-                        this.boughtItems.splice(i, 1);
+                for (var i = 0; i < this.boughtBooks.length; i++) {
+                    if (this.boughtBooks[i].isbn === isbn) {
+                        this.boughtBooks.splice(i, 1);
                         return;
                     }
                 }
             },
 
             clear: function() {
-                this.boughtItems.length = 0;
+                this.boughtBooks.length = 0;
             },
 
             calculateSum: function() {
-                var sum = this.boughtItems.reduce(
+                var sum = this.boughtBooks.reduce(
                     function(sum, b) {
                         return sum + b.price;
                     },

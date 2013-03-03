@@ -33,7 +33,7 @@ define(
             this.set('pages', pages);
         };
 
-        BookListModel.prototype.findBook = function(isbn) {
+        BookListModel.prototype.find = function(isbn) {
             var list = this.get('list');
             for (var i = 0; i < list.length; i++) {
                 var book = list[i];
