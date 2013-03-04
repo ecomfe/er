@@ -33,9 +33,9 @@
         require(
             [
                 'er', 'er/ajax', 'er/Deferred', 'er/template', 'er/config',
-                'common/database', 'book/init'
+                'common/database', 'book/init', 'cart/init'
             ],
-            function(er, ajax, Deferred, template, config, book) {
+            function(er, ajax, Deferred, template, config, database, book, cart) {
                 var loadingTemplate = [
                     ajax.get('src/book/list.tpl'),
                     ajax.get('src/book/view.tpl')
@@ -50,29 +50,40 @@
                         er.start();
                     }
                 );
+
+                var linkToCart = $('#link-to-cart > a');
+                function updateBoughtNumber() {
+                    var count = this.boughtBooks.length;
+                    var text = '购物车';
+                    if (count > 0) {
+                        text += '(' + count + ')';
+                    }
+                    linkToCart.text(text);
+                }
+                cart.on('add', updateBoughtNumber);
+                cart.on('remove', updateBoughtNumber);
+                cart.on('clear', updateBoughtNumber);
+
+                var topEdge = $('#nav').offset().top;
+                var body = $('body');
+                var document = $('html');
+                var navigator = $('#nav');
+                function adjustNavigator() {
+                    var scrollTop = 
+                        Math.max(body.scrollTop(), document.scrollTop());
+                    var top = topEdge - scrollTop;
+                    if (top <= 0) {
+                        navigator.addClass('fix-on-top');
+                    }
+                    else {
+                        navigator.removeClass('fix-on-top');
+                    }
+                }
+
+                $(window).on('scroll', adjustNavigator);
+                adjustNavigator();
             }
         );
-
-        (function() {
-            var topEdge = $('#nav').offset().top;
-            var body = $('body');
-            var document = $('html');
-            var navigator = $('#nav');
-            function adjustNavigator() {
-                var scrollTop = 
-                    Math.max(body.scrollTop(), document.scrollTop());
-                var top = topEdge - scrollTop;
-                if (top <= 0) {
-                    navigator.addClass('fix-on-top');
-                }
-                else {
-                    navigator.removeClass('fix-on-top');
-                }
-            }
-
-            $(window).on('scroll', adjustNavigator);
-            adjustNavigator();
-        }());
     </script>
 </body>
 </html>

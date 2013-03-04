@@ -52,9 +52,6 @@ define(
             helper.animate(animationProperties, 1000)
                 .promise()
                 .done(function() { $(this).remove(); });
-
-            var boughtBooks = require('cart/init').boughtBooks.length;
-            $('#link-to-cart > a').text('购物车 (' + boughtBooks + ')');
         };
 
         require('er/util').inherits(BookListView, View);
