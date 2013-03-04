@@ -6,8 +6,7 @@
  * @author otakustay
  */
 define(
-    'util',
-    function(require, module, exports) {
+    function(require, exports) {
         var now = +new Date();
 
         /**
@@ -132,5 +131,7 @@ define(
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
         };
+
+        return exports;
     }
 );

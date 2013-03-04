@@ -6,7 +6,6 @@
  * @author otakustay, erik
  */
 define(
-    'controller',
     function(require) {
         var actionPathMapping = {}; // 用于根据URL找Action配置
         var actionTypeMapping = {}; // 用户根据Action类型生成URL

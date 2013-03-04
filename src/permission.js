@@ -6,7 +6,6 @@
  * @author otakustay
  */
 define(
-    'permission',
     function() {
         var authorities = {};
 

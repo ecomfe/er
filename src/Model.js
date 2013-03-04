@@ -6,7 +6,6 @@
  * @author otakustay
  */
 define(
-    'Model',
     function(require) {
         /**
          * 加载一个数据

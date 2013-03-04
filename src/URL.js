@@ -6,7 +6,6 @@
  * @author otakustay
  */
 define(
-    'URL',
     function(require) {
         var util = require('./util');
 

@@ -6,7 +6,6 @@
  * @author otakustay
  */
 define(
-    'assert',
     function() {
         if (window.DEBUG) {
             /**

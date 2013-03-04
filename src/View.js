@@ -6,7 +6,6 @@
  * @author otakustay
  */
 define(
-    'View',
     function(require) {
         var Observable = require('./Observable');
 

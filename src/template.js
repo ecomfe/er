@@ -36,7 +36,6 @@
  * 简易的模板解析器
  */
 define(
-    'template',
     function(require) {
         var util = require('./util');
 

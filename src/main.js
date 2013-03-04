@@ -1,5 +1,4 @@
 define(
-    'main',
     function(require) {
         return {
             version: '${version}',

@@ -6,7 +6,6 @@
  * @author otakustay
  */
 define(
-    'router',
     function(require) {
         var routes = [];
         var backup = null;

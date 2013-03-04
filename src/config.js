@@ -6,7 +6,6 @@
  * @author otakustay
  */
 define(
-    'config',
     {
         /**
          * 应用主DOM容器的id

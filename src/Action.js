@@ -6,7 +6,6 @@
  * @author otakustay
  */
 define(
-    'Action',
     function(require) {
         var util = require('./util');
         var Observable = require('./Observable');

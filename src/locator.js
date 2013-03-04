@@ -6,7 +6,6 @@
  * @author otakustay, erik
  */
 define(
-    'locator',
     function(require) {
         /**
          * 地址监听对象

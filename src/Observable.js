@@ -6,8 +6,7 @@
  * @author otakustay
  */
 define(
-    'Observable',
-    function() {
+    function(require) {
         var guidKey = '_erObservableGUID';
 
         /**

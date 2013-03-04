@@ -6,8 +6,7 @@
  * @author otakustay
  */
 define(
-    'ajax',
-    function(require, module, ajax) {
+    function(require) {
         /**
          * 生成XMLHttpRequest请求的最终URL
          *
