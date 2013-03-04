@@ -385,7 +385,7 @@ define(
                         );
                         break;
                     case 'author':
-                        rresult.sort(
+                        result.sort(
                             function(x, y) {
                                 return x.author.localeCompare(y.author);
                             }

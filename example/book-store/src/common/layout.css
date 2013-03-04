@@ -14,6 +14,15 @@ ul, ol {
     padding: 0;
     margin: 0;
 }
+.interactive {
+    padding: 3px 10px;
+    color: #fff;
+    background-color: #f95;
+    cursor: default;
+}
+.interactive:hover {
+    background-color: #d73;
+}
 
 #nav {
     overflow: hidden;

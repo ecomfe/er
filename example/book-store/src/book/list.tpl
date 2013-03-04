@@ -1,4 +1,17 @@
 <!-- target: bookList -->
+<div id="book-list-filter">
+    <div id="book-list-order">
+        <span class="filter-title">排序</span>
+        <a href="#/book/list~keywords=${keywords|url}&amp;author=${author|url}&amp;publisher=${publisher|url}">默认</a>
+        <a href="#/book/list~keywords=${keywords|url}&amp;author=${author|url}&amp;publisher=${publisher|url}&amp;order=price">价格</a>
+        <a href="#/book/list~keywords=${keywords|url}&amp;author=${author|url}&amp;publisher=${publisher|url}&amp;order=author">作者</a>
+        <a href="#/book/list~keywords=${keywords|url}&amp;author=${author|url}&amp;publisher=${publisher|url}&amp;order=publisher">出版社</a>
+    </div>
+    <div id="book-list-search">
+        <input id="keywords" value="${keywords|html}" />
+        <span id="submit-search" class="interactive">搜索</span>
+    </div>
+</div>
 <ol id="book-list">
     <!-- for: ${list} as ${book} -->
     <li class="book-info" data-isbn="${book.isbn}">
@@ -25,7 +38,7 @@
             </li>
         </ul>
         <div class="action">
-            <span class="buy">加入购物车</span>
+            <span class="interactive buy">加入购物车</span>
         </div>
     </li>
     <!-- /for -->

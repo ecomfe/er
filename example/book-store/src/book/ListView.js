@@ -12,10 +12,10 @@ define(
             this.fire('buy', { isbn: isbn });
         }
 
-        // function search() {
-        //     var keywords = document.getElementById('keywords').value;
-        //     this.fire('search', { keywords: keywords });
-        // }
+        function search() {
+            var keywords = document.getElementById('keywords').value;
+            this.fire('search', { keywords: keywords });
+        }
 
         BookListView.prototype.template = 'bookList';
 
@@ -24,6 +24,7 @@ define(
 
             var util = require('er/util');
             container.on('click', '.buy', util.bindFn(buyBook, this));
+            $('#submit-search').on('click', util.bindFn(search, this));
         };
 
         BookListView.prototype.showBoughtTip = function(isbn) {

@@ -10,7 +10,8 @@ define(
                 page: this.get('page'),
                 keywords: this.get('keywords'),
                 author: this.get('author'),
-                publisher: this.get('publisher')
+                publisher: this.get('publisher'),
+                order: this.get('order')
             };
 
             var datasource = require('er/datasource');
