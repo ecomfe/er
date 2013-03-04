@@ -56,7 +56,12 @@ define(
         View.prototype.render = function() {
             var container = document.getElementById(this.container);
             var template = require('./template');
-            template.merge(container, this.template, this.model);
+            var model = this.model;
+            if (model && typeof model.get !== 'function') {
+                var Model = require('./Model');
+                model = new Model(model);
+            }
+            template.merge(container, this.template, model);
 
             this.enterDocument();
         };
