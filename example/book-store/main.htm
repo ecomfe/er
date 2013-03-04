@@ -5,6 +5,7 @@
     <title>Book Store</title>
     <link rel="stylesheet" href="src/common/layout.css">
     <link rel="stylesheet" href="src/book/list.css">
+    <link rel="stylesheet" href="src/cart/list.css">
     <script src="src/common/esl.js"></script>
     <script src="src/common/jquery.js"></script>
 </head>
@@ -38,12 +39,14 @@
             function(er, ajax, Deferred, template, config, database, book, cart) {
                 var loadingTemplate = [
                     ajax.get('src/book/list.tpl'),
-                    ajax.get('src/book/view.tpl')
+                    ajax.get('src/book/view.tpl'),
+                    ajax.get('src/cart/list.tpl')
                 ];
                 Deferred.join(loadingTemplate).done(
-                    function(bookList, bookView) {
+                    function(bookList, bookView, cartList) {
                         template.parse(bookList[0]);
                         template.parse(bookView[0]);
+                        template.parse(cartList[0]);
 
                         config.indexURL = '/book/list';
 

@@ -10,7 +10,7 @@ define(
         CartList.prototype.createModel = function() {
             var cart = require('cart/init');
             return {
-                list: cart.boughtItems,
+                list: cart.boughtBooks || [],
                 total: cart.calculateSum()
             };
         };
@@ -34,8 +34,9 @@ define(
         }
 
         CartList.prototype.initBehavior = function() {
-            this.view.on('remove', removeBook.bind(this));
-            this.view.on('clear', clearCart.bind(this));
+            var util = require('er/util');
+            this.view.on('remove', util.bindFn(removeBook, this));
+            this.view.on('clear', util.bindFn(clearCart, this));
         };
 
         require('er/util').inherits(CartList, Action);

@@ -1,5 +1,4 @@
 define(
-    'cart/init',
     function(require) {
         var actions = [
             {
@@ -23,7 +22,7 @@ define(
                 for (var i = 0; i < this.boughtBooks.length; i++) {
                     if (this.boughtBooks[i].isbn === isbn) {
                         this.boughtBooks.splice(i, 1);
-                        return;
+                        break;
                     }
                 }
                 this.fire('remove', isbn);

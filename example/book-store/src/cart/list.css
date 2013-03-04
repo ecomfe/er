@@ -1,0 +1,23 @@
+#cart-list {
+    width: 100%;
+}
+#product-column {
+    width: 480px;
+}
+#price-column {
+    width: 360px;
+    text-align: center;
+}
+#cart-list .name {
+    vertical-align: top;
+}
+#cart-list .price::before {
+    content: "￥";
+}
+
+#total-price {
+    font-weight: bold;
+}
+#total-price::before {
+    content: "￥";
+}
