@@ -1,5 +1,4 @@
 define(
-    'book/init',
     function(require) {
         var actions = [
             {

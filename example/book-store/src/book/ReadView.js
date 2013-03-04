@@ -1,5 +1,4 @@
 define(
-    'book/ReadView',
     function(require) {
         var View = require('er/View');
 

@@ -1,5 +1,4 @@
 define(
-    'book/ListModel',
     function() {
         var Model = require('er/Model');
 

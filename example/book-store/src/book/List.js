@@ -1,5 +1,4 @@
 define(
-    'book/List',
     function(require) {
         var Action = require('er/Action');
 

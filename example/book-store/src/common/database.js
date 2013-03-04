@@ -1,5 +1,4 @@
 define(
-    'common/database',
     function() {
         /*jshint maxlen: 600 */
         var books = [

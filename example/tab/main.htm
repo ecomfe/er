@@ -5,12 +5,9 @@
     <title>标签页示例</title>
     <link rel="stylesheet" href="css/all.css">
     <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.min.js"></script>
-    <script src="js/loader.js"></script>
+    <script src="js/esl.js"></script>
 </head>
 <body>
-    <script src="../../src/config.js"></script>
-    <script src="../../src/Observable.js"></script>
-    <script src="../../src/locator.js"></script>
     <h1>标签页示例</h1>
     <p>本示例展示如何使用<code>router</code>组件，完成一个简单的<em>标签页切换</em>功能。</p>
     <h2>示例</h2>
@@ -58,19 +55,33 @@
         </section>
     </div>
     <script>
-        var locator = require('er/locator');
-        locator.on(
-            'redirect',
-            function(e) {
-                var target = e.url;
-                $('#tabs li').removeClass('active');
-                $('#tabs a[href="#' + target + '"]').parent().addClass('active');
+        require.config({
+            packages: [
+                {
+                    name: 'er',
+                    location: '../../src',
+                    main: 'main'
+                }
+            ]
+        });
+        require(
+            ['er/config', 'er/locator'],
+            function(config, locator) {
+                config.indexURL = 'intro';
+                locator.on(
+                    'redirect',
+                    function(e) {
+                        var target = e.url;
+                        $('#tabs li').removeClass('active');
+                        $('#tabs a[href="#' + target + '"]').parent().addClass('active');
 
-                $('#example > section').hide();
-                $('#' + target).show();
+                        $('#example > section').hide();
+                        $('#' + target).show();
+                    }
+                );
+                locator.start();
             }
         );
-        locator.start();
     </script>
 </body>
 </html>

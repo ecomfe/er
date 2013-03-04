@@ -1,5 +1,4 @@
 define(
-    'book/Read',
     function(require) {
         var Action = require('er/Action');
 

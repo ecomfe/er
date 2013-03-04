@@ -3,41 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <title>Book Store</title>
-    <script src="src/common/loader.js"></script>
     <link rel="stylesheet" href="src/common/layout.css">
     <link rel="stylesheet" href="src/book/list.css">
+    <script src="src/common/esl.js"></script>
+    <script src="src/common/jquery.js"></script>
 </head>
 <body>
-    <script src="src/common/jquery-1.9.1.js"></script>
-
-    <script src="lib/er/config.js"></script>
-    <script src="lib/er/util.js"></script>
-    <script src="lib/er/assert.js"></script>
-    <script src="lib/er/Observable.js"></script>
-    <script src="lib/er/URL.js"></script>
-    <script src="lib/er/Deferred.js"></script>
-    <script src="lib/er/ajax.js"></script>
-    <script src="lib/er/permission.js"></script>
-    <script src="lib/er/datasource.js"></script>
-    <script src="lib/er/template.js"></script>
-    <script src="lib/er/locator.js"></script>
-    <script src="lib/er/router.js"></script>
-    <script src="lib/er/controller.js"></script>
-    <script src="lib/er/Action.js"></script>
-    <script src="lib/er/Model.js"></script>
-    <script src="lib/er/View.js"></script>
-    <script src="lib/er/main.js"></script>
-
-    <script src="src/common/database.js"></script>
-    <script src="src/book/ListModel.js"></script>
-    <script src="src/book/ListView.js"></script>
-    <script src="src/book/List.js"></script>
-    <script src="src/book/ReadView.js"></script>
-    <script src="src/book/Read.js"></script>
-    <script src="src/book/init.js"></script>
-    <script src="src/cart/ListView.js"></script>
-    <script src="src/cart/List.js"></script>
-    <script src="src/cart/init.js"></script>
     <div id="page">
         <h1>Book Store</h1>
         <nav id="nav">
@@ -49,36 +20,48 @@
         <div id="main"></div>
     </div>
     <script>
-        var ajax = require('er/ajax');
-        var loadingTemplate = [
-            ajax.request(
-                { url: 'src/book/list.tpl', dataType: 'text', method: 'GET' }
-            ),
-            ajax.request(
-                { url: 'src/book/view.tpl', dataType: 'text', method: 'GET' }
-            )
-        ];
-        require('er/Deferred').join(loadingTemplate).done(
-            function(bookList, bookView) {
-                require('er/template').parse(bookList[0]);
-                require('er/template').parse(bookView[0]);
-                require('book/init');
+        require.config({
+            baseUrl: 'src',
+            packages: [
+                {
+                    name: 'er',
+                    location: '../lib/er',
+                    main: 'main'
+                }
+            ]
+        });
+        require(
+            [
+                'er', 'er/ajax', 'er/Deferred', 'er/template', 'er/config',
+                'common/database', 'book/init'
+            ],
+            function(er, ajax, Deferred, template, config, book) {
+                var loadingTemplate = [
+                    ajax.get('src/book/list.tpl'),
+                    ajax.get('src/book/view.tpl')
+                ];
+                Deferred.join(loadingTemplate).done(
+                    function(bookList, bookView) {
+                        template.parse(bookList[0]);
+                        template.parse(bookView[0]);
 
-                require('er/config').indexURL = '/book/list';
+                        config.indexURL = '/book/list';
 
-                require('er/main').start();
+                        er.start();
+                    }
+                );
             }
         );
 
-        var adjustNavigator = (function() {
+        (function() {
             var topEdge = $('#nav').offset().top;
             var body = $('body');
             var document = $('html');
             var navigator = $('#nav');
-
-            return function() {
-                var top = 
-                    topEdge - Math.max(body.scrollTop(), document.scrollTop());
+            function adjustNavigator() {
+                var scrollTop = 
+                    Math.max(body.scrollTop(), document.scrollTop());
+                var top = topEdge - scrollTop;
                 if (top <= 0) {
                     navigator.addClass('fix-on-top');
                 }
@@ -86,10 +69,10 @@
                     navigator.removeClass('fix-on-top');
                 }
             }
-        }());
 
-        $(window).on('scroll', adjustNavigator);
-        adjustNavigator();
+            $(window).on('scroll', adjustNavigator);
+            adjustNavigator();
+        }());
     </script>
 </body>
 </html>
