@@ -27,8 +27,9 @@ define(
         }
 
         BookList.prototype.initBehavior = function() {
-            this.view.on('buy', buyBook.bind(this));
-            this.view.on('search', search.bind(this));
+            var util = require('er/util');
+            this.view.on('buy', util.bindFn(buyBook, this));
+            this.view.on('search', util.bindFn(search, this));
         };
 
         require('er/util').inherits(BookList, Action);

@@ -23,7 +23,7 @@ define(
             var container = $('#' + this.container);
 
             var util = require('er/util');
-            container.on('click', '.buy', util.bindFn(buyBook, this));
+            $('#book-list').on('click', '.buy', util.bindFn(buyBook, this));
             $('#submit-search').on('click', util.bindFn(search, this));
         };
 
