@@ -33,10 +33,17 @@
         });
         require(
             [
-                'er', 'er/ajax', 'er/Deferred', 'er/template', 'er/config',
+                'er', 'er/events', 'er/ajax', 
+                'er/Deferred', 'er/template', 'er/config',
                 'common/database', 'book/init', 'cart/init'
             ],
-            function(er, ajax, Deferred, template, config, database, book, cart) {
+            function(er, events, ajax, Deferred, template, config, database, book, cart) {
+                events.on(
+                    'error',
+                    function(error) {
+                        console.log(error);
+                    }
+                );
                 var loadingTemplate = [
                     ajax.get('src/book/list.tpl'),
                     ajax.get('src/book/view.tpl'),

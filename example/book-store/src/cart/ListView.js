@@ -1,5 +1,4 @@
 define(
-    'cart/ListView',
     function(require) {
         var View = require('er/View');
 

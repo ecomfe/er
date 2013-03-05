@@ -1,5 +1,4 @@
 define(
-    'cart/List',
     function(require) {
         var Action = require('er/Action');
 
