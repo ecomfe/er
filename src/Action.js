@@ -74,7 +74,11 @@ define(
             this.model = this.createModel(args);
             if (this.model && typeof this.model.load === 'function') {
                 var loadingModel = this.model.load();
-                return loadingModel.done(util.bindFn(this.forwardToView, this));
+                var events = require('./events');
+                return loadingModel.then(
+                    util.bindFn(this.forwardToView, this),
+                    util.bindFn(events.notifyError, events)
+                );
             }
             else {
                 this.forwardToView();
@@ -142,7 +146,8 @@ define(
                 this.fire('entercomplete');
             }
             else {
-                throw new Error('No view attached to this action');
+                var events = require('./events');
+                events.notifyError('No view attached to this action');
             }
         };
 

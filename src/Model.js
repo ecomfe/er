@@ -263,9 +263,15 @@ define(
          * @public
          */
         Model.prototype.load = function() {
-            var loading = load(this, this.datasource);
-            var util = require('./util');
-            return loading.done(util.bindFn(this.prepare, this));
+            try {
+                var loading = load(this, this.datasource);
+                var util = require('./util');
+                return loading.done(util.bindFn(this.prepare, this));
+            }
+            catch (ex) {
+                var Deferred = require('./Deferred');
+                return Deferred.rejected(ex);
+            }
         };
 
         /**

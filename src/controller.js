@@ -81,7 +81,7 @@ define(
                 // 需要对这个配置进行特殊处理，如果没有404对应的Action，
                 // 就返回null
                 if (!actionPathMapping[args.url.getPath()]) {
-                    throw new Error('no action configured');
+                    require('./events').notifyError('no action configured');
                 }
                 return loadAction(args);
             }
@@ -164,7 +164,9 @@ define(
 
             assert.has(loading, 'loadAction should always find an Action');
 
-            loading.done(enterAction);
+            var events = require('./events');
+            var util = require('./util');
+            loading.then(enterAction, util.bindFn(events.notifyError, events));
         }
 
         return {
