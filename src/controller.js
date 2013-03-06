@@ -48,8 +48,9 @@ define(
          * 根据URL加载对应的Action对象
          *
          * @param {Object} args 调用Action的初始化参数
-         * @return {?Promise} 如果有相应的Action配置，返回一个Promise对象，
-         * 当Action实例创建完毕后会执行`resolve`操作。否则返回**null**
+         * @return {Promise} 如果有相应的Action配置，返回一个Promise对象，
+         * 如果正确创建了Action对象，则该Promise对象进入**resolved**状态，
+         * 如果没找到Action的配置或者加载Action失败，则进入**rejected**状态
          */
         function loadAction(args) {
             var path = args.url.getPath();
@@ -76,13 +77,16 @@ define(
             // 如果没有Action的配置，则跳转到404页面
             if (!actionConfig) {
                 args.url = URL.parse(config.notFoundLocation);
+
                 // 对于404页面，是一切未找到的URL最终归宿，
                 // 因此如果404对应的Action没有配置，会进入死循环，
                 // 需要对这个配置进行特殊处理，如果没有404对应的Action，
                 // 就返回null
                 if (!actionPathMapping[args.url.getPath()]) {
-                    require('./events').notifyError('no action configured');
+                    return Deferred.rejected(
+                        'no action configured for url ' + args.url.getPath());
                 }
+
                 return loadAction(args);
             }
 
@@ -119,9 +123,34 @@ define(
                         return;
                     }
 
-                    var action = typeof SpecificAction === 'function'
-                        ? new SpecificAction()
-                        : SpecificAction;
+                    // 没有Action配置的`type`属性对应的模块实现
+                    if (!SpecificAction) {
+                        loading.reject(
+                            'No action implement for ' + actionConfig.type);
+                        return;
+                    }
+
+                    // 如果是个函数，则认为是Action的构造函数
+                    if (typeof SpecificAction === 'function') {
+                        loading.resolve(new SpecificAction(), args);
+                        return;
+                    }
+
+                    // 此时`SpecificAction`是一个对象，
+                    // 有可能是Action工厂或直接是Action对象
+                    var action = SpecificAction;
+                    // 处理Action工厂，
+                    // Action工厂是一个对象，它能生产出一个Action对象，
+                    // 有`createRuntimeAction`方法的对象即为Action工厂
+                    if (typeof action.createRuntimeAction === 'function') {
+                        // 此处不支持Action工厂返回Promise
+                        action = action.createRuntimeAction(args);
+                        if (!action) {
+                            loading.rejected(
+                                'Action factory returns non-action');
+                            return;
+                        }
+                    }
                     loading.resolve(action, args);
                 }
             );
