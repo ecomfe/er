@@ -1,101 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Book Store</title>
-  <link rel="stylesheet" href="src/common/layout.css">
-  <link rel="stylesheet" href="src/book/list.css">
-  <link rel="stylesheet" href="src/cart/list.css">
-  <script src="src/common/esl.js"></script>
-  <script src="src/common/jquery.js"></script>
+    <meta charset="utf-8" />
+    <title>Book Store</title>
+    <link rel="stylesheet" href="src/common/layout.css">
+    <link rel="stylesheet" href="src/book/list.css">
+    <link rel="stylesheet" href="src/cart/list.css">
+    <script src="src/common/esl.js"></script>
+    <script src="src/common/jquery.js"></script>
 </head>
 <body>
-<div id="page">
-  <h1>Book Store</h1>
-  <div id="nav-wrap">
-    <nav id="nav">
-      <ul>
-        <li id="link-to-book-list"><a href="#/book/list">图书列表</a></li>
-        <li id="link-to-cart"><a href="#/cart/list">购物车</a></li>
-      </ul>
-    </nav>
-  </div>
-  <div id="main"></div>
-</div>
+    <div id="page">
+        <h1>Book Store</h1>
+        <div id="nav-wrap">
+            <nav id="nav">
+                <ul>
+                    <li id="link-to-book-list"><a href="#/book/list">图书列表</a></li>
+                    <li id="link-to-cart"><a href="#/cart/list">购物车</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div id="main"></div>
+    </div>
 <script>
-  require.config({
-    baseUrl: 'src',
-    packages: [
-      {
-        name: 'er',
-        location: '../lib/er',
-        main: 'main'
-      }
-    ]
-  });
-  require(
-      [
-        'er', 'er/events', 'er/ajax',
-        'er/Deferred', 'er/template', 'er/config',
-        'common/database', 'book/init', 'cart/init'
-      ],
-      function(er, events, ajax, Deferred, template, config, database, book, cart) {
-        events.on(
-            'error',
-            function(error) {
-              console.log(error);
+    require.config({
+        baseUrl: 'src',
+        packages: [
+            {
+                name: 'er',
+                location: '../lib/er',
+                main: 'main'
             }
-        );
-        var loadingTemplate = [
-          ajax.get('src/book/list.tpl'),
-          ajax.get('src/book/view.tpl'),
-          ajax.get('src/cart/list.tpl')
-        ];
-        Deferred.join(loadingTemplate).done(
-            function(bookList, bookView, cartList) {
-              template.parse(bookList[0]);
-              template.parse(bookView[0]);
-              template.parse(cartList[0]);
+        ]
+    });
+    require(
+        [
+            'er', 'er/events', 'er/ajax',
+            'er/Deferred', 'er/template', 'er/config',
+            'common/database', 'book/init', 'cart/init'
+        ],
+        function(er, events, ajax, Deferred, template, config, database, book, cart) {
+            events.on(
+                'error',
+                function(error) {
+                    console.log(error);
+                }
+            );
+            var loadingTemplate = [
+                ajax.get('src/book/list.tpl'),
+                ajax.get('src/book/view.tpl'),
+                ajax.get('src/cart/list.tpl')
+            ];
+            Deferred.join(loadingTemplate).done(
+                function(bookList, bookView, cartList) {
+                    template.parse(bookList[0]);
+                    template.parse(bookView[0]);
+                    template.parse(cartList[0]);
 
-              config.indexURL = '/book/list';
-              console.log(er.version);
-              er.start();
+                    config.indexURL = '/book/list';
+                    console.log(er.version);
+                    er.start();
+                }
+            );
+
+            var linkToCart = $('#link-to-cart > a');
+            function updateBoughtNumber() {
+                var count = this.boughtBooks.length;
+                var text = '购物车';
+                if (count > 0) {
+                    text += '(' + count + ')';
+                }
+                linkToCart.text(text);
             }
-        );
+            cart.on('add', updateBoughtNumber);
+            cart.on('remove', updateBoughtNumber);
+            cart.on('clear', updateBoughtNumber);
 
-        var linkToCart = $('#link-to-cart > a');
-        function updateBoughtNumber() {
-          var count = this.boughtBooks.length;
-          var text = '购物车';
-          if (count > 0) {
-            text += '(' + count + ')';
-          }
-          linkToCart.text(text);
+            var topEdge = $('#nav').offset().top;
+            var body = $('body');
+            var document = $('html');
+            var navigator = $('#nav');
+            function adjustNavigator() {
+                var scrollTop =
+                    Math.max(body.scrollTop(), document.scrollTop());
+                var top = topEdge - scrollTop;
+                if (top <= 0) {
+                    navigator.addClass('fix-on-top');
+                }
+                else {
+                    navigator.removeClass('fix-on-top');
+                }
+            }
+
+            $(window).on('scroll', adjustNavigator);
+            adjustNavigator();
         }
-        cart.on('add', updateBoughtNumber);
-        cart.on('remove', updateBoughtNumber);
-        cart.on('clear', updateBoughtNumber);
-
-        var topEdge = $('#nav').offset().top;
-        var body = $('body');
-        var document = $('html');
-        var navigator = $('#nav');
-        function adjustNavigator() {
-          var scrollTop =
-              Math.max(body.scrollTop(), document.scrollTop());
-          var top = topEdge - scrollTop;
-          if (top <= 0) {
-            navigator.addClass('fix-on-top');
-          }
-          else {
-            navigator.removeClass('fix-on-top');
-          }
-        }
-
-        $(window).on('scroll', adjustNavigator);
-        adjustNavigator();
-      }
-  );
+    );
 </script>
 </body>
 </html>
