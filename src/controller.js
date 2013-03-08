@@ -191,7 +191,7 @@ define(
 
             var loading = loadAction(context);
 
-            assert.has(loading, 'loadAction should always find an Action');
+            assert.has(loading, 'loadAction should always return a Promise');
 
             var events = require('./events');
             var util = require('./util');
