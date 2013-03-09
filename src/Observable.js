@@ -106,7 +106,7 @@ define(
 
             var inlineHandler = this['on' + type];
             if (typeof inlineHandler === 'function') {
-                inlineHandler.apply(this, args);
+                inlineHandler.call(this, event);
             }
 
             var alreadyInvoked = {};
