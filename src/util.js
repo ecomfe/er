@@ -3,7 +3,7 @@
  * Copyright 2013 Baidu Inc. All rights reserved.
  * 
  * @file 杂而乱的工具对象
- * @author otakustay
+ * @author otakustay, errorrik
  */
 define(
     function(require, exports) {
@@ -15,7 +15,7 @@ define(
          * @return {number} 一个唯一的ID
          */
         exports.guid = function() {
-            return now++;
+            return 'er' + now++;
         };
 
         /**
