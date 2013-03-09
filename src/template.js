@@ -1164,7 +1164,7 @@ define(
                     case EXPR_T.number:
                         return eval(expr.text);
                     case EXPR_T.variable:
-                        return getVariableValue(scope, expr.text);
+                        return getVariableValue(scope, expr.text, 'raw');
                 }
             }
         }());
@@ -1205,10 +1205,8 @@ define(
             }
 
             // 过滤处理
-            if (filterName) {
-                filterName = filterContainer[filterName.substr(1)];
-                filterName && (value = filterName(value));
-            }
+            var filter = filterContainer[filterName || 'html'];
+            filter && (value = filter(value));
 
             return value;
         }
@@ -1290,13 +1288,12 @@ define(
          */
         function replaceVariable(text, scope) {
             return text.replace(
-                /\$\{([.a-z0-9\[\]'"_]+)\s*(\|[a-z]+)?\s*\}/ig,
-                function($0, $1, $2) {
-                    return getVariableValue(scope, $1, $2);
+                /\$\{([.a-z0-9\[\]'"_]+)\s*(\|([a-z]+))?\s*\}/ig,
+                function($0, $1, $2, $3) {
+                    return getVariableValue(scope, $1, $3);
                 }
             );
         }
-
 
         /**
          * 执行import
