@@ -311,7 +311,14 @@ define(
          */
         Model.prototype.set = function(key, value) {
             if (arguments.length >= 2) {
+                var oldValue = this._store[key];
                 this._store[key] = value;
+                var event = {
+                    name: key,
+                    oldValue: oldValue,
+                    newValue: value
+                };
+                this.fire('change', event);
             }
             else {
                 var extension = key;
@@ -331,6 +338,12 @@ define(
         Model.prototype.remove = function(key) {
             var value = this._store[key];
             delete this._store[key];
+            var event = {
+                name: key,
+                oldValue: value,
+                newValue: undefined
+            };
+            this.fire('change', event);
             return value;
         };
 
