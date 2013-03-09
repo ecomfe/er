@@ -1439,7 +1439,7 @@ define(
              * @public
              * @param {HTMLElement} output 要输出到的容器元素
              * @param {string} tplName 视图模板
-             * @param {string} opt_privateContextId 私用context环境的id
+             * @param {Model} model 获取数据的对象，实现`get({string}dataName):{*}`方法即可
              */
             merge: merge
         };
