@@ -151,8 +151,6 @@ define(
          * @param {Object=} context 初始化的数据
          */
         function Model(context) {
-            Observable.apply(this, arguments);
-
             this._store = {};
 
             if (context) {

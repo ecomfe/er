@@ -22,7 +22,6 @@ define(
          * @extends Observable
          */
         function Action() {
-            Observable.apply(this, arguments);
         }
 
         /**

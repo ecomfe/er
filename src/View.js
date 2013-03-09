@@ -21,7 +21,6 @@ define(
          * @extends Observable
          */
         function View() {
-            Observable.apply(this, arguments);
         }
 
         /**

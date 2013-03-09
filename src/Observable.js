@@ -26,6 +26,10 @@ define(
          * @public
          */
         Observable.prototype.on = function(type, handler) {
+            if (!this._events) {
+                this._events = {};
+            }
+
             var pool = this._events[type];
             if (!pool) {
                 pool = this._events[type] = [];
@@ -45,6 +49,10 @@ define(
          * @public
          */
         Observable.prototype.un = function(type, handler) {
+            if (!this._events) {
+                return;
+            }
+            
             if (!handler) {
                 this._events[type] = [];
                 return;
@@ -85,6 +93,10 @@ define(
          * @public
          */
         Observable.prototype.fire = function(type, event) {
+            if (!this._events) {
+                return;
+            }
+            
             if (Object.prototype.toString.call(event) === '[object Object]') {
                 event.type = type;
             }
