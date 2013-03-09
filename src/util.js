@@ -6,15 +6,20 @@
  * @author otakustay, errorrik
  */
 define(
-    function(require, exports) {
+    function() {
         var now = +new Date();
+
+        /**
+         * 工具模块，放一些杂七杂八的东西
+         */
+        var util = {};
 
         /**
          * 获取一个唯一的ID
          *
          * @return {number} 一个唯一的ID
          */
-        exports.guid = function() {
+        util.guid = function() {
             return 'er' + now++;
         };
 
@@ -25,7 +30,7 @@ define(
          * @param {...Object} destinations 用于混合的对象
          * @return 返回混合了`destintions`属性的`source`对象
          */
-        exports.mix = function(source) {
+        util.mix = function(source) {
             for (var i = 1; i < arguments.length; i++) {
                 var destination = arguments[i];
                 for (var key in destination) {
@@ -46,7 +51,7 @@ define(
          * @param {...*} args 固定的参数
          * @return {function} 固定了`this`变量和若干参数后的新函数对象
          */
-        exports.bindFn = nativeBind
+        util.bindFn = nativeBind
             ? function(fn) {
                 return nativeBind.apply(fn, [].slice.call(arguments, 1));
             }
@@ -64,7 +69,7 @@ define(
          * @type {function}
          * @const
          */
-        exports.noop = function() {};
+        util.noop = function() {};
 
         /**
          * 设置继承关系
@@ -73,7 +78,7 @@ define(
          * @param {function} superType 父类
          * @return {function} 子类
          */
-        exports.inherits = function(type, superType) {
+        util.inherits = function(type, superType) {
             var Empty = function() {};
             Empty.prototype = superType.prototype;
             var proto = new Empty();
@@ -95,7 +100,7 @@ define(
          * @param {string} text 文本内容
          * @return {*} 对应的JSON对象
          */
-        exports.parseJSON = function(text) {
+        util.parseJSON = function(text) {
             if (window.JSON && typeof JSON.parse === 'function') {
                 return JSON.parse(text);
             }
@@ -112,7 +117,7 @@ define(
          * @param {string} source 源字符串
          * @return {string} 移除前后空格后的字符串
          */
-        exports.trim = function(source) {
+        util.trim = function(source) {
             return source.replace(whitespace, '');
         };
 
@@ -122,7 +127,7 @@ define(
          * @param {string} 源字符串
          * @param {string} HTML编码后的字符串
          */
-        exports.encodeHTML = function(source) {
+        util.encodeHTML = function(source) {
             source = source + '';
             return source
                 .replace(/&/g,'&amp;')
@@ -132,6 +137,6 @@ define(
                 .replace(/'/g, '&#39;');
         };
 
-        return exports;
+        return util;
     }
 );

@@ -12,7 +12,7 @@ define(
         /**
          * 权限管理器，提供权限的注册和判断功能
          */
-        return {
+        var permssion = {
             /**
              * 添加权限说明
              * 
@@ -52,5 +52,7 @@ define(
                 return !!authorities[name];
             }
         };
+
+        return permssion;
     }
 );

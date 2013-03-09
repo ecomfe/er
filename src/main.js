@@ -1,6 +1,9 @@
 define(
     function(require) {
-        return {
+        /**
+         * main模块，没啥用
+         */
+        var main = {
             version: '${version}',
 
             start: function() {
@@ -9,5 +12,7 @@ define(
                 require('./locator').start();
             }
         };
+        
+        return main;
     }
 );

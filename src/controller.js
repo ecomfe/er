@@ -198,7 +198,10 @@ define(
             loading.then(enterAction, util.bindFn(events.notifyError, events));
         }
 
-        return {
+        /**
+         * URL与Action的调度器
+         */
+        var controller = {
             /**
              * 注册一个Action
              *
@@ -245,5 +248,7 @@ define(
                 require('./router').setBackup(forward);
             }
         };
+
+        return controller;
     }
 );

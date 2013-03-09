@@ -48,7 +48,7 @@ define(
          * - 当使用正则表达式作为规则时，URL的path部分匹配该正则
          * - 当所有路由规则均不匹配某个URL时，会调用`backup`函数
          */
-        return {
+        var router = {
             /**
              * 添加一条路由规则
              *
@@ -75,5 +75,7 @@ define(
                 require('./locator').on('redirect', executeRoute);
             }
         };
+
+        return router;
     }
 );

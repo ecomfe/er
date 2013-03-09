@@ -1404,7 +1404,7 @@ define(
         }
 
         // 返回暴露的方法
-        return {
+        var template = {
             /**
              * 添加过滤器
              * 
@@ -1443,5 +1443,7 @@ define(
              */
             merge: merge
         };
+
+        return template;
     }
 );
