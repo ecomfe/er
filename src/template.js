@@ -184,13 +184,13 @@ define(
         };
 
         function Scope(parent) {
-            this.context = {};
+            this._store = {};
             this.parent = parent;
         }
 
         Scope.prototype = {
             get: function(name) {
-                var value = this.context[name];
+                var value = this._store[name];
                 if (value == null && this.parent) {
                     return this.parent.get(name);
                 }
@@ -203,7 +203,7 @@ define(
             },
 
             set: function(name, value) {
-                this.context[name] = value;
+                this._store[name] = value;
             }
         };
 
@@ -1170,84 +1170,6 @@ define(
         }());
 
         /**
-         * 解析带有类型的模板变量的值
-         * 
-         * @inner
-         * @param {string} varName 变量名
-         * @param {string} type 变量类型，暂时为lang|config
-         * @return {string}
-         */
-        function getVariableValueByType(varName, type) {
-            var packs = varName.split('.'),
-                len = packs.length - 1,
-                topPackageName = packs.shift(),
-                win = window,
-                objOnDef = require('./config').defaultModule,
-                variable,
-                objOnSelf,
-                objOnBase;
-
-            type = type.toLowerCase();
-
-            // 多层示例假设: ${package.sub.test:lang}
-            // 如果getConfig('DEFAULT_PACKAGE')的值为 "project" 
-            // 查找对象:
-            // project.package.sub.lang.test
-            // package.sub.lang.test
-            // lang.package.sub.test
-            // object:project
-            objOnDef && (objOnDef = win[objOnDef]); 
-            // object:package
-            objOnSelf = win[topPackageName]; 
-            // object:lang.package
-            objOnBase = win[type] && win[type][topPackageName]; 
-            // 对于单层的值，如: ${test:lang}
-            // 查找对象 project.lang.test 和 lang.test
-            if (len === 0) {
-                objOnDef = objOnDef && objOnDef[type];
-                return ((objOnDef && objOnDef[topPackageName]) 
-                    || objOnBase 
-                    || '');
-            }
-
-            // object: project.package
-            objOnDef = objOnDef && objOnDef[topPackageName]; 
-            varName = packs.pop();
-            len--;
-
-            while (len--) {
-                variable = packs.shift();
-                objOnDef = objOnDef && objOnDef[variable];
-                objOnSelf = objOnSelf && objOnSelf[variable];
-                objOnBase = objOnBase && objOnBase[variable];
-            }
-
-            // object: project.package.sub.lang
-            objOnDef = objOnDef && objOnDef[type]; 
-            // object: package.sub.lang
-            objOnSelf = objOnSelf && objOnSelf[type]; 
-
-            // object: project.package.sub.lang.test
-            objOnDef = objOnDef && objOnDef[varName]; 
-            // object: package.sub.lang.test
-            objOnSelf = objOnSelf && objOnSelf[varName]; 
-            // object: lang.package.sub.test
-            objOnBase = objOnBase && objOnBase[varName]; 
-
-            if (objOnDef != null) {
-                return objOnDef;
-            }
-            else if (objOnSelf != null) {
-                return objOnSelf;
-            }
-            else if (objOnBase != null) {
-                return objOnBase;
-            }
-
-            return '';
-        }
-
-        /**
          * 解析模板变量的值
          * 
          * @inner
@@ -1257,40 +1179,29 @@ define(
          * @return {string}
          */
         function getVariableValue(scope, varName, filterName) {
-            var typeRule = /:([a-z]+)$/i;
-            var match = varName.match(typeRule);
-            var value = '';
-            var i, len;
-            var variable, propName, propLen;
+            varName = varName.split(/[\.\[]/);
+            var variable = scope.get(varName[0]);
+            varName.shift();
 
-            varName = varName.replace(typeRule, '');
-            if (match && match.length > 1) {
-                value = getVariableValueByType(varName, match[1]);
+            for (var i = 0, len = varName.length; i < len; i++) {
+                if (variable == null) {
+                    break;
+                }
+
+                var propName = varName[i].replace(/\]$/, '');
+                var propLen = propName.length;
+                if (/^(['"])/.test(propName) 
+                    && propName.lastIndexOf(RegExp.$1) === --propLen
+                ) {
+                    propName = propName.slice(1, propLen);
+                }
+
+                variable = variable[propName];
             }
-            else {
-                varName = varName.split(/[\.\[]/);
-                variable = scope.get(varName[0]);
-                varName.shift();
 
-                for (i = 0, len = varName.length; i < len; i++) {
-                    if (variable == null) {
-                        break;
-                    }
-
-                    propName = varName[i].replace(/\]$/, '');
-                    propLen = propName.length;
-                    if (/^(['"])/.test(propName) 
-                        && propName.lastIndexOf(RegExp.$1) === --propLen
-                    ) {
-                        propName = propName.slice(1, propLen);
-                    }
-
-                    variable = variable[propName];
-                }
-
-                if (variable != null) {
-                    value = variable;
-                }
+            var value = '';
+            if (variable != null) {
+                value = variable;
             }
 
             // 过滤处理
@@ -1379,7 +1290,7 @@ define(
          */
         function replaceVariable(text, scope) {
             return text.replace(
-                /\$\{([.:a-z0-9\[\]'"_]+)\s*(\|[a-z]+)?\s*\}/ig,
+                /\$\{([.a-z0-9\[\]'"_]+)\s*(\|[a-z]+)?\s*\}/ig,
                 function($0, $1, $2) {
                     return getVariableValue(scope, $1, $2);
                 }
@@ -1478,16 +1389,16 @@ define(
          * @inner
          * @param {HTMLElement} output 要输出到的容器元素
          * @param {string} tplName 模板名
-         * @param {Model} context 获取数据的对象，实现`get`方法即可
+         * @param {Model} model 获取数据的对象，实现`get({string}dataName):{*}`方法即可
          */
-        function merge(output, tplName, context) {
+        function merge(output, tplName, model) {
             var html = '';
             var target;
 
             if (output) {
                 try {
                     target = getTarget(tplName);
-                    html = exec(target, context);
+                    html = exec(target, new Scope(model));
                 }
                 catch (ex) {}
 
