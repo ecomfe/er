@@ -9,7 +9,7 @@ define(
     function(require) {
         var plugin = {
             load: function(resourceId, parentRequire, load) {
-                function addTemplate(template) {
+                function addTemplate(text) {
                     var template = require('./template');
                     template.parse(text);
                     load(text);
