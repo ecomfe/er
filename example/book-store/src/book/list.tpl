@@ -44,9 +44,9 @@
     <!-- /for -->
 </ol>
 <div id="list-page">
-    <span page="${page}-1" class="previous <!-- if: (page === 1) -->disable<!-- /if -->">上一页</span>
+    <a data-page="${page}-1" class="previous <!-- if: ${page} == 1 -->disable<!-- /if -->">上一页</a>
     <!-- for: ${pages} as ${p} -->
-    <span  page="${p}" class="index <!-- if: (p === page) -->disable current<!-- /if -->">${p}</span>
+    <a data-page="${p}" class="index <!-- if: ${p} == ${page} -->disable current<!-- /if -->">${p}</a>
     <!-- /for -->
-    <span page="${page}+1" class="next <!-- if: (page === pageCount) -->disable<!-- /if -->">下一页</span>
+    <a data-page="${page}+1" class="next <!-- if: ${page} == ${pageCount} -->disable<!-- /if -->">下一页</a>
 </div>

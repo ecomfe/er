@@ -12,10 +12,10 @@ define(
 
         var cart = {
             boughtBooks: [],
-            find: function(isbn){
-                var i = this.boughtBooks.length ;
-                while(i--) {
-                    if(this.boughtBooks[i].isbn === isbn) {
+            find: function(isbn) {
+                var i = this.boughtBooks.length;
+                while (i--) {
+                    if (this.boughtBooks[i].isbn === isbn) {
                         return i;
                     }
                 }

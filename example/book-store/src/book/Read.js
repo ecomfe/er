@@ -8,7 +8,7 @@ define(
 
         function buyBook() {
             require('cart/init').add(this.model.valueOf());
-            this.view.boughtBooks(this.model.get('isbn'));
+            this.view.boughtBook(this.model.get('isbn'));
         }
 
         BookRead.prototype.createModel = function(context) {

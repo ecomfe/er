@@ -12,12 +12,12 @@ define(
 
         BookReadView.prototype.template = 'bookView';
 
-        BookReadView.prototype.boughtBooks = function(isbn) {
-            require('book/ListView').prototype.showBoughtTip.call(this, isbn);
+        BookReadView.prototype.boughtBook = function(isbn) {
+            require('book/effect').showBoughtTip.call(this, isbn);
         };
 
         BookReadView.prototype.enterDocument = function() {
-            $('#book-list').on('click', '.buy', require('er/util').bindFn(buyBook, this));
+            $('#buy').click(require('er/util').bindFn(buyBook, this));
         };
         
         require('er/util').inherits(BookReadView, View);

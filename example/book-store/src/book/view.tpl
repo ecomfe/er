@@ -25,7 +25,7 @@
             </li>
         </ul>
         <div class="action">
-            <span class="interactive buy">加入购物车</span>
+            <span class="interactive buy" id="buy">加入购物车</span>
         </div>
     </li>
 </ol>
