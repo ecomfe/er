@@ -6,6 +6,11 @@ define(
             Action.apply(this, arguments);
         }
 
+        function buyBook() {
+            require('cart/init').add(this.model.valueOf());
+            this.view.boughtBook(this.model.get('isbn'));
+        }
+
         BookRead.prototype.createModel = function(context) {
             var Model = require('er/Model');
             var model = new Model(context);
@@ -16,6 +21,10 @@ define(
         };
 
         BookRead.prototype.viewType = require('book/ReadView');
+
+        BookRead.prototype.initBehavior = function() {
+            this.view.on('buy', require('er/util').bindFn(buyBook, this))
+        };
 
         require('er/util').inherits(BookRead, Action);
 

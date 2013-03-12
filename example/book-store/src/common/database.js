@@ -364,8 +364,8 @@ define(
                 var pageIndex = query.page || 1;
                 var pageSize = 6;
                 var pageCount = Math.ceil(result.length / pageSize);
-
-                result = result.slice((pageIndex - 1) * pageSize, pageSize);
+                var itemBegin = (pageIndex - 1) * pageSize
+                result = result.slice(itemBegin, itemBegin + pageSize);
                 for (var i = 0; i < result.length; i++) {
                     var book = result[i];
                     var clone = {};
