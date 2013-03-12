@@ -54,3 +54,21 @@
 #book-list .buy {
     padding: 6px 10px;
 }
+#list-page .previous,
+#list-page .next,
+#list-page .index{
+    color: #0000ff;
+}
+
+#list-page .disable {
+    color: #cccccc;
+}
+
+#list-page .current {
+    color: #BB6622;
+}
+
+#list-page :not(.disable):hover {
+    text-decoration: underline;
+    cursor: pointer;
+}

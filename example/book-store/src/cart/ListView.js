@@ -6,6 +6,16 @@ define(
             View.apply(this, arguments);
         }
 
+        function plusBook(e) {
+            var isbn = $(e.target).closest('tr').attr('data-isbn');
+            this.fire('plus', { isbn: isbn });
+        }
+
+        function minusBook(e) {
+            var isbn = $(e.target).closest('tr').attr('data-isbn');
+            this.fire('minus', { isbn: isbn });
+        }
+
         function removeBook(e) {
             var isbn = $(e.target).closest('tr').attr('data-isbn');
             this.fire('remove', { isbn: isbn });
@@ -19,8 +29,13 @@ define(
 
         CartListView.prototype.enterDocument = function() {
             var util = require('er/util');
-            $('#cart-list').on(
-                'click', '.remove', util.bindFn(removeBook, this));
+            $('#cart-list')
+                .on(
+                    'click', '.remove', util.bindFn(removeBook, this))
+                .on(
+                    'click', '.plus', util.bindFn(plusBook, this))
+                .on(
+                    'click', '.minus', util.bindFn(minusBook, this));
             $('#clear-cart').on('click', util.bindFn(clearCart, this));
         };
 

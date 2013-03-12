@@ -12,10 +12,46 @@ define(
 
         var cart = {
             boughtBooks: [],
+            find: function(isbn) {
+                var i = this.boughtBooks.length;
+                while (i--) {
+                    if (this.boughtBooks[i].isbn === isbn) {
+                        return i;
+                    }
+                }
+                return -1;
+            },
 
             add: function(book) {
-                this.boughtBooks.push(book);
+                var cartIndex = this.find(book.isbn);
+                if (cartIndex > -1) {
+                    this.plus(book.isbn);
+                }
+                else {
+                    book.count = 1;
+                    this.boughtBooks.push(book);
+                }
                 this.fire('add', book);
+            },
+
+            plus: function(isbn) {
+                var cartIndex = this.find(isbn);
+                if (cartIndex > -1) {
+                    this.boughtBooks[cartIndex].count++;
+                    this.fire('plus', isbn);
+                }
+            },
+
+            minus: function(isbn) {
+                var cartIndex = this.find(isbn);
+                if (cartIndex > -1) {
+                    var book = this.boughtBooks[cartIndex];
+                    book.count--;
+                    if (book.count < 0) {
+                        book.count = 0;
+                    }
+                    this.fire('minus', isbn);
+                }
             },
 
             remove: function(isbn) {
@@ -36,7 +72,7 @@ define(
             calculateSum: function() {
                 var sum = this.boughtBooks.reduce(
                     function(sum, b) {
-                        return sum + b.price;
+                        return sum + b.price * b.count;
                     },
                     0
                 );
