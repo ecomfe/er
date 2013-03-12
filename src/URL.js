@@ -110,13 +110,14 @@ define(
         /**
          * 根据path和给定的query对象生成URL对象
          *
-         * @param {string} path 已经存在的URL
+         * @param {string|URL} path 已经存在的URL
          * @param {Object} query URL的参数对象
          * @param {Object=} options 控制解析行为的相关参数
          * @param {string=} options.querySeparator 用于分隔path和search的字符
          * @return {URL} 一个URL对象
          */
         URL.withQuery = function(path, query, options) {
+            path = path + '';
             var defaults = { querySeparator: '~' };
             options = util.mix(defaults, options);
 
