@@ -16,6 +16,15 @@ define(
             this.fire('search', { keywords: keywords });
         }
 
+        function flip(e) {
+            var page = e.target.innerHTML;
+            if (/(\+|\-)/.test(page)) {
+                page = parseInt(page) + (RegExp.$1 === '+' ? 1 : -1);
+                //如果模版里支持最简单的${page + 1} 这样的表达式就不会这样了。。。
+            }
+            this.fire('flip', { page: page });
+        }
+
         BookListView.prototype.template = 'bookList';
 
         BookListView.prototype.enterDocument = function() {
@@ -24,6 +33,7 @@ define(
             var util = require('er/util');
             $('#book-list').on('click', '.buy', util.bindFn(buyBook, this));
             $('#submit-search').on('click', util.bindFn(search, this));
+            $('#list-page').on('click', ':not(.disable)', util.bindFn(flip, this));
         };
 
         BookListView.prototype.showBoughtTip = function(isbn) {

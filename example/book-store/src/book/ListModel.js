@@ -24,7 +24,8 @@ define(
         BookListModel.prototype.prepare = function() {
             var list = this.get('list');
             this.set('list', list.result);
-            this.set('page', list.page);
+            this.set('page', list.page ? list.page : 1);
+            this.set('pageCount', list.pageCount);
 
             var pages = [];
             for (var i = 1; i <= list.pageCount; i++) {
