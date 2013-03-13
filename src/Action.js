@@ -115,7 +115,8 @@ define(
             this.view = this.createView();
             if (this.view) {
                 this.view.model = this.model;
-                if (this.context) {
+                // 如果创建View的时候已经设置了`container`，就不要强行干扰了
+                if (this.context && !this.view.container) {
                     this.view.container = this.context.container;
                 }
 
