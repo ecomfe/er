@@ -102,7 +102,15 @@ define(
 
                     var data = xhr.responseText;
                     if (options.dataType === 'json') {
-                        data = util.parseJSON(data);
+                        try {
+                            data = util.parseJSON(data);
+                        }
+                        catch (ex) {
+                            // 服务器返回的数据不符合JSON格式，认为请求失败
+                            requesting.reject(fakeXHR);
+                            ajax.on('fail', { xhr: fakeXHR });
+                            return;
+                        }
                     }
 
                     if (status >= 200 && status < 300 || status === 304) {
