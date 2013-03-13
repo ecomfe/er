@@ -219,14 +219,16 @@ define(
          * @param {string} url 请求的地址
          * @param {Object=} data 请求的数据
          * @param {function=} done 请求成功后的回调函数
+         * @param {string=} dataType 指定响应的数据格式，可为**text**或**json**
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        ajax.post = function(url, data, done) {
+        ajax.post = function(url, data, done, dataType) {
             var options = {
                 method: 'POST',
                 url: url, 
                 data: data,
+                dataType: dataType || 'json',
                 done: done
             };
             return ajax.request(options);
