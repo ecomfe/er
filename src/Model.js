@@ -356,7 +356,7 @@ define(
          */
         Model.prototype.getAsModel = function(key) {
             var value = this.get(key);
-            if ({}.toString.call(value) !== '[object Object]') {
+            if (!value || {}.toString.call(value) !== '[object Object]') {
                 return new Model();
             }
             else {
