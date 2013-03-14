@@ -67,6 +67,10 @@ define(
             var xhrWrapper = {
                 abort: function() {
                     xhr.abort();
+                    fakeXHR.status = 408; // HTTP 408: Request Timeout
+                    fakeXHR.readyState = xhr.readyState;
+                    fakeXHR.responseText = '';
+                    fakeXHR.responseXML = '';
                     requesting.reject(fakeXHR);
                     /**
                      * 任意一个XMLHttpRequest请求失败时触发
@@ -107,6 +111,7 @@ define(
                         }
                         catch (ex) {
                             // 服务器返回的数据不符合JSON格式，认为请求失败
+                            fakeXHR.error = ex;
                             requesting.reject(fakeXHR);
                             ajax.on('fail', { xhr: fakeXHR });
                             return;
@@ -114,7 +119,7 @@ define(
                     }
 
                     if (status >= 200 && status < 300 || status === 304) {
-                        requesting.resolve(data, fakeXHR);
+                        requesting.resolve(data);
                         /**
                          * 任意一个XMLHttpRequest请求失败时触发
                          *
@@ -125,7 +130,7 @@ define(
                         ajax.on('done', { xhr: fakeXHR });
                     }
                     else {
-                        requesting.reject(data, fakeXHR);
+                        requesting.reject(fakeXHR);
                         ajax.on('fail', { xhr: fakeXHR });
                     }
                 }
@@ -219,7 +224,7 @@ define(
          * @param {string} url 请求的地址
          * @param {Object=} data 请求的数据
          * @param {function=} done 请求成功后的回调函数
-         * @param {string=} dataType 指定响应的数据格式，可为**text**或**json**
+         * @param {string=} dataType 指定w响应的数据格式，可为**text**或**json**
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
