@@ -19,13 +19,6 @@
             document.getElementById('log').innerHTML += '<li>' + text + '</li>';
         }
 
-        function dump() {
-            var output = model.valueOf();
-            var json = JSON.stringify(output, null, '    ');
-            var util = require('util');
-            document.getElementById('result').innerHTML = util.encodeHTML(json);
-        }
-
         require.config({
             packages: [
                 {
@@ -67,11 +60,18 @@
                         }
                     },
                     {
-                        // 使用数据获取配置项指定key
+                        // 使用数据获取配置项指定name
                         retrieve: function() { return 30; },
-                        key: 'thirty'
+                        name: 'thirty'
                     }
                 ];
+
+                function dump() {
+                    var output = model.valueOf();
+                    var json = JSON.stringify(output, null, '    ');
+                    var util = require('er/util');
+                    document.getElementById('result').innerHTML = util.encodeHTML(json);
+                }
 
                 model.load().done(dump);
             }
