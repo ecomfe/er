@@ -1,5 +1,7 @@
 define(
     function(require) {
+        require('er/tpl!./list.tpl');
+
         var View = require('er/View');
 
         function BookListView() {

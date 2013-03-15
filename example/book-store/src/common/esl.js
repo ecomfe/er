@@ -1,17 +1,18 @@
 /**
-* ESL (Enterprise Standard Loader)
-* Copyright 2013 Baidu Inc. All rights reserved.
-* 
-* @file Browser端标准加载器，符合AMD规范
-* @author errorrik(errorrik@gmail.com)
-*/
+ * ESL (Enterprise Standard Loader)
+ * Copyright 2013 Baidu Inc. All rights reserved.
+ * 
+ * @file Browser端标准加载器，符合AMD规范
+ * @author errorrik(errorrik@gmail.com)
+ */
+
 var define;
 var require;
 
-(function(global) {
+(function ( global ) {
     // "mod_"开头的变量或函数为内部模块管理函数
     // 为提高压缩率，不使用function或object包装
-    var require = createLocalRequire('');
+    var require = createLocalRequire( '' );
 
     /**
      * 定义模块
@@ -25,44 +26,48 @@ var require;
         var dependencies;
         var factory;
 
-        for (var i = 0, len = arguments.length; i < len; i++) {
-            var arg = arguments[i];
+        for ( var i = 0, len = arguments.length; i < len; i++ ) {
+            var arg = arguments[ i ];
 
-            switch (typeof arg) {
-            case 'string':
-                id = arg;
-                break;
-            case 'function':
-                factory = arg;
-                break;
-            case 'object':
-                if (!dependencies && isArray(arg)) {
-                    dependencies = arg;
-                } else {
+            switch ( typeof arg ) {
+                case 'string':
+                    id = arg;
+                    break;
+                case 'function':
                     factory = arg;
-                }
-                break;
+                    break;
+                case 'object':
+                    if ( !dependencies && isArray( arg ) ) {
+                        dependencies = arg;
+                    }
+                    else {
+                        factory = arg;
+                    }
+                    break;
             }
         }
-
+        
         // 出现window不是疏忽
         // esl设计是做为browser端的loader
         // 闭包的global更多意义在于：
-        // define和require方法可以被挂到用户自定义对象中
+        //     define和require方法可以被挂到用户自定义对象中
         var opera = window.opera;
 
         // IE下通过current script的data-require-id获取当前id
-        if (!id && document.attachEvent && (!(opera && opera.toString() === '[object Opera]'))) {
-            id = getCurrentScript()
-                .getAttribute('data-require-id');
+        if ( 
+            !id 
+            && document.attachEvent 
+            && (!(opera && opera.toString() === '[object Opera]')) 
+        ) {
+            id = getCurrentScript().getAttribute( 'data-require-id' );
         }
 
         // 纪录到共享变量中，在load或readystatechange中处理
-        currentScriptDefines.push({
-            id: id,
-            deps: dependencies || [],
-            factory: factory
-        });
+        currentScriptDefines.push( {
+            id      : id,
+            deps    : dependencies || [],
+            factory : factory
+        } );
     }
 
     define.amd = {};
@@ -101,28 +106,28 @@ var require;
      * @param {Array.<string>} hardDepends 强依赖模块列表
      * @param {Array.<string>} depends 依赖模块列表
      */
-    function mod_define(id, factory, factoryArgs, hardDepends, depends) {
+    function mod_define( id, factory, factoryArgs, hardDepends, depends ) {
         var module = {
-            id: id,
-            factoryArgs: factoryArgs,
-            hardDeps: hardDepends,
-            deps: depends || [],
-            factory: factory,
-            exports: {},
-            state: MODULE_STATE_UNINIT
+            id           : id,
+            factoryArgs  : factoryArgs,
+            hardDeps     : hardDepends,
+            deps         : depends || [],
+            factory      : factory,
+            exports      : {},
+            state        : MODULE_STATE_UNINIT
         };
 
         // 将模块预存入defining集合中
-        mod_modules[id] = module;
+        mod_modules[ id ] = module;
 
         // 内建模块
         var buildinModule = {
-            require: createLocalRequire(id),
-            exports: module.exports,
-            module: module
+            require : createLocalRequire( id ),
+            exports : module.exports,
+            module  : module
         };
 
-        mod_addInitedListener(initModule);
+        mod_addInitedListener( initModule );
         initModule();
 
         /**
@@ -133,10 +138,10 @@ var require;
          */
         function isInitReady() {
             var isReady = 1;
-            each(hardDepends, function(id) {
-                isReady = id in BUILDIN_MODULE || mod_isInited(id);
+            each( hardDepends, function ( id ) {
+                isReady = id in BUILDIN_MODULE || mod_isInited( id );
                 return isReady;
-            });
+            } );
 
             return isReady;
         }
@@ -147,38 +152,43 @@ var require;
          * @inner
          */
         function initModule() {
-            if (mod_isInited(id) || !isInitReady()) {
+            if ( mod_isInited( id ) || !isInitReady() ) {
                 return;
             }
 
             // 构造factory参数
             var args = [];
-            each(
-            factoryArgs,
-
-            function(moduleId, index) {
-                args[index] = buildinModule[moduleId] || mod_getModuleExports(moduleId);
-            })
+            each( 
+                factoryArgs,
+                function ( moduleId, index ) {
+                    args[ index ] = 
+                        buildinModule[ moduleId ]
+                        || mod_getModuleExports( moduleId );
+                } 
+            )
 
             // 调用factory函数初始化module
             try {
-                var exports = typeof factory == 'function' ? factory.apply(global, args) : factory;
+                var exports = typeof factory == 'function'
+                    ? factory.apply( global, args )
+                    : factory;
 
-                if (typeof exports != 'undefined') {
+                if ( typeof exports != 'undefined' ) {
                     module.exports = exports;
                 }
-            } catch (ex) {
-                if (ex.message.indexOf('[MODULE_MISS]') === 0) {
+            } 
+            catch ( ex ) {
+                if ( ex.message.indexOf('[MODULE_MISS]') === 0 ) {
                     return;
                 }
 
                 throw ex;
             }
-
+            
             module.state = MODULE_STATE_INITED;
-            mod_removeInitedListener(initModule);
-
-            mod_fireInited(id);
+            mod_removeInitedListener( initModule );
+            
+            mod_fireInited( id );
         }
     }
 
@@ -212,14 +222,14 @@ var require;
      * @inner
      * @param {string} id 模块标识
      */
-    function mod_fireInited(id) {
+    function mod_fireInited( id ) {
         mod_fireLevel++;
-        each(
-        mod_initedListener,
-
-        function(listener) {
-            listener && listener(id);
-        });
+        each( 
+            mod_initedListener,
+            function ( listener ) {
+                listener && listener( id );
+            }
+        );
         mod_fireLevel--;
 
         mod_sweepInitedListener();
@@ -234,18 +244,16 @@ var require;
      * @param {Function} listener 模块定义监听器
      */
     function mod_sweepInitedListener() {
-        if (mod_fireLevel < 1) {
-            mod_removeListenerIndex.sort(function(a, b) {
-                return b - a;
-            });
+        if ( mod_fireLevel < 1 ) {
+            mod_removeListenerIndex.sort( function ( a, b ) { return b - a; });
 
-            each(
-            mod_removeListenerIndex,
-
-            function(index) {
-                mod_initedListener.splice(index, 1);
-            });
-
+            each( 
+                mod_removeListenerIndex,
+                function ( index ) {
+                    mod_initedListener.splice( index, 1 );
+                }
+            );
+            
             mod_removeListenerIndex = [];
         }
     }
@@ -256,15 +264,15 @@ var require;
      * @inner
      * @param {Function} listener 模块定义监听器
      */
-    function mod_removeInitedListener(listener) {
+    function mod_removeInitedListener( listener ) {
         each(
-        mod_initedListener,
-
-        function(item, index) {
-            if (listener == item) {
-                mod_removeListenerIndex.push(index);
+            mod_initedListener,
+            function ( item, index ) {
+                if ( listener == item ) {
+                    mod_removeListenerIndex.push( index );
+                }
             }
-        });
+        );
     }
 
     /**
@@ -273,8 +281,8 @@ var require;
      * @inner
      * @param {Function} listener 模块定义监听器
      */
-    function mod_addInitedListener(listener) {
-        mod_initedListener.push(listener);
+    function mod_addInitedListener( listener ) {
+        mod_initedListener.push( listener );
     }
 
     /**
@@ -284,7 +292,7 @@ var require;
      * @param {string} id 模块标识
      * @return {boolean}
      */
-    function mod_exists(id) {
+    function mod_exists( id ) {
         return id in mod_modules;
     }
 
@@ -295,8 +303,9 @@ var require;
      * @param {string} id 模块标识
      * @return {boolean}
      */
-    function mod_isInited(id) {
-        return mod_exists(id) && mod_modules[id].state == MODULE_STATE_INITED;
+    function mod_isInited( id ) {
+        return mod_exists( id ) 
+            && mod_modules[ id ].state == MODULE_STATE_INITED;
     }
 
     /**
@@ -306,9 +315,9 @@ var require;
      * @param {string} id 模块标识
      * @return {*}
      */
-    function mod_getModuleExports(id) {
-        if (mod_exists(id)) {
-            return mod_modules[id].exports;
+    function mod_getModuleExports( id ) {
+        if ( mod_exists( id ) ) {
+            return mod_modules[ id ].exports;
         }
 
         return null;
@@ -321,8 +330,8 @@ var require;
      * @param {string} id 模块标识
      * @return {Object}
      */
-    function mod_getModule(id) {
-        return mod_modules[id];
+    function mod_getModule( id ) {
+        return mod_modules[ id ];
     }
 
     /**
@@ -332,13 +341,13 @@ var require;
      * @param {string} resourceId 资源标识
      * @param {*} value 资源对象
      */
-    function mod_addResource(resourceId, value) {
-        mod_modules[resourceId] = {
+    function mod_addResource( resourceId, value ) {
+        mod_modules[ resourceId ] = {
             exports: value || true,
             state: MODULE_STATE_INITED
         };
 
-        mod_fireInited(resourceId);
+        mod_fireInited( resourceId );
     }
 
     /**
@@ -356,9 +365,9 @@ var require;
      * @type {Object}
      */
     var BUILDIN_MODULE = {
-        require: require,
-        exports: 1,
-        module: 1
+        require : require,
+        exports : 1,
+        module  : 1
     };
 
     /**
@@ -366,65 +375,65 @@ var require;
      * 
      * @inner
      */
-    function completeDefine(currentId) {
+    function completeDefine( currentId ) {
         var requireModules = [];
         var pluginModules = [];
-        var defines = currentScriptDefines.slice(0);
+        var defines = currentScriptDefines.slice( 0 );
 
         currentScriptDefines.length = 0;
         currentScriptDefines = [];
 
         // 第一遍处理合并依赖，找出依赖中是否包含资源依赖
         each(
-        defines,
-
-        function(defineItem, defineIndex) {
-            var id = defineItem.id || currentId;
-            var depends = defineItem.deps;
-            var factory = defineItem.factory;
-
-            if (mod_exists(id)) {
-                return;
-            }
-
-            // 处理define中编写的依赖声明
-            // 默认为['require', 'exports', 'module']
-            if (depends.length === 0) {
-                depends.push('require', 'exports', 'module');
-            }
-
-            // 处理实际需要加载的依赖
-            var realDepends = [];
-            defineItem.realDeps = realDepends;
-            realDepends.push.apply(realDepends, depends);
-
-            // 分析function body中的require
-            var requireRule = /require\(\s*(['"'])([^'"]+)\1\s*\)/g;
-            var commentRule = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
-            if (typeof factory == 'function') {
-                factory.toString()
-                    .replace(commentRule, '')
-                    .replace(requireRule, function($0, $1, $2) {
-                    realDepends.push($2);
-                });
-            }
-
-            // 分析resource加载的plugin module id
-            each(
-            realDepends,
-
-            function(dependId) {
-                var idInf = parseId(dependId);
-                if (idInf.resource) {
-                    pluginModules.push(normalize(idInf.module, id));
+            defines,
+            function ( defineItem, defineIndex ) {
+                var id = defineItem.id || currentId;
+                var depends = defineItem.deps;
+                var factory = defineItem.factory;
+                
+                if ( mod_exists( id ) ) {
+                    return;
                 }
-            });
-        });
 
+                // 处理define中编写的依赖声明
+                // 默认为['require', 'exports', 'module']
+                if ( depends.length === 0 ) {
+                    depends.push( 'require', 'exports', 'module' );
+                }
+
+                // 处理实际需要加载的依赖
+                var realDepends = [];
+                defineItem.realDeps = realDepends;
+                realDepends.push.apply( realDepends, depends );
+
+                // 分析function body中的require
+                var requireRule = /require\(\s*(['"'])([^'"]+)\1\s*\)/g;
+                var commentRule = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+                if ( typeof factory == 'function' ) {
+                    factory.toString()
+                        .replace( commentRule, '' )
+                        .replace( requireRule, function ( $0, $1, $2 ) {
+                            realDepends.push( $2 );
+                        });
+                }
+
+                // 分析resource加载的plugin module id
+                each(
+                    realDepends,
+                    function ( dependId ) {
+                        var idInf = parseId( dependId );
+                        if ( idInf.resource ) {
+                            pluginModules.push( normalize( idInf.module, id ) );
+                        }
+                    }
+                );
+            }
+        );
+        
         // 尝试加载"资源加载所需模块"，后进行第二次处理
         // 需要先加载模块的愿意是：如果模块不存在，无法进行资源id normalize化
         // pretreatAndDefine处理所有依赖，并进行module define
-        nativeRequire(pluginModules, pretreatAndDefine);
+        nativeRequire( pluginModules, pretreatAndDefine );
 
         /**
          * 判断模块是否在后续的定义中
@@ -443,17 +452,17 @@ var require;
          * @return {boolean} 
          */
         // function isInAfterDefine( startIndex, dependId ) {
-        // var len = defines.length;
-        // for ( ; startIndex < len; startIndex++ ) {
-        // var defineId = defines[ startIndex ].id;
-        // if ( dependId == ( defineId || currentId ) ) {
-        // return 1;
-        // }
-        // }
+        //     var len = defines.length;
+        //     for ( ; startIndex < len; startIndex++ ) {
+        //         var defineId = defines[ startIndex ].id;
+        //         if ( dependId == ( defineId || currentId ) ) {
+        //             return 1;
+        //         }
+        //     }
 
-        // return 0;
+        //     return 0;
         // }
-
+        
         /**
          * 预处理依赖，并进行define
          * 
@@ -461,56 +470,60 @@ var require;
          */
         function pretreatAndDefine() {
             each(
-            defines,
-
-            function(defineItem, defineIndex) {
-                var id = defineItem.id || currentId;
-                var depends = defineItem.deps;
-                var realDepends = defineItem.realDeps;
-                var hardDepends = [];
-
-                // 对参数中声明的依赖进行normalize
-                // 并且处理参数中声明依赖的循环依赖
-                var len = depends.length;
-                while (len--) {
-                    var dependId = normalize(depends[len], id);
-                    depends[len] = dependId;
-                    if (!isInDependencyChain(id, dependId)) {
-                        hardDepends.unshift(dependId);
+                defines,
+                function ( defineItem, defineIndex ) {
+                    var id = defineItem.id || currentId;
+                    var depends = defineItem.deps;
+                    var realDepends = defineItem.realDeps;
+                    var hardDepends = [];
+                    
+                    // 对参数中声明的依赖进行normalize
+                    // 并且处理参数中声明依赖的循环依赖
+                    var len = depends.length;
+                    while ( len-- ) {
+                        var dependId = normalize( depends[ len ], id );
+                        depends[ len ] = dependId;
+                        if ( !isInDependencyChain( id, dependId ) ) {
+                            hardDepends.unshift( dependId );
+                        }
                     }
-                }
 
-                // 依赖模块id normalize化，并去除必要的依赖。去除的依赖模块有：
-                // 1. 内部模块：require/exports/module
-                // 2. 重复模块：dependencies参数和内部require可能重复
-                // 3. 空模块：dependencies中使用者可能写空
-                // 4. 在当前script中，被定义在后续代码中的模块
-                // 
-                // 后来使用了新的机制监测依赖和进行模块定义，4被废除
-                var len = realDepends.length;
-                var existsDepend = {};
-                var realRequireDepends = [];
-
-                while (len--) {
-                    var dependId = normalize(realDepends[len], id);
-                    if (!dependId || dependId in existsDepend || dependId in BUILDIN_MODULE
-                    //|| isInAfterDefine( defineIndex + 1, dependId )
-                    ) {
-                        realDepends.splice(len, 1);
-                    } else {
-                        existsDepend[dependId] = 1;
-                        realDepends[len] = dependId;
+                    // 依赖模块id normalize化，并去除必要的依赖。去除的依赖模块有：
+                    // 1. 内部模块：require/exports/module
+                    // 2. 重复模块：dependencies参数和内部require可能重复
+                    // 3. 空模块：dependencies中使用者可能写空
+                    // 4. 在当前script中，被定义在后续代码中的模块
+                    // 
+                    // 后来使用了新的机制监测依赖和进行模块定义，4被废除
+                    var len = realDepends.length;
+                    var existsDepend = {};
+                    var realRequireDepends = [];
+                    
+                    while ( len-- ) {
+                        var dependId = normalize( realDepends[ len ], id );
+                        if ( !dependId
+                             || dependId in existsDepend
+                             || dependId in BUILDIN_MODULE
+                             //|| isInAfterDefine( defineIndex + 1, dependId )
+                        ) {
+                            realDepends.splice( len, 1 );
+                        }
+                        else {
+                            existsDepend[ dependId ] = 1;
+                            realDepends[ len ] = dependId;
+                        }
                     }
+
+                    // 将实际依赖压入加载序列中，后续统一进行require
+                    requireModules.push.apply( requireModules, realDepends );
+                    mod_define( 
+                        id, defineItem.factory, 
+                        depends, hardDepends, realDepends
+                    );
                 }
+            );
 
-                // 将实际依赖压入加载序列中，后续统一进行require
-                requireModules.push.apply(requireModules, realDepends);
-                mod_define(
-                id, defineItem.factory,
-                depends, hardDepends, realDepends);
-            });
-
-            nativeRequire(requireModules);
+            nativeRequire( requireModules );
         }
     }
 
@@ -521,16 +534,18 @@ var require;
      * @inner
      * @return {boolean}
      */
-    function isInDependencyChain(source, target) {
-        var module = mod_getModule(target);
+    function isInDependencyChain( source, target ) {
+        var module = mod_getModule( target );
         var depends = module && module.hardDeps;
-
-        if (depends) {
+        
+        if ( depends ) {
             var len = depends.length;
 
-            while (len--) {
-                var dependName = depends[len];
-                if (source == dependName || isInDependencyChain(source, dependName)) {
+            while ( len-- ) {
+                var dependName = depends[ len ];
+                if ( source == dependName
+                     || isInDependencyChain( source, dependName ) 
+                ) {
                     return 1;
                 }
             }
@@ -538,7 +553,7 @@ var require;
 
         return 0;
     }
-
+    
     /**
      * 获取模块
      * 
@@ -546,45 +561,48 @@ var require;
      * @param {Function=} callback 获取模块完成时的回调函数
      * @return {Object}
      */
-    function nativeRequire(ids, callback, baseId) {
+    function nativeRequire( ids, callback, baseId ) {
         callback = callback || new Function();
         baseId = baseId || '';
 
         // 根据 https://github.com/amdjs/amdjs-api/wiki/require
         // It MUST throw an error if the module has not 
         // already been loaded and evaluated.
-        if (typeof ids == 'string') {
-            if (!mod_isInited(ids)) {
-                throw new Error('[MODULE_MISS]' + ids + ' is not exists!');
+        if ( typeof ids == 'string' ) {
+            if ( !mod_isInited( ids ) ) {
+                throw new Error( '[MODULE_MISS]' + ids + ' is not exists!' );
             }
 
-            return mod_getModuleExports(ids);
+            return mod_getModuleExports( ids );
         }
 
-        if (!isArray(ids)) {
+        if ( !isArray( ids ) ) {
             return;
         }
-
-        if (ids.length === 0) {
+        
+        if ( ids.length === 0 ) {
             callback();
             return;
         }
-
+        
         var isCallbackCalled = 0;
-        mod_addInitedListener(tryFinishRequire);
+        mod_addInitedListener( tryFinishRequire );
         each(
-        ids,
+            ids,
+            function ( id ) {
+                if ( id in BUILDIN_MODULE ) {
+                    return;
+                } 
 
-        function(id) {
-            if (id in BUILDIN_MODULE) {
-                return;
+                ( id.indexOf( '!' ) > 0 
+                    ? loadResource
+                    : loadModule
+                )( id, baseId );
             }
-
-            (id.indexOf('!') > 0 ? loadResource : loadModule)(id, baseId);
-        });
+        );
 
         tryFinishRequire();
-
+        
         /**
          * 尝试完成require，调用callback
          * 在模块与其依赖模块都加载完时调用
@@ -592,7 +610,7 @@ var require;
          * @inner
          */
         function tryFinishRequire() {
-            if (isCallbackCalled) {
+            if ( isCallbackCalled ) {
                 return;
             }
 
@@ -606,46 +624,50 @@ var require;
              * @param {Array} modules 直接模块标识列表
              * @return {boolean}
              */
-            function isAllInited(modules) {
+            function isAllInited( modules ) {
                 var allInited = 1;
                 each(
-                modules,
+                    modules,
+                    function ( id ) {
+                        if ( visitedModule[ id ] ) {
+                            return;
+                        }
+                        visitedModule[ id ] = 1;
 
-                function(id) {
-                    if (visitedModule[id]) {
-                        return;
-                    }
-                    visitedModule[id] = 1;
+                        if ( BUILDIN_MODULE[ id ] ) {
+                            return;
+                        }
 
-                    if (BUILDIN_MODULE[id]) {
-                        return;
+                        if ( 
+                            !mod_isInited( id ) 
+                            || !isAllInited( mod_getModule( id ).deps )
+                        ) {
+                            allInited = 0;
+                            return false;
+                        }
                     }
-
-                    if (!mod_isInited(id) || !isAllInited(mod_getModule(id)
-                        .deps)) {
-                        allInited = 0;
-                        return false;
-                    }
-                });
+                );
 
                 return allInited;
             }
 
             // 检测并调用callback
-            if (isAllInited(ids)) {
+            if ( isAllInited( ids ) ) {
                 isCallbackCalled = 1;
-                mod_removeInitedListener(tryFinishRequire);
+                mod_removeInitedListener( tryFinishRequire );
 
                 var args = [];
-                each(
-                ids,
+                each( 
+                    ids,
+                    function ( id ) {
+                        args.push( 
+                            BUILDIN_MODULE[ id ] 
+                            || mod_getModuleExports( id ) 
+                        );
+                    }
+                );
 
-                function(id) {
-                    args.push(
-                    BUILDIN_MODULE[id] || mod_getModuleExports(id));
-                });
-
-                callback.apply(global, args);
+                callback.apply( global, args );
             }
         }
     }
@@ -664,26 +686,29 @@ var require;
      * @inner
      * @param {string} moduleId 模块标识
      */
-    function loadModule(moduleId) {
-        if (
-        mod_exists(moduleId) || loadingModules[moduleId]) {
+    function loadModule( moduleId ) {
+        if ( 
+            mod_exists( moduleId )
+            || loadingModules[ moduleId ]
+        ) {
             return;
         }
 
-        loadingModules[moduleId] = 1;
+        loadingModules[ moduleId ] = 1;
 
         // 创建script标签
-        var script = document.createElement('script');
-        script.setAttribute('data-require-id', moduleId);
-        script.src = id2Path(moduleId);
+        var script = document.createElement( 'script' );
+        script.setAttribute( 'data-require-id', moduleId );
+        script.src = toUrl( moduleId ) + '.js';
         script.async = true;
-        if (script.readyState) {
+        if ( script.readyState ) {
             script.onreadystatechange = loadedListener;
-        } else {
+        }
+        else {
             script.onload = loadedListener;
         }
         // TODO: onerror
-        appendScript(script);
+        appendScript( script );
 
         /**
          * script标签加载完成的事件处理函数
@@ -692,12 +717,14 @@ var require;
          */
         function loadedListener() {
             var readyState = script.readyState;
-            if (
-            typeof readyState == 'undefined' || /^(loaded|complete)$/.test(readyState)) {
+            if ( 
+                typeof readyState == 'undefined'
+                || /^(loaded|complete)$/.test( readyState )
+            ) {
                 script.onload = script.onreadystatechange = null;
 
-                completeDefine(moduleId);
-                delete loadingModules[moduleId];
+                completeDefine( moduleId );
+                delete loadingModules[ moduleId ];
                 script = null;
             }
         }
@@ -710,25 +737,29 @@ var require;
      * @param {string} pluginAndResource 插件与资源标识
      * @param {string} baseId 当前环境的模块标识
      */
-    function loadResource(pluginAndResource, baseId) {
-        var idInfo = parseId(pluginAndResource);
+    function loadResource( pluginAndResource, baseId ) {
+        var idInfo = parseId( pluginAndResource );
         var pluginId = idInfo.module;
         var resourceId = idInfo.resource;
 
-        function load(plugin) {
-            plugin.load(
-            resourceId,
-            createLocalRequire(baseId),
-
-            function(value) {
-                mod_addResource(pluginAndResource, value);
-            }, {});
+        function load( plugin ) {
+            if ( !mod_isInited( pluginAndResource ) ) {
+                plugin.load( 
+                    resourceId, 
+                    createLocalRequire( baseId ),
+                    function ( value ) {
+                        mod_addResource( pluginAndResource, value );
+                    },
+                    {}
+                );
+            }
         }
 
-        if (!mod_isInited(pluginId)) {
-            nativeRequire([pluginId], load);
-        } else {
-            load(mod_getModuleExports(pluginId));
+        if ( !mod_isInited( pluginId ) ) {
+            nativeRequire( [ pluginId ], load ); 
+        }
+        else {
+            load( mod_getModuleExports( pluginId ) );
         }
     }
 
@@ -738,12 +769,12 @@ var require;
      * @inner
      * @type {Object}
      */
-    var requireConf = {
-        baseUrl: './',
-        paths: {},
-        config: {},
-        map: {},
-        packages: []
+    var requireConf = { 
+        baseUrl  : './',
+        paths    : {},
+        config   : {},
+        map      : {},
+        packages : []
     };
 
     /**
@@ -751,17 +782,17 @@ var require;
      * 
      * @param {Object} conf 配置对象
      */
-    require.config = function(conf) {
+    require.config = function ( conf ) {
         // 原先采用force和deep的mixin方案
         // 后来考虑到如果使用者将require.config写在多个地方
         // 打包分析需要考虑合并以及合并顺序问题，比较混乱
         // 又回归最简单的对象拷贝方案实现
-        for (var key in conf) {
-            if (conf.hasOwnProperty(key)) {
-                requireConf[key] = conf[key];
+        for ( var key in conf ) {
+            if ( conf.hasOwnProperty( key ) ) {
+                requireConf[ key ] = conf[ key ];
             }
         }
-
+        
         createConfIndex();
     };
 
@@ -774,7 +805,7 @@ var require;
      * @inner
      */
     function createConfIndex() {
-        requireConf.baseUrl = requireConf.baseUrl.replace(/\/$/, '') + '/';
+        requireConf.baseUrl = requireConf.baseUrl.replace( /\/$/, '' ) + '/';
         createPathsIndex();
         createMappingIdIndex();
         createPackagesIndex();
@@ -795,26 +826,25 @@ var require;
      */
     function createPackagesIndex() {
         packagesIndex = [];
-        each(
-        requireConf.packages,
-
-        function(package, index) {
-            var pkg = package;
-            if (typeof package == 'string') {
-                pkg = {
-                    name: package.split('/')[0],
-                    location: package,
-                    main: 'main'
-                };
+        each( 
+            requireConf.packages,
+            function ( packageConf, index ) {
+                var pkg = packageConf;
+                if ( typeof packageConf == 'string' ) {
+                    pkg = {
+                        name: packageConf.split('/')[ 0 ],
+                        location: packageConf,
+                        main: 'main'
+                    };
+                }
+                
+                pkg.location = pkg.location || pkg.name;
+                pkg.main = (pkg.main || 'main').replace(/\.js$/i, '');
+                packagesIndex.push( pkg );
             }
+        );
 
-            pkg.location = pkg.location || pkg.name;
-            pkg.main = (pkg.main || 'main')
-                .replace(/\.js$/i, '');
-            packagesIndex.push(pkg);
-        });
-
-        packagesIndex.sort(createDescSorter('name'));
+        packagesIndex.sort( createDescSorter( 'name' ) );
     }
 
     /**
@@ -831,8 +861,8 @@ var require;
      * @inner
      */
     function createPathsIndex() {
-        pathsIndex = kv2List(requireConf.paths);
-        pathsIndex.sort(createDescSorter());
+        pathsIndex = kv2List( requireConf.paths );
+        pathsIndex.sort( createDescSorter() );
     }
 
     /**
@@ -842,7 +872,7 @@ var require;
      * @type {Array}
      */
     var mappingIdIndex;
-
+    
     /**
      * 创建mapping内部索引
      * 
@@ -850,19 +880,21 @@ var require;
      */
     function createMappingIdIndex() {
         mappingIdIndex = [];
-
-        mappingIdIndex = kv2List(requireConf.map);
-        mappingIdIndex.sort(createDescSorter());
+        
+        mappingIdIndex = kv2List( requireConf.map );
+        mappingIdIndex.sort( createDescSorter() );
 
         each(
-        mappingIdIndex,
-
-        function(item) {
-            var key = item.k;
-            item.v = kv2List(item.v);
-            item.v.sort(createDescSorter());
-            item.reg = key == '*' ? /^/ : createPrefixRegexp(key);
-        });
+            mappingIdIndex,
+            function ( item ) {
+                var key = item.k;
+                item.v = kv2List( item.v );
+                item.v.sort( createDescSorter() );
+                item.reg = key == '*'
+                    ? /^/
+                    : createPrefixRegexp( key );
+            }
+        );
     }
 
     /**
@@ -872,35 +904,41 @@ var require;
      * @param {string} id 模块标识
      * @return {string}
      */
-    function toUrl(id) {
-        var url = id;
+    function toUrl( id ) {
+        if ( !MODULE_ID_REG.test( id ) ) {
+            return id;
+        }
 
+        var url = id;
         var isPathMap = 0;
-        each(pathsIndex, function(item) {
+
+        each( pathsIndex, function ( item ) {
             var key = item.k;
-            if (createPrefixRegexp(key)
-                .test(url)) {
-                url = url.replace(key, item.v);
+            if ( createPrefixRegexp( key ).test( url ) ) {
+                url = url.replace( key, item.v );
                 isPathMap = 1;
                 return false;
             }
-        });
+        } );
 
-        if (!isPathMap) {
-            each(
-            packagesIndex,
-
-            function(package) {
-                var name = package.name;
-                if (createPrefixRegexp(name)
-                    .test(id)) {
-                    url = url.replace(name, package.location);
-                    return false;
+        if ( !isPathMap ) {
+            each( 
+                packagesIndex,
+                function ( packageConf ) {
+                    var name = packageConf.name;
+                    if ( createPrefixRegexp( name ).test( id ) ) {
+                        url = url.replace( name, packageConf.location );
+                        return false;
+                    }
                 }
-            });
+            );
         }
 
-        return './' + url;
+        if ( !/^([a-z]{2,10}:\/)?\//i.test( url ) ) {
+            url = requireConf.baseUrl + url;
+        }
+
+        return url;
     }
 
     /**
@@ -910,40 +948,41 @@ var require;
      * @param {number} baseId 当前module id
      * @return {Function}
      */
-    function createLocalRequire(baseId) {
-        function req(requireId, callback) {
-            if (typeof requireId == 'string') {
-                requireId = normalize(requireId, baseId);
-                return nativeRequire(requireId, callback, baseId);
-            } else if (isArray(requireId)) {
+    function createLocalRequire( baseId ) {
+        function req( requireId, callback ) {
+            if ( typeof requireId == 'string' ) {
+                requireId = normalize( requireId, baseId );
+                return nativeRequire( requireId, callback, baseId );
+            }
+            else if ( isArray( requireId ) ) {
                 // 分析是否有resource使用的plugin没加载
                 var unloadedPluginModules = [];
-                each(
-                requireId,
-
-                function(id) {
-                    var idInfo = parseId(id);
-                    var pluginId = normalize(idInfo.module, baseId);
-                    if (idInfo.resource && !mod_isInited(pluginId)) {
-                        unloadedPluginModules.push(pluginId);
+                each( 
+                    requireId, 
+                    function ( id ) { 
+                        var idInfo = parseId( id );
+                        var pluginId = normalize( idInfo.module, baseId );
+                        if ( idInfo.resource && !mod_isInited( pluginId ) ) {
+                            unloadedPluginModules.push( pluginId );
+                        }
                     }
-                });
+                );
 
                 // 加载模块
-                nativeRequire(
-                unloadedPluginModules,
-
-                function() {
-                    var ids = [];
-                    each(
-                    requireId,
-
-                    function(id) {
-                        ids.push(normalize(id, baseId))
-                    });
-                    nativeRequire(ids, callback, baseId);
-                },
-                baseId);
+                nativeRequire( 
+                    unloadedPluginModules, 
+                    function () {
+                        var ids = [];
+                        each( 
+                            requireId, 
+                            function ( id ) { 
+                                ids.push( normalize( id, baseId ) ) 
+                            } 
+                        );
+                        nativeRequire( ids, callback, baseId );
+                    }, 
+                    baseId
+                );
             }
         }
 
@@ -954,14 +993,14 @@ var require;
          * @param {string} source 符合描述格式的源字符串
          * @return {string} 
          */
-        req.toUrl = function(id) {
-            return toUrl(normalize(id, baseId));
+        req.toUrl = function ( id ) {
+            return toUrl( normalize( id, baseId ) );
         };
 
         return req;
     }
 
-
+    
 
     /**
      * id normalize化
@@ -971,41 +1010,48 @@ var require;
      * @param {string} baseId 当前环境的模块标识
      * @return {string}
      */
-    function normalize(id, baseId) {
-        if (!id) {
+    function normalize( id, baseId ) {
+        if ( !id ) {
             return '';
         }
 
-        var idInfo = parseId(id);
-        var resourceId = idInfo.resource;
-        var moduleId = relative2absolute(idInfo.module, baseId);
-
-        each(
-        packagesIndex,
-
-        function(package) {
-            var name = package.name;
-            var main = name + '/' + package.main;
-            if (name == moduleId) {
-                moduleId = moduleId.replace(name, main);
-                return false;
-            }
-        });
-
-        moduleId = mappingId(moduleId, baseId);
-
-        if (resourceId) {
-            var module = mod_getModuleExports(moduleId);
-            resourceId = module.normalize ? module.normalize(
-            resourceId,
-
-            function(resId) {
-                return normalize(resId, baseId)
-            }) : normalize(resourceId, baseId);
-
-            return moduleId + '!' + resourceId;
+        var idInfo = parseId( id );
+        if ( !idInfo ) {
+            return id;
         }
 
+        var resourceId = idInfo.resource;
+        var moduleId = relative2absolute( idInfo.module, baseId );
+
+        each(
+            packagesIndex,
+            function ( packageConf ) {
+                var name = packageConf.name;
+                var main = name + '/' + packageConf.main;
+                if ( name == moduleId
+                ) {
+                    moduleId = moduleId.replace( name, main );
+                    return false;
+                }
+            }
+        );
+
+        moduleId = mappingId( moduleId, baseId );
+        
+        if ( resourceId ) {
+            var module = mod_getModuleExports( moduleId );
+            resourceId = module.normalize
+                ? module.normalize( 
+                    resourceId, 
+                    function ( resId ) {
+                        return normalize( resId, baseId )
+                    }
+                  )
+                : normalize( resourceId, baseId );
+            
+            return moduleId + '!' + resourceId;
+        }
+        
         return moduleId;
     }
 
@@ -1017,55 +1063,53 @@ var require;
      * @param {string} baseId 当前所在环境id
      * @return {string}
      */
-    function relative2absolute(id, baseId) {
-        if (/^\.{1,2}/.test(id)) {
-            var basePath = baseId.split('/');
-            var namePath = id.split('/');
+    function relative2absolute( id, baseId ) {
+        if ( /^\.{1,2}/.test( id ) ) {
+            var basePath = baseId.split( '/' );
+            var namePath = id.split( '/' );
             var baseLen = basePath.length - 1;
             var nameLen = namePath.length;
             var cutBaseTerms = 0;
             var cutNameTerms = 0;
 
-            pathLoop: for (var i = 0; i < nameLen; i++) {
-                var term = namePath[i];
-                switch (term) {
-                case '..':
-                    if (cutBaseTerms < baseLen - 1) {
-                        cutBaseTerms++;
+            pathLoop: for ( var i = 0; i < nameLen; i++ ) {
+                var term = namePath[ i ];
+                switch ( term ) {
+                    case '..':
+                        if ( cutBaseTerms < baseLen - 1 ) {
+                            cutBaseTerms++;
+                            cutNameTerms++;
+                        }
+                        else {
+                            break pathLoop;
+                        }
+                        break;
+                    case '.':
                         cutNameTerms++;
-                    } else {
+                        break;
+                    default:
                         break pathLoop;
-                    }
-                    break;
-                case '.':
-                    cutNameTerms++;
-                    break;
-                default:
-                    break pathLoop;
                 }
             }
 
             basePath.length = baseLen - cutBaseTerms;
-            namePath = namePath.slice(cutNameTerms);
+            namePath = namePath.slice( cutNameTerms );
 
-            basePath.push.apply(basePath, namePath);
-            return basePath.join('/');
+            basePath.push.apply( basePath, namePath );
+            return basePath.join( '/' );
         }
 
         return id;
     }
 
     /**
-     * 将模块id转换成路径
+     * 模块id正则
      * 
+     * @const
      * @inner
-     * @param {string} id 模块id
-     * @return {string}
+     * @type {RegExp}
      */
-    function id2Path(id) {
-        return toUrl(id)
-            .replace('./', requireConf.baseUrl) + '.js';
-    }
+    var MODULE_ID_REG = /^([-_a-z0-9\.]+(\/[-_a-z0-9\.]+)*)(!.*)?$/i;
 
     /**
      * 解析id，返回带有module和resource属性的Object
@@ -1074,13 +1118,13 @@ var require;
      * @param {string} id 标识
      * @return {Object}
      */
-    function parseId(id) {
-        if (/^([-_a-z0-9\.]+(\/[-_a-z0-9\.]+)*)(!.*)?$/i.test(id)) {
+    function parseId( id ) {
+        if ( MODULE_ID_REG.test( id ) ) {
             var resourceId = RegExp.$3;
 
             return {
-                module: RegExp.$1,
-                resource: resourceId ? resourceId.slice(1) : ''
+                module   : RegExp.$1,
+                resource : resourceId ? resourceId.slice( 1 ) : ''
             };
         }
 
@@ -1095,26 +1139,26 @@ var require;
      * @param {string} baseId 当前环境的模块id
      * @return {string}
      */
-    function mappingId(id, baseId) {
-        each(
-        mappingIdIndex,
+    function mappingId( id, baseId ) {
+        each( 
+            mappingIdIndex, 
+            function ( item ) {
+                if ( item.reg.test( baseId ) ) {
 
-        function(item) {
-            if (item.reg.test(baseId)) {
+                    each( item.v, function ( mapData ) {
+                        var key = mapData.k;
+                        var rule = createPrefixRegexp( key );
+                        
+                        if ( rule.test( id ) ) {
+                            id = id.replace( key, mapData.v );
+                            return false;
+                        }
+                    } );
 
-                each(item.v, function(mapData) {
-                    var key = mapData.k;
-                    var rule = createPrefixRegexp(key);
-
-                    if (rule.test(id)) {
-                        id = id.replace(key, mapData.v);
-                        return false;
-                    }
-                });
-
-                return false;
+                    return false;
+                }
             }
-        });
+        );
 
         return id;
     }
@@ -1126,14 +1170,14 @@ var require;
      * @param {Object} source 对象数据
      * @return {Array.<Object>}
      */
-    function kv2List(source) {
+    function kv2List( source ) {
         var list = [];
-        for (var key in source) {
-            if (source.hasOwnProperty(key)) {
-                list.push({
-                    k: key,
-                    v: source[key]
-                });
+        for ( var key in source ) {
+            if ( source.hasOwnProperty( key ) ) {
+                list.push( {
+                    k: key, 
+                    v: source[ key ]
+                } );
             }
         }
 
@@ -1157,17 +1201,21 @@ var require;
      * @return {HTMLDocument}
      */
     function getCurrentScript() {
-        if (currentlyAddingScript) {
+        if ( currentlyAddingScript ) {
             return currentlyAddingScript;
-        } else if (
-        interactiveScript && interactiveScript.readyState == 'interactive') {
+        }
+        else if ( 
+            interactiveScript 
+            && interactiveScript.readyState == 'interactive'
+        ) {
             return interactiveScript;
-        } else {
-            var scripts = document.getElementsByTagName('script');
+        }
+        else {
+            var scripts = document.getElementsByTagName( 'script' );
             var scriptLen = scripts.length;
-            while (scriptLen--) {
-                var script = scripts[scriptLen];
-                if (script.readyState == 'interactive') {
+            while ( scriptLen-- ) {
+                var script = scripts[ scriptLen ];
+                if ( script.readyState == 'interactive' ) {
                     interactiveScript = script;
                     return script;
                 }
@@ -1181,13 +1229,12 @@ var require;
      * @inner
      * @param {HTMLScriptElement} script script标签
      */
-    function appendScript(script) {
+    function appendScript( script ) {
         currentlyAddingScript = script;
 
         var doc = document;
-        (doc.getElementsByTagName('head')[0] || doc.body)
-            .appendChild(script);
-
+        (doc.getElementsByTagName('head')[0] || doc.body).appendChild( script );
+        
         currentlyAddingScript = null;
     }
 
@@ -1198,8 +1245,8 @@ var require;
      * @param {string} prefix id前缀
      * @return {RegExp}
      */
-    function createPrefixRegexp(prefix) {
-        return new RegExp('^' + prefix + '(/|$)');
+    function createPrefixRegexp( prefix ) {
+        return new RegExp( '^' + prefix + '(/|$)' );
     }
 
     /**
@@ -1209,7 +1256,7 @@ var require;
      * @param {*} obj 要判断的对象
      * @return {boolean}
      */
-    function isArray(obj) {
+    function isArray( obj ) {
         return obj instanceof Array;
     }
 
@@ -1220,10 +1267,10 @@ var require;
      * @param {Array} source 数组源
      * @param {function(Array,Number):boolean} iterator 遍历函数
      */
-    function each(source, iterator) {
-        if (isArray(source)) {
-            for (var i = 0, len = source.length; i < len; i++) {
-                if (iterator(source[i], i) === false) {
+    function each( source, iterator ) {
+        if ( isArray( source ) ) {
+            for ( var i = 0, len = source.length; i < len; i++ ) {
+                if ( iterator( source[ i ], i ) === false ) {
                     break;
                 }
             }
@@ -1237,18 +1284,18 @@ var require;
      * @param {string} property 数组项对象名
      * @return {Function}
      */
-    function createDescSorter(property) {
+    function createDescSorter( property ) {
         property = property || 'k';
 
-        return function(a, b) {
-            var aValue = a[property];
-            var bValue = b[property];
+        return function ( a, b ) {
+            var aValue = a[ property ];
+            var bValue = b[ property ];
 
-            if (bValue == '*') {
+            if ( bValue == '*' ) {
                 return -1;
             }
 
-            if (aValue == '*') {
+            if ( aValue == '*' ) {
                 return 1;
             }
 
@@ -1259,4 +1306,4 @@ var require;
     // 暴露全局对象
     global.define = define;
     global.require = require;
-})(this);
+})( this );
