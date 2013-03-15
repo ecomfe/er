@@ -16,7 +16,7 @@ define(
                 }
 
                 var url = parentRequire.toUrl(resourceId);
-                require('./ajax').get(url).done(addTemplate);
+                require('./ajax').get(url, null, addTemplate, true);
             }
         };
 
