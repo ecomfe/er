@@ -33,6 +33,14 @@ define(
         util.mix = function(source) {
             for (var i = 1; i < arguments.length; i++) {
                 var destination = arguments[i];
+
+                // 就怕有人传**null**之类的进来
+                if (!destination) {
+                    continue;
+                }
+
+                // 这里如果`destination`是字符串的话，会遍历出下标索引来，
+                // 认为这是调用者希望的效果，所以不作处理
                 for (var key in destination) {
                     if (destination.hasOwnProperty(key)) {
                         source[key] = destination[key];
@@ -42,6 +50,9 @@ define(
             return source;
         };
 
+        // `bind`的实现特别使用引擎原生的，
+        // 因为自己实现的`bind`很会影响调试时的单步调试，
+        // 跳进一个函数的时候还要经过这个`bind`几步很烦，原生的就不会
         var nativeBind = Function.prototype.bind;
         /**
          * 固定函数的`this`变量和若干参数
