@@ -53,12 +53,11 @@
             ];
             Deferred.join(loadingTemplate).done(
                 function(bookList, bookView, cartList) {
-                    template.parse(bookList[0]);
-                    template.parse(bookView[0]);
-                    template.parse(cartList[0]);
+                    template.parse(bookList);
+                    template.parse(bookView);
+                    template.parse(cartList);
 
                     config.indexURL = '/book/list';
-                    console.log(er.version);
                     er.start();
                 }
             );
