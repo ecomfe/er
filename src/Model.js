@@ -313,12 +313,16 @@ define(
             if (arguments.length >= 2) {
                 var oldValue = this._store[name];
                 this._store[name] = value;
-                var event = {
-                    name: name,
-                    oldValue: oldValue,
-                    newValue: value
-                };
-                this.fire('change', event);
+
+                // 只在新旧值不同的情况下触发事件
+                if (oldValue !== value) {
+                    var event = {
+                        name: name,
+                        oldValue: oldValue,
+                        newValue: value
+                    };
+                    this.fire('change', event);
+                }
             }
             else {
                 var extension = name;
@@ -336,6 +340,11 @@ define(
          * @public
          */
         Model.prototype.remove = function(name) {
+            // 如果原来就没这个值，就不触发`change`事件了
+            if (!this._store.hasOwnProperty(name)) {
+                return;
+            }
+
             var value = this._store[name];
             delete this._store[name];
             var event = {
