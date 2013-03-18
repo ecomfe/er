@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         var Observable = require('./Observable');
 
         /**
@@ -52,7 +52,7 @@ define(
          *
          * @public
          */
-        View.prototype.render = function() {
+        View.prototype.render = function () {
             var container = document.getElementById(this.container);
             var template = require('./template');
             var model = this.model;
@@ -78,7 +78,7 @@ define(
          *
          * @public
          */
-        View.prototype.dispose = function() {
+        View.prototype.dispose = function () {
             var container = document.getElementById(this.container);
             container && (container.innerHTML = '');
         };

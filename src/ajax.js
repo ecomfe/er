@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         /**
          * 生成XMLHttpRequest请求的最终URL
          *
@@ -44,7 +44,7 @@ define(
          * @return {FakeXHR} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及`XMLHTTPRequest`对象的相应方法
          */
-        ajax.request = function(options) {
+        ajax.request = function (options) {
             var assert = require('./assert');
             assert.hasProperty(options, url, 'url property is required');
 
@@ -65,7 +65,7 @@ define(
 
             var fakeXHR = requesting.promise();
             var xhrWrapper = {
-                abort: function() {
+                abort: function () {
                     xhr.abort();
                     fakeXHR.status = 408; // HTTP 408: Request Timeout
                     fakeXHR.readyState = xhr.readyState;
@@ -81,13 +81,13 @@ define(
                      */
                     ajax.on('fail', { xhr: fakeXHR });
                 },
-                setRequestHeader: function(name, value) {
+                setRequestHeader: function (name, value) {
                     xhr.setRequestHeader(name, value);
                 }
             };
             util.mix(fakeXHR, xhrWrapper);
 
-            xhr.onreadystatechange = function() {
+            xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     var status = xhr.status;
                     // `file://`协议下状态码始终为0
@@ -184,7 +184,7 @@ define(
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        ajax.get = function(url, data, done, cache) {
+        ajax.get = function (url, data, done, cache) {
             var options = {
                 method: 'GET',
                 url: url,
@@ -205,7 +205,7 @@ define(
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        ajax.getJSON = function(url, data, done, cache) {
+        ajax.getJSON = function (url, data, done, cache) {
             var options = {
                 method: 'GET',
                 url: url,
@@ -228,7 +228,7 @@ define(
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        ajax.post = function(url, data, done, dataType) {
+        ajax.post = function (url, data, done, dataType) {
             var options = {
                 method: 'POST',
                 url: url, 
@@ -245,13 +245,13 @@ define(
          * @param {string} url 发送的目标URL
          * @param {Object=} data 额外添加的参数
          */
-        ajax.log = function(url, data) {
+        ajax.log = function (url, data) {
             var img = new Image();
             var pool = window.ER_LOG_POOL || (window.ER_LOG_POOL = {});
             var id = +new Date();
             pool[id] = img;
 
-            img.onload = img.onerror = img.onabort = function() {
+            img.onload = img.onerror = img.onabort = function () {
                 // 如果这个img很不幸正好加载了一个存在的资源，又是个gif动画，
                 // 则在gif动画播放过程中，img会多次触发onload，因此一定要清空
                 img.onload = img.onerror = img.onabort = null;

@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         var routes = [];
         var backup = null;
 
@@ -55,7 +55,7 @@ define(
              * @param {string | RegExp} 匹配URL的path部分的字符串或正则表达式
              * @param {function} handler 匹配成功时执行的函数
              */
-            add: function(rule, handler) {
+            add: function (rule, handler) {
                 routes.push({ rule: rule, handler: handler });
             },
 
@@ -64,14 +64,14 @@ define(
              *
              * @param {function} handler 后备处理函数
              */
-            setBackup: function(handler) {
+            setBackup: function (handler) {
                 backup = handler;
             },
 
             /**
              * 开始`router`对象的工作
              */
-            start: function() {
+            start: function () {
                 require('./locator').on('redirect', executeRoute);
             }
         };

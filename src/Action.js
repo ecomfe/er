@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         var util = require('./util');
         var Observable = require('./Observable');
 
@@ -57,7 +57,7 @@ define(
          * @param {string} container 用来展现当前Action的DOM容器的id
          * @public
          */
-        Action.prototype.enter = function(context) {
+        Action.prototype.enter = function (context) {
             /**
              * 进入Action生命周期
              *
@@ -95,7 +95,7 @@ define(
          * @return {Object} 当前Action需要使用的Model对象
          * @protected
          */
-        Action.prototype.createModel = function(context) {
+        Action.prototype.createModel = function (context) {
             return this.modelType ? new this.modelType(context) : {};
         };
 
@@ -104,7 +104,7 @@ define(
          *
          * @private
          */
-        Action.prototype.forwardToView = function() {
+        Action.prototype.forwardToView = function () {
             /**
              * Model加载完成时触发
              *
@@ -157,7 +157,7 @@ define(
          * @return {Object} 当前Action需要使用的View对象
          * @public
          */
-        Action.prototype.createView = function() {
+        Action.prototype.createView = function () {
             return this.viewType ? new this.viewType() : null;
         };
 
@@ -166,7 +166,7 @@ define(
          *
          * @protected
          */
-        Action.prototype.initBehavior = function() {
+        Action.prototype.initBehavior = function () {
         };
 
         /**
@@ -174,7 +174,7 @@ define(
          *
          * @protected
          */
-        Action.prototype.leave = function() {
+        Action.prototype.leave = function () {
             /**
              * 准备离开Action时触发
              *

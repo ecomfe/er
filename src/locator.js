@@ -6,7 +6,7 @@
  * @author otakustay, erik
  */
 define(
-    function(require) {
+    function (require) {
         /**
          * 地址监听对象
          * 
@@ -81,7 +81,7 @@ define(
          * @param {Object=} options 额外附加的参数对象
          * @param {boolean=} options.force 确定当跳转地址不变时是否强制刷新
          */
-        locator.redirect = function(url, options) {
+        locator.redirect = function (url, options) {
             options = options || {};
 
             // 当类型为URL时，使用`toString`可转为正常的url字符串
@@ -112,7 +112,7 @@ define(
         /**
          * 刷新当前地址
          */
-        locator.reload = function() {
+        locator.reload = function () {
             if (currentLocation) {
                 locator.redirect(currentLocation, { force: true });
             }
@@ -121,7 +121,7 @@ define(
         /**
          * 开始`locator`对象的工作
          */
-        locator.start = function() {
+        locator.start = function () {
             // 如果有hashchange事件则使用事件，否则定时监听
             if (window.addEventListener) {
                 window.addEventListener('hashchange', forwardHash);

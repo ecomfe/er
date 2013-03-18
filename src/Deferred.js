@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         var util = require('./util');
         var assert = require('./assert');
 
@@ -28,7 +28,7 @@ define(
                 : deferred._failCallbacks.slice();
 
             setTimeout(
-                function() {
+                function () {
                     for (var i = 0; i < callbacks.length; i++) {
                         var callback = callbacks[i];
                         try {
@@ -58,7 +58,7 @@ define(
          * @return {function} 关联函数，可注册在`original`的相关回调函数上
          */
         function pipe(original, deferred, callback, actionType) {
-            return function() {
+            return function () {
                 // `.then(done)`及`.then(null, fail)`时使用
                 // 
                 // 根据`callback`的行为，进行以下处理：
@@ -72,10 +72,10 @@ define(
 
                         if (Deferred.isPromise(returnValue)) {
                             returnValue.then(
-                                function() {
+                                function () {
                                     deferred.resolve.apply(deferred, arguments);
                                 },
-                                function() {
+                                function () {
                                     deferred.reject.apply(deferred, arguments);
                                 }
                             );
@@ -130,7 +130,7 @@ define(
          * @param {*} value 需要判断的对象
          * @return {boolean} 如果`value`是`Promise`对象，则返回true
          */
-        Deferred.isPromise = function(value) {
+        Deferred.isPromise = function (value) {
             return value && typeof value.then === 'function';
         };
 
@@ -140,7 +140,7 @@ define(
          * @param {...*} args 执行回调时的参数
          * @public
          */
-        Deferred.prototype.resolve = function() {
+        Deferred.prototype.resolve = function () {
             if (this._state !== 'pending') {
                 return;
             }
@@ -157,7 +157,7 @@ define(
          * @param {...*} args 执行回调时的参数
          * @public
          */
-        Deferred.prototype.reject = function() {
+        Deferred.prototype.reject = function () {
             if (this._state !== 'pending') {
                 return;
             }
@@ -177,7 +177,7 @@ define(
          * @return {Promise} 新的`Promise`对象
          * @public
          */
-        Deferred.prototype.done = function(callback) {
+        Deferred.prototype.done = function (callback) {
             return this.then(callback);
         };
 
@@ -190,7 +190,7 @@ define(
          * @return {Promise} 新的`Promise`对象
          * @public
          */
-        Deferred.prototype.fail = function(callback) {
+        Deferred.prototype.fail = function (callback) {
             return this.then(null, callback);
         };
 
@@ -204,7 +204,7 @@ define(
          * @return {Promise} 新的`Promise`对象
          * @public
          */
-        Deferred.prototype.always = function(callback) {
+        Deferred.prototype.always = function (callback) {
             return this.then(callback, callback);
         };
 
@@ -233,7 +233,7 @@ define(
          * @return {Promise} 新的`Promise`对象
          * @public
          */
-        Deferred.prototype.then = function(done, fail) {
+        Deferred.prototype.then = function (done, fail) {
             var deferred = new Deferred();
 
             this._doneCallbacks.push(pipe(this, deferred, done, 'resolve'));
@@ -250,7 +250,7 @@ define(
          * @return {string} 返回**pending**、**resolved**或**rejected**
          * @public
          */
-        Deferred.prototype.state = function() {
+        Deferred.prototype.state = function () {
             return this._state;
         };
 
@@ -260,7 +260,7 @@ define(
          * @return {boolean} 表示当前对象是否处在**resolved**状态
          * @public
          */
-        Deferred.prototype.isResolved = function() {
+        Deferred.prototype.isResolved = function () {
             return this._state === 'resolved';
         };
 
@@ -270,7 +270,7 @@ define(
          * @return {boolean} 表示当前对象是否处在**rejected**状态
          * @public
          */
-        Deferred.prototype.isRejected = function() {
+        Deferred.prototype.isRejected = function () {
             return this._state === 'rejected';
         };
 
@@ -291,7 +291,7 @@ define(
          * @return {Promise} 一个Promise对象
          * @public
          */
-        Deferred.prototype.promise = function() {
+        Deferred.prototype.promise = function () {
             return this._promise;
         };
 
@@ -320,7 +320,7 @@ define(
          * @param {...Promise | ...Array.<Promise>} 需要组合的`Promise`对象
          * @return {Promise} 一个新的`Promise`对象
          */
-        Deferred.join = function() {
+        Deferred.join = function () {
             // 典型的异步并发归并问题，使用计数器来解决
             var workingUnits = [].concat.apply([], arguments);
             var workingCount = workingUnits.length;
@@ -370,7 +370,7 @@ define(
          * @param {...*} 用于调用`resolve`方法的参数
          * @return {Promise} 一个已经处于**resolved**状态的`Promise`对象
          */
-        Deferred.resolved = function() {
+        Deferred.resolved = function () {
             var deferred = new Deferred();
             deferred.resolve.apply(deferred, arguments);
             return deferred.promise();
@@ -382,7 +382,7 @@ define(
          * @param {...*} 用于调用`reject`方法的参数
          * @return {Promise} 一个已经处于**rejected**状态的`Promise`对象
          */
-        Deferred.rejected = function() {
+        Deferred.rejected = function () {
             var deferred = new Deferred();
             deferred.reject.apply(deferred, arguments);
             return deferred.promise();

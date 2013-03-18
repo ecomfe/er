@@ -6,7 +6,7 @@
  * @author otakustay, errorrik
  */
 define(
-    function() {
+    function () {
         var now = +new Date();
 
         /**
@@ -19,7 +19,7 @@ define(
          *
          * @return {number} 一个唯一的ID
          */
-        util.guid = function() {
+        util.guid = function () {
             return 'er' + now++;
         };
 
@@ -30,7 +30,7 @@ define(
          * @param {...Object} destinations 用于混合的对象
          * @return 返回混合了`destintions`属性的`source`对象
          */
-        util.mix = function(source) {
+        util.mix = function (source) {
             for (var i = 1; i < arguments.length; i++) {
                 var destination = arguments[i];
 
@@ -63,12 +63,12 @@ define(
          * @return {function} 固定了`this`变量和若干参数后的新函数对象
          */
         util.bindFn = nativeBind
-            ? function(fn) {
+            ? function (fn) {
                 return nativeBind.apply(fn, [].slice.call(arguments, 1));
             }
-            : function(fn, context) {
+            : function (fn, context) {
                 var extraArgs = [].slice.call(arguments, 2);
-                return function() {
+                return function () {
                     var args = extraArgs.concat(arguments);
                     return fn.apply(context, args);
                 };
@@ -80,7 +80,7 @@ define(
          * @type {function}
          * @const
          */
-        util.noop = function() {};
+        util.noop = function () {};
 
         /**
          * 设置继承关系
@@ -89,8 +89,8 @@ define(
          * @param {function} superType 父类
          * @return {function} 子类
          */
-        util.inherits = function(type, superType) {
-            var Empty = function() {};
+        util.inherits = function (type, superType) {
+            var Empty = function () {};
             Empty.prototype = superType.prototype;
             var proto = new Empty();
 
@@ -111,7 +111,7 @@ define(
          * @param {string} text 文本内容
          * @return {*} 对应的JSON对象
          */
-        util.parseJSON = function(text) {
+        util.parseJSON = function (text) {
             if (window.JSON && typeof JSON.parse === 'function') {
                 return JSON.parse(text);
             }
@@ -128,7 +128,7 @@ define(
          * @param {string} source 源字符串
          * @return {string} 移除前后空格后的字符串
          */
-        util.trim = function(source) {
+        util.trim = function (source) {
             return source.replace(whitespace, '');
         };
 
@@ -138,7 +138,7 @@ define(
          * @param {string} 源字符串
          * @param {string} HTML编码后的字符串
          */
-        util.encodeHTML = function(source) {
+        util.encodeHTML = function (source) {
             source = source + '';
             return source
                 .replace(/&/g,'&amp;')

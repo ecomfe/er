@@ -36,7 +36,7 @@
  * 简易的模板解析器
  */
 define(
-    function(require) {
+    function (require) {
         var util = require('./util');
 
         /**
@@ -55,7 +55,7 @@ define(
              *
              * @return {Any}
              */
-            current: function() {
+            current: function () {
                 return this.container[this.index];
             },
 
@@ -64,7 +64,7 @@ define(
              *
              * @param {Any} elem
              */
-            push: function(elem) {
+            push: function (elem) {
                 this.container[++this.index] = elem;
             },
 
@@ -73,7 +73,7 @@ define(
              *
              * @return {Any}
              */
-            pop: function() {
+            pop: function () {
                 if (this.index < 0) {
                     return null;
                 }
@@ -89,7 +89,7 @@ define(
              *
              * @return {Any}
              */
-            bottom: function() {
+            bottom: function () {
                 return this.container[0];
             }
         };
@@ -110,14 +110,14 @@ define(
              *
              * @param {Any} elem 添加项
              */
-            push: function(elem) {
+            push: function (elem) {
                 this.raw[this.idx++] = elem;
             },
 
             /**
              * 添加多个元素到数组末端
              */
-            pushMore: function() {
+            pushMore: function () {
                 for (var i = 0, l = arguments.length; i < l; i++) {
                     this.push(arguments[i]);
                 }
@@ -129,7 +129,7 @@ define(
              * @param {string} split 分隔串
              * @return {string}
              */
-            join: function(split) {
+            join: function (split) {
                 return this.raw.join(split);
             },
 
@@ -138,7 +138,7 @@ define(
              *
              * @return {Array}
              */
-            getRaw: function() {
+            getRaw: function () {
                 return this.raw;
             }
         };
@@ -160,7 +160,7 @@ define(
              *
              * @return {Object}
              */
-            next: function() {
+            next: function () {
                 return this.stream[++this.index];
             },
 
@@ -169,7 +169,7 @@ define(
              *
              * @return {Object}
              */
-            prev: function() {
+            prev: function () {
                 return this.stream[--this.index];
             },
 
@@ -178,7 +178,7 @@ define(
              *
              * @return {Object}
              */
-            current: function() {
+            current: function () {
                 return this.stream[this.index];
             }
         };
@@ -189,7 +189,7 @@ define(
         }
 
         Scope.prototype = {
-            get: function(name) {
+            get: function (name) {
                 var value = this._store[name];
                 if (value == null && this.parent) {
                     return this.parent.get(name);
@@ -202,7 +202,7 @@ define(
                 return null;
             },
 
-            set: function(name, value) {
+            set: function (name, value) {
                 this._store[name] = value;
             }
         };
@@ -422,7 +422,7 @@ define(
          * @inner
          * @param {Array} stream 构造单元流
          */
-        var syntaxAnalyse = (function() {
+        var syntaxAnalyse = (function () {
             var astParser = {};
             var targetCache;
             var masterCache;
@@ -486,7 +486,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.TARGET] = function() {
+            astParser[TYPE.TARGET] = function () {
                 var node = nodeIterator.current();
                 node.block = [];
                 node.content = {};
@@ -520,7 +520,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.MASTER] = function() {
+            astParser[TYPE.MASTER] = function () {
                 var node = nodeIterator.current();
                 node.block = [];
 
@@ -567,7 +567,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.CONTENTPLACEHOLDER] = function() {
+            astParser[TYPE.CONTENTPLACEHOLDER] = function () {
                 analyseStack.current()
                     .block.push(nodeIterator.current());
             };
@@ -577,7 +577,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.CONTENT] = function() {
+            astParser[TYPE.CONTENT] = function () {
                 var node = nodeIterator.current();
                 node.block = [];
 
@@ -622,7 +622,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.FOR] = function() {
+            astParser[TYPE.FOR] = function () {
                 var node = nodeIterator.current();
                 node.block = [];
 
@@ -664,7 +664,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.IF] = function() {
+            astParser[TYPE.IF] = function () {
                 var node = nodeIterator.current();
                 node.block = [];
 
@@ -704,7 +704,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.ELIF] = function() {
+            astParser[TYPE.ELIF] = function () {
                 var node = nodeIterator.current();
                 node.type = TYPE.IF;
                 node.block = [];
@@ -744,7 +744,7 @@ define(
              * @inner
              */
             astParser[TYPE.
-            ELSE] = function() {
+            ELSE] = function () {
                 var unit = nodeIterator.current();
                 var node = analyseStack.current();
                 var nodeType;
@@ -790,7 +790,7 @@ define(
                 }
             };
 
-            return function(stream) {
+            return function (stream) {
                 var unit;
                 var key;
                 var target;
@@ -877,7 +877,7 @@ define(
          *
          * @inner
          */
-        var condExpr = (function() {
+        var condExpr = (function () {
             // 表达式类型
             var EXPR_T = {
                 or: 1,
@@ -897,7 +897,7 @@ define(
                  * @inner
                  * @param {string} source 表达式源
                  */
-                parse: function(source) {
+                parse: function (source) {
                     source = util.trim(source);
                     var arr;
                     var str;
@@ -1289,7 +1289,7 @@ define(
         function replaceVariable(text, scope) {
             return text.replace(
                 /\$\{([.a-z0-9\[\]'"_]+)\s*(\|([a-z]+))?\s*\}/ig,
-                function($0, $1, $2, $3) {
+                function ($0, $1, $2, $3) {
                     return getVariableValue(scope, $1, $3);
                 }
             );
@@ -1412,7 +1412,7 @@ define(
              * @param {string} type 过滤器类型
              * @param {Function} filter 过滤器
              */
-            addFilter: function(type, filter) {
+            addFilter: function (type, filter) {
                 filterContainer[type] = filter;
             },
 

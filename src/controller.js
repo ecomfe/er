@@ -6,7 +6,7 @@
  * @author otakustay, erik
  */
 define(
-    function(require) {
+    function (require) {
         var actionPathMapping = {}; // 用于根据URL找Action配置
         var actionTypeMapping = {}; // 用户根据Action类型生成URL
         var currentURL = null;
@@ -111,7 +111,7 @@ define(
             // 这里强制使用global require
             window.require(
                 [actionConfig.type],
-                function(SpecificAction) {
+                function (SpecificAction) {
                     // 未防止在加载Action模块的时候，用户的操作导致进入其它模块，
                     // 这里需要判断当前的URL是否依旧是加载时指定的URL。
                     // 如果URL发生了变化，则应当不对Action模块作实例化处理。
@@ -212,7 +212,7 @@ define(
              * @param {Array.<string>= | string=} config.authority 访问权限
              * @param {string=} noAuthorityLocation 无权限时的跳转路径
              */
-            registerAction: function(config) {
+            registerAction: function (config) {
                 assert.hasProperty(
                     config, 'path', 
                     'action config should contains a "path" property'
@@ -231,7 +231,7 @@ define(
              * @param {Object=} query 访问Action时的参数
              * @return {URL} 对应的URL对象
              */
-            getPathByAction: function(actionType, query) {
+            getPathByAction: function (actionType, query) {
                 var actionConfig = actionTypeMapping[actionType];
                 if (!actionConfig) {
                     return URL.empty;
@@ -243,7 +243,7 @@ define(
             /**
              * 开始`controller`对象的工作
              */
-            start: function() {
+            start: function () {
                 // 干脆接管所有路由
                 require('./router').setBackup(forward);
             }

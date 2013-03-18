@@ -6,9 +6,9 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         var plugin = {
-            load: function(resourceId, parentRequire, load) {
+            load: function (resourceId, parentRequire, load) {
                 function addTemplate(text) {
                     var template = require('./template');
                     template.parse(text);

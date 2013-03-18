@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         /**
          * 加载一个数据
          *
@@ -260,7 +260,7 @@ define(
          * @return {Promise} `Promise`对象，在数据加载且`prepare`方法执行后触发
          * @public
          */
-        Model.prototype.load = function() {
+        Model.prototype.load = function () {
             try {
                 var loading = load(this, this.datasource);
                 var util = require('./util');
@@ -288,7 +288,7 @@ define(
          * 则返回一个`Promise`对象，通知调用者等待
          * @protected
          */
-        Model.prototype.prepare = function() {
+        Model.prototype.prepare = function () {
         };
 
         /**
@@ -298,7 +298,7 @@ define(
          * @return {*} `name`对应的值
          * @public
          */
-        Model.prototype.get = function(name) {
+        Model.prototype.get = function (name) {
             return this._store[name];
         };
 
@@ -309,7 +309,7 @@ define(
          * @param {*=} value 对应的值，如果`name`是对象，则没有此参数
          * @public
          */
-        Model.prototype.set = function(name, value) {
+        Model.prototype.set = function (name, value) {
             if (arguments.length >= 2) {
                 var oldValue = this._store[name];
                 this._store[name] = value;
@@ -339,7 +339,7 @@ define(
          * @return {*} 在删除前`name`对应的值
          * @public
          */
-        Model.prototype.remove = function(name) {
+        Model.prototype.remove = function (name) {
             // 如果原来就没这个值，就不触发`change`事件了
             if (!this._store.hasOwnProperty(name)) {
                 return;
@@ -363,7 +363,7 @@ define(
          * @return {Model} `name`对应的值组装成的新的`Model`对象
          * @public
          */
-        Model.prototype.getAsModel = function(name) {
+        Model.prototype.getAsModel = function (name) {
             var value = this.get(name);
             if (!value || {}.toString.call(value) !== '[object Object]') {
                 return new Model();
@@ -380,7 +380,7 @@ define(
          * @public
          * @override
          */
-        Model.prototype.valueOf = function() {
+        Model.prototype.valueOf = function () {
             // 为保证`valueOf`获取对象后修改不会影响到当前`Model`对象，
             // 需要做一次克隆的操作
             var util = require('./util');
@@ -393,7 +393,7 @@ define(
          * @return {Model} 克隆后的新`Model`对象
          * @public
          */
-        Model.prototype.clone = function() {
+        Model.prototype.clone = function () {
             return new Model(this._store);
         };
 

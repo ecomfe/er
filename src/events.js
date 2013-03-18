@@ -1,5 +1,5 @@
 define(
-    function(require) {
+    function (require) {
         /**
          * 事件中心
          * 
@@ -13,7 +13,7 @@ define(
              *
              * @param {*} error 错误对象，如果是字符串则会被封装为一个Error对象
              */
-            notifyError: function(error) {
+            notifyError: function (error) {
                 if (typeof error === 'string') {
                     error = new Error(error);
                 }

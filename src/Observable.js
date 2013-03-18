@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         var guidKey = '_erObservableGUID';
 
         /**
@@ -25,7 +25,7 @@ define(
          * @param {function} handler 事件的处理函数
          * @public
          */
-        Observable.prototype.on = function(type, handler) {
+        Observable.prototype.on = function (type, handler) {
             if (!this._events) {
                 this._events = {};
             }
@@ -48,7 +48,7 @@ define(
          * 无此参数则注销`type`指定类型的所有事件处理函数
          * @public
          */
-        Observable.prototype.un = function(type, handler) {
+        Observable.prototype.un = function (type, handler) {
             if (!this._events) {
                 return;
             }
@@ -92,7 +92,7 @@ define(
          * @param {Object} event 事件对象
          * @public
          */
-        Observable.prototype.fire = function(type, event) {
+        Observable.prototype.fire = function (type, event) {
             if (!this._events) {
                 return;
             }
@@ -142,7 +142,7 @@ define(
          * 
          * @param {*} target 需要支持事件处理功能的对象
          */
-        Observable.enable = function(target) {
+        Observable.enable = function (target) {
             target._events = [];
             target.on = Observable.prototype.on;
             target.un = Observable.prototype.un;
