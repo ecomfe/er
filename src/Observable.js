@@ -93,6 +93,13 @@ define(
          * @public
          */
         Observable.prototype.fire = function (type, event) {
+            // 无论`this._events`有没有被初始化，
+            // 如果有直接挂在对象上的方法是要触发的
+            var inlineHandler = this['on' + type];
+            if (typeof inlineHandler === 'function') {
+                inlineHandler.call(this, event);
+            }
+
             if (!this._events) {
                 return;
             }
@@ -104,20 +111,14 @@ define(
                 event = { type: type, data: event };
             }
 
-            var inlineHandler = this['on' + type];
-            if (typeof inlineHandler === 'function') {
-                inlineHandler.call(this, event);
-            }
-
             var alreadyInvoked = {};
             var pool = this._events[type];
             if (!pool) {
-                return;
-            }
-            for (var i = 0; i < pool.length; i++) {
-                var handler = pool[i];
-                if (!alreadyInvoked.hasOwnProperty(handler[guidKey])) {
-                    handler.call(this, event);
+                for (var i = 0; i < pool.length; i++) {
+                    var handler = pool[i];
+                    if (!alreadyInvoked.hasOwnProperty(handler[guidKey])) {
+                        handler.call(this, event);
+                    }
                 }
             }
 
