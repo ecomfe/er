@@ -359,7 +359,7 @@ define(
          * @param {boolean=} options.silent 如果该值为true则不触发`change`事件
          * @public
          */
-        Model.prototype.fill = function(extension, options) {
+        Model.prototype.fill = function (extension, options) {
             options = options || {};
 
             var changes = [];
