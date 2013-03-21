@@ -113,7 +113,7 @@ define(
 
             var alreadyInvoked = {};
             var pool = this._events[type];
-            if (!pool) {
+            if (pool) {
                 for (var i = 0; i < pool.length; i++) {
                     var handler = pool[i];
                     if (!alreadyInvoked.hasOwnProperty(handler[guidKey])) {
