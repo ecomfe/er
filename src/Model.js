@@ -7,6 +7,8 @@
  */
 define(
     function (require) {
+        var silent = { silent: true };
+
         /**
          * 加载一个数据
          *
@@ -21,21 +23,21 @@ define(
             var value = options.retrieve(model);
             var Deferred = require('./Deferred');
 
+            function addDataToModel(value) {
+                if (options.dump) {
+                    model.fill(value, silent);
+                }
+                else {
+                    model.set(options.name, value, silent);
+                }
+            }
+
             if (Deferred.isPromise(value)) {
-                var util = require('./util');
-                var addDataToModel = options.dump
-                    ? util.bindFn(model.set, model)
-                    : util.bindFn(model.set, model, options.name);
                 value.done(addDataToModel);
                 return value;
             }
             else {
-                if (options.dump) {
-                    model.set(value);
-                }
-                else {
-                    model.set(options.name, value);
-                }
+                addDataToModel(value);
                 return Deferred.resolved();
             }
         }
@@ -154,7 +156,7 @@ define(
             this._store = {};
 
             if (context) {
-                this.set(context);
+                this.fill(context, silent);
             }
         }
 
@@ -303,32 +305,78 @@ define(
         };
 
         /**
+         * 设置单个属性值
+         *
+         * @param {Model} 作为容器的Model对象
+         * @param {string} name 属性名
+         * @param {*} value 对应的值
+         * @param {Object} 一个变化记录项
+         */
+        function setProperty(model, name, value) {
+            var type = model._store.hasOwnProperty(name) ? 'change' : 'add';
+            var oldValue = model._store[name];
+            model._store[name] = value;
+
+            // 只在新旧值不同的情况下才有变化记录项
+            if (oldValue !== value) {
+                return {
+                    type: type,
+                    name: name,
+                    oldValue: oldValue,
+                    newValue: value
+                };
+            }
+
+            return null;
+        }
+
+        /**
          * 设置值
          *
-         * @param {string | Object} name 属性名，如果是对象，则把对象里的每个键加入
-         * @param {*=} value 对应的值，如果`name`是对象，则没有此参数
+         * @param {string} name 属性名
+         * @param {*} value 对应的值
+         * @param {Object=} options 相关选项
+         * @param {boolean=} options.silent 如果该值为true则不触发`change`事件
          * @public
          */
-        Model.prototype.set = function (name, value) {
-            if (arguments.length >= 2) {
-                var oldValue = this._store[name];
-                this._store[name] = value;
+        Model.prototype.set = function (name, value, options) {
+            options = options || {};
 
-                // 只在新旧值不同的情况下触发事件
-                if (oldValue !== value) {
-                    var event = {
-                        name: name,
-                        oldValue: oldValue,
-                        newValue: value
-                    };
-                    this.fire('change', event);
+            var record = setProperty(this, name, value);
+            if (record && !options.silent) {
+                var event = {
+                    changes: [record]
+                };
+                this.fire('change', event);
+            }
+        };
+
+        /**
+         * 批量设置值
+         *
+         * @param {Object} extension 批量值的存放对象
+         * @param {Object=} options 相关选项
+         * @param {boolean=} options.silent 如果该值为true则不触发`change`事件
+         * @public
+         */
+        Model.prototype.fill = function(extension, options) {
+            options = options || {};
+
+            var changes = [];
+            for (var name in extension) {
+                if (extension.hasOwnProperty(name)) {
+                    var record = setProperty(this, name, extension[name]);
+                    if (record) {
+                        changes.push(record);
+                    }
                 }
             }
-            else {
-                var extension = name;
-                for (var name in extension) {
-                    this.set(name, extension[name]);
-                }
+
+            if (changes.length && !options.silent) {
+                var event = {
+                    changes: changes
+                };
+                this.fire('change', event);
             }
         };
 
@@ -337,22 +385,34 @@ define(
          *
          * @param {string} name 属性名
          * @return {*} 在删除前`name`对应的值
+         * @param {Object=} options 相关选项
+         * @param {boolean=} options.silent 如果该值为true则不触发`change`事件
          * @public
          */
-        Model.prototype.remove = function (name) {
+        Model.prototype.remove = function (name, options) {
             // 如果原来就没这个值，就不触发`change`事件了
             if (!this._store.hasOwnProperty(name)) {
                 return;
             }
 
+            options = options || {};
             var value = this._store[name];
             delete this._store[name];
-            var event = {
-                name: name,
-                oldValue: value,
-                newValue: undefined
-            };
-            this.fire('change', event);
+
+            if (!options.silent) {
+                var event = {
+                    changes: [
+                        {
+                            type: 'remove',
+                            name: name,
+                            oldValue: value,
+                            newValue: undefined
+                        }
+                    ]
+                };
+                this.fire('change', event);
+            }
+
             return value;
         };
 
