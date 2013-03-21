@@ -55,6 +55,9 @@ define(
         function loadAction(args) {
             var path = args.url.getPath();
             var actionConfig = actionPathMapping[path];
+            var events = require('./events');
+
+            events.fire('loadaction', { url: args.url });
 
             // 关于actionConfig配置项：
             // 
@@ -76,6 +79,8 @@ define(
 
             // 如果没有Action的配置，则跳转到404页面
             if (!actionConfig) {
+                events.fire('actionnotfound', { url: args.url });
+
                 args.url = URL.parse(config.notFoundLocation);
 
                 // 对于404页面，是一切未找到的URL最终归宿，
@@ -93,6 +98,11 @@ define(
             // 检查权限，如果没有权限的话，根据Action或全局配置跳转
             var hasAuthority = checkAuthority(actionConfig.authority);
             if (!hasAuthority) {
+                events.fire(
+                    'permissiondenied', 
+                    { url: args.url, config: actionConfig }
+                );
+
                 var location = actionConfig.noAuthorityLocation 
                     || config.noAuthorityLocation;
                 args.url = URL.parse(location);
@@ -101,6 +111,15 @@ define(
 
             // 检查Action的跳转，类似302跳转，用于系统升级迁移
             if (actionConfig.movedTo) {
+                events.fire(
+                    'actionmoved', 
+                    {
+                        url: args.url, 
+                        config: actionConfig, 
+                        movedTo: actionConfig.movedTo
+                    }
+                );
+
                 var forwardURL = URL.parse(actionConfig.movedTo);
                 args.url = forwardURL;
                 return loadAction(args);
@@ -125,8 +144,19 @@ define(
 
                     // 没有Action配置的`type`属性对应的模块实现
                     if (!SpecificAction) {
-                        loading.reject(
-                            'No action implement for ' + actionConfig.type);
+                        var reason = 
+                            'No action implement for ' + actionConfig.type;
+
+                        events.fire(
+                            'actionfail',
+                            {
+                                url: args.url,
+                                config: actionConfig,
+                                reason: reason
+                            }
+                        );
+
+                        loading.reject(reason);
                         return;
                     }
 
@@ -146,11 +176,32 @@ define(
                         // 此处不支持Action工厂返回Promise
                         action = action.createRuntimeAction(args);
                         if (!action) {
-                            loading.rejected(
-                                'Action factory returns non-action');
+                            var reason = 'Action factory returns non-action';
+
+                            events.fire(
+                                'actionfail',
+                                {
+                                    url: args.url,
+                                    config: actionConfig,
+                                    action: action,
+                                    reason: reason
+                                }
+                            );
+
+                            loading.rejected(reason);
                             return;
                         }
                     }
+
+                    events.fire(
+                        'actionloaded',
+                        {
+                            url: acrgs.url,
+                            config: actionConfig,
+                            action: SpecificAction
+                        }
+                    );
+
                     loading.resolve(action, args);
                 }
             );
@@ -165,12 +216,22 @@ define(
          * @param {Object} context `Action`对象执行的上下文
          */
         function enterAction(action, context) {
+            var events = require('./events');
+
             if (currentAction) {
+                events.fire('leaveaction', { action: action });
+                
                 if (typeof currentAction.leave === 'function') {
                     currentAction.leave();
                 }
             }
             currentAction = action;
+
+            require('./events').fire(
+                'enteraction',
+                require('./util').mix({}, context)
+            );
+
             action.enter(context);
         }
 

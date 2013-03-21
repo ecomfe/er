@@ -106,6 +106,8 @@ define(
                  * @param {string} e.url 当前的URL
                  */
                 locator.fire('redirect', { url: url });
+
+                require('./events').fire('redirect', { url: url });
             }
         };
 

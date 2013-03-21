@@ -34,6 +34,8 @@ define(
             if (backup) {
                 backup.call(null, url);
             }
+
+            require('./events').fire('route', { url: url });
         }
 
         /**
