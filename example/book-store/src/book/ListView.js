@@ -57,9 +57,16 @@ define(
                 function() {
                     var url = $(this).attr('href').substring(1);
                     var controller = require('er/controller');
-                    var loader = 
+
+                    // 如果之前就有正在加载的，先把那个取消掉
+                    if (this.loadingBookViewAction) {
+                        // `renderChildAction`返回的Promise对象有个`cancel`方法
+                        this.loadingBookViewAction.cancel();
+                    }
+
+                    this.loadingBookViewAction = 
                         controller.renderChildAction(url, 'book-info-panel');
-                    loader.done(showBookInfo);
+                    this.loadingBookViewAction.done(showBookInfo);
                     return false;
                 }
             );
