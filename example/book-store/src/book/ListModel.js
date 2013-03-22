@@ -15,8 +15,7 @@ define(
 
             var datasource = require('er/datasource');
             this.datasource = {
-                list: datasource.queryDatabase(queryArguments),
-                locator: datasource.constant(require('er/locator'))
+                list: datasource.queryDatabase(queryArguments)
             };
         }
 

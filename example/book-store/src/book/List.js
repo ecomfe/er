@@ -19,18 +19,20 @@ define(
 
         function search(e) {
             var query = { keywords: e.keywords };
-            var locator = this.model.get('locator');
             var URL = require('er/URL');
-            locator.redirect(URL.withQuery('/book/list', query));
+            this.redirect(URL.withQuery('/book/list', query));
         }
 
         function flip(e) {
             var query = { page: e.page };
-            var locator = this.model.get('locator');
             var URL = require('er/URL');
             var cURL = this.model.get('url');
-            locator.redirect(URL.withQuery(cURL.getPath(),
-                require('er/util').mix(cURL.getQuery(), query)));
+            this.redirect(
+                URL.withQuery(
+                    cURL.getPath(),
+                    require('er/util').mix(cURL.getQuery(), query)
+                )
+            );
         }
 
         BookList.prototype.initBehavior = function() {
