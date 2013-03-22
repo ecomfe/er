@@ -50,3 +50,7 @@
     <!-- /for -->
     <a data-page="${page}+1" class="next <!-- if: ${page} == ${pageCount} -->disable<!-- /if -->">下一页</a>
 </div>
+<div id="book-info">
+    <span id="close-book-info">关闭</span>
+    <div id="book-info-panel"></div>
+</div>
