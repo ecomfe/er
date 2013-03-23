@@ -36,7 +36,7 @@ define(
             action.on('leave', hideBookInfo);
             $('#close-book-info').on(
                 'click',
-                require('er/util').bindFn(action.leave, action)
+                require('er/util').bind(action.leave, action)
             );
         }
 
@@ -46,10 +46,10 @@ define(
             var container = $('#' + this.container);
 
             var util = require('er/util');
-            $('#book-list').on('click', '.buy', util.bindFn(buyBook, this));
-            $('#submit-search').on('click', util.bindFn(search, this));
+            $('#book-list').on('click', '.buy', util.bind(buyBook, this));
+            $('#submit-search').on('click', util.bind(search, this));
             $('#list-page').on(
-                'click', ':not(.disable)' , util.bindFn(flip, this));
+                'click', ':not(.disable)' , util.bind(flip, this));
 
             container.on(
                 'click',

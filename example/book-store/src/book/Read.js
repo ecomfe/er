@@ -23,7 +23,7 @@ define(
         BookRead.prototype.viewType = require('book/ReadView');
 
         BookRead.prototype.initBehavior = function() {
-            this.view.on('buy', require('er/util').bindFn(buyBook, this))
+            this.view.on('buy', require('er/util').bind(buyBook, this))
         };
 
         require('er/util').inherits(BookRead, Action);

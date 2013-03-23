@@ -300,7 +300,7 @@ define(
                 forward(url, require('./config').mainElement, null, false);
             var events = require('./events');
             var util = require('./util');
-            loader.then(enterAction, util.bindFn(events.notifyError, events));
+            loader.then(enterAction, util.bind(events.notifyError, events));
         }
 
         function enterChildAction(action, context) {
@@ -394,7 +394,7 @@ define(
             var util = require('./util');
             loader.then(
                 enterChildAction,
-                util.bindFn(events.notifyError, events)
+                util.bind(events.notifyError, events)
             );
             return loader;
         }

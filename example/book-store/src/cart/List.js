@@ -47,10 +47,10 @@ define(
 
         CartList.prototype.initBehavior = function() {
             var util = require('er/util');
-            this.view.on('plus', util.bindFn(plusBook, this));
-            this.view.on('minus', util.bindFn(minusBook, this));
-            this.view.on('remove', util.bindFn(removeBook, this));
-            this.view.on('clear', util.bindFn(clearCart, this));
+            this.view.on('plus', util.bind(plusBook, this));
+            this.view.on('minus', util.bind(minusBook, this));
+            this.view.on('remove', util.bind(removeBook, this));
+            this.view.on('clear', util.bind(clearCart, this));
         };
 
         require('er/util').inherits(CartList, Action);

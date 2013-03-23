@@ -19,7 +19,7 @@ define(
         };
 
         BookReadView.prototype.enterDocument = function() {
-            $('#buy').click(require('er/util').bindFn(buyBook, this));
+            $('#buy').click(require('er/util').bind(buyBook, this));
         };
         
         require('er/util').inherits(BookReadView, View);

@@ -111,14 +111,14 @@ define(
             this._failCallbacks = [];
 
             this._promise =  {
-                done: util.bindFn(this.done, this),
-                fail: util.bindFn(this.fail, this),
-                always: util.bindFn(this.always, this),
-                then: util.bindFn(this.then, this),
-                state: util.bindFn(this.state, this),
-                isRejected: util.bindFn(this.isRejected, this),
-                isResolved: util.bindFn(this.isResolved, this),
-                promise: util.bindFn(this.promise, this)
+                done: util.bind(this.done, this),
+                fail: util.bind(this.fail, this),
+                always: util.bind(this.always, this),
+                then: util.bind(this.then, this),
+                state: util.bind(this.state, this),
+                isRejected: util.bind(this.isRejected, this),
+                isResolved: util.bind(this.isResolved, this),
+                promise: util.bind(this.promise, this)
             };
         }
         
@@ -356,8 +356,8 @@ define(
             for (var i = 0; i < workingUnits.length; i++) {
                 var unit = workingUnits[i];
                 unit.then(
-                    util.bindFn(resolveOne, unit, i),
-                    util.bindFn(rejectOne, unit, i)
+                    util.bind(resolveOne, unit, i),
+                    util.bind(rejectOne, unit, i)
                 );
             }
 

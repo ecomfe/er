@@ -75,8 +75,8 @@ define(
                 var loadingModel = this.model.load();
                 var events = require('./events');
                 return loadingModel.then(
-                    util.bindFn(this.forwardToView, this),
-                    util.bindFn(events.notifyError, events)
+                    util.bind(this.forwardToView, this),
+                    util.bind(events.notifyError, events)
                 );
             }
             else {

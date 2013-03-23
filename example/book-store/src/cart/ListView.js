@@ -33,12 +33,12 @@ define(
             var util = require('er/util');
             $('#cart-list')
                 .on(
-                    'click', '.remove', util.bindFn(removeBook, this))
+                    'click', '.remove', util.bind(removeBook, this))
                 .on(
-                    'click', '.plus', util.bindFn(plusBook, this))
+                    'click', '.plus', util.bind(plusBook, this))
                 .on(
-                    'click', '.minus', util.bindFn(minusBook, this));
-            $('#clear-cart').on('click', util.bindFn(clearCart, this));
+                    'click', '.minus', util.bind(minusBook, this));
+            $('#clear-cart').on('click', util.bind(clearCart, this));
         };
 
         require('er/util').inherits(CartListView, View);

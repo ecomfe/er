@@ -56,7 +56,7 @@ define(
             for (var i = 0; i < datasource.length; i++) {
                 var unit = datasource[i];
                 var util = require('./util');
-                var task = util.bindFn(load, null, model, unit);
+                var task = util.bind(load, null, model, unit);
                 loading = loading.done(task);
             }
             return loading;
@@ -266,7 +266,7 @@ define(
             try {
                 var loading = load(this, this.datasource);
                 var util = require('./util');
-                return loading.done(util.bindFn(this.prepare, this));
+                return loading.done(util.bind(this.prepare, this));
             }
             catch (ex) {
                 var Deferred = require('./Deferred');

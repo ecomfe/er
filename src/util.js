@@ -62,7 +62,7 @@ define(
          * @param {...*} args 固定的参数
          * @return {function} 固定了`this`变量和若干参数后的新函数对象
          */
-        util.bindFn = nativeBind
+        util.bind = nativeBind
             ? function (fn) {
                 return nativeBind.apply(fn, [].slice.call(arguments, 1));
             }
