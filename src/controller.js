@@ -308,7 +308,9 @@ define(
             // 如果是hash跳转，则转到controller上来
             function hijack(e) {
                 e = e || window.event;
-                var href = e.target.getAttribute('href', 2);
+                //下面两行是以主流浏览器为主，兼容IE的事件属性操作
+                var target = e.target || e.srcElement;
+                var href = target.getAttribute('href', 2) || '';
 
                 // 是hash跳转的链接就取消掉默认的跳转行为
                 if (href.charAt(0) === '#') {
