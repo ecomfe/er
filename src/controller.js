@@ -331,6 +331,19 @@ define(
                 // 转到`renderChildAction`上
                 var url = href.substring(1);
 
+                // 去别的Action前记得移掉`hijack`事件，
+                // 如果Action不是继承自ER框架的基类，而是一个普通的对象，
+                // 则可能不提供`leave`事件，所以有可能会跳过移除`hijack`过程。
+                // 
+                // 当然可能根据下面的代码，在当前Action的`leave`中已经移除了，
+                // 不过反正多移除一次也没副作用
+                if (container.removeEventListener) {
+                    container.removeEventListener('click', hijack, false);
+                }
+                else {
+                    container.detachEvent('onclick', hijack);
+                }
+
                 renderChildAction(url, context.container);
             }
 
