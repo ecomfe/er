@@ -325,7 +325,7 @@ define(
                 // 转到`renderChildAction`上
                 var url = href.substring(1);
 
-                renderChildAction(url, container);
+                renderChildAction(url, context.container);
             }
 
             // 需要给Action额外提供一个`redirect`方法，
