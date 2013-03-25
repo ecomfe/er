@@ -47,7 +47,7 @@ Deferred对象是一个通用对象，该对象是对[Promise/A规范](http://wi
 
 `always`方法等效于调用`then`方法，并使用同一个函数作为`done`和`fail`参数。
 
-### state方法
+### state属性
 
 `state`方法用于获取当前Deferred对象的状态，一个Deferred有以下3种状态：
 
@@ -55,20 +55,23 @@ Deferred对象是一个通用对象，该对象是对[Promise/A规范](http://wi
 - **resolved** ：该Deferred对象运行成功。
 - **rejected** ：该Deferred对象运行失败。
 
-### isResolved和isRejected方法
+### promise属性
 
-`isResolved`方法相当于`state() === 'resolved'`。
+`promise`属性得到一个Promise对象，一个Promise对象是对Deferred对象的只读表达，其包含了当前Deferred对象的以下方法：
 
-`isRejected`方法相当于`state() === 'rejected'`。
-
-### promise方法
-
-`promise`方法会返回一个Promise对象，一个Promise对象是对Deferred对象的只读表达，其包含了当前Deferred对象的以下方法：
-
-- `done` / `fail` / `always` / `then`
-- `state` / `isRejected` / `isResolved`
+- `done`
+- `fail`
+- `always`
+- `then`
 
 但并不包含操纵Deferred对象状态的方法，即`resolve`和`reject`方法。
+
+### resolver属性
+
+`resolver`属性得到一个Resolver对象，一个Resolver对象是对Deferred对象的只写表达，其包含了当前Deferred对象的以下方法：
+
+- `resolve`
+- `reject`
 
 ### join静态方法
 

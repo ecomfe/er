@@ -137,7 +137,7 @@ define(
 
             // 让loadAction返回一个特殊的Promise，
             // 可以通过调用`cancel()`取消Action加载完的后续执行
-            var loader = loading.promise();
+            var loader = loading.promise;
             var canceled = false;
             loader.cancel = function () {
                 canceled = true;

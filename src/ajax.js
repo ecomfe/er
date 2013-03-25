@@ -63,7 +63,7 @@ define(
                 ? new XMLHttpRequest()
                 : new ActiveXObject('Microsoft.XMLHTTP');
 
-            var fakeXHR = requesting.promise();
+            var fakeXHR = requesting.promise;
             var xhrWrapper = {
                 abort: function () {
                     xhr.abort();
@@ -143,7 +143,7 @@ define(
                 fakeXHR.fail(options.fail);
             }
             if (typeof options.complete === 'function') {
-                fakeXHR.always(options.complete);   
+                fakeXHR.ensure(options.complete);   
             }
 
             var method = options.method.toUpperCase();

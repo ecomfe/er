@@ -25,7 +25,7 @@ define(
             };
             
             helper.animate(animationProperties, 1000)
-                .promise()
+                .promise
                 .done(function() {
                     $(this).remove();
                 });
