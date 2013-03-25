@@ -310,8 +310,14 @@ define(
                 e = e || window.event;
                 //下面两行是以主流浏览器为主，兼容IE的事件属性操作
                 var target = e.target || e.srcElement;
-                var href = target.getAttribute('href', 2) || '';
 
+                // 担心有人在`<span>`之类的上面放`href`属性，还是判断一下标签
+                if (target.nodeName.toLowerCase() !== 'a') {
+                    return;
+                }
+
+                // `<a>`元素也可能没有`href`属性
+                var href = target.getAttribute('href', 2) || '';
                 // 是hash跳转的链接就取消掉默认的跳转行为
                 if (href.charAt(0) === '#') {
                     if (e.preventDefault) {
