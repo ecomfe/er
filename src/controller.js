@@ -327,6 +327,9 @@ define(
                         e.returnValue = false;
                     }
                 }
+                else if(!href || /^javascript:/i.test(href)) {
+                    return;
+                } 
 
                 // 转到`renderChildAction`上
                 var url = href.substring(1);
