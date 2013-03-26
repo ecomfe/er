@@ -10,6 +10,7 @@ define(
         var util = require('./util');
         var assert = require('./assert');
 
+
         /**
          * 尝试执行相关的回调函数
          * 
@@ -86,7 +87,7 @@ define(
                 // 
                 // 直接使用原`Deferred`保存的参数将`deferred`改为对应状态
                 else {
-                    resolver[actionType](original._args);
+                    deferred[actionType].apply(deferred, original._args);
                 }
             };
         }
