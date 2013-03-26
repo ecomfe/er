@@ -304,6 +304,38 @@ define(
         }
 
         function enterChildAction(action, context) {
+            var currentURL = context.url;
+            // 用于处理子Action中跳转的特殊`redirect`方法，
+            // 接口与`locator.redirect`保持一致
+            function redirect(url, options) {
+                var url = require('./locator').resolveURL(url, options);
+
+                var changed = url.toString() !== currentURL.toString();
+                if (changed || options.force) {
+                    events.fire('leaveaction', { action: action });
+
+                    if (typeof action.leave === 'function') {
+                        action.leave();
+                    }
+
+                    // 如果Action是个普通对象而非继承框架的基类，
+                    // 那可能没有`leave`方法及`leave`事件，
+                    // 所以在`leave`事件中解绑事件会不执行，
+                    // 因此在这里再解绑一次，重复解绑不会出错
+                    // 
+                    // 这里与下面的代码重复的，不过事件解绑是固定的代码，
+                    // 所以抽出来成独立的函数没啥意思，就保留原样
+                    if (container.removeEventListener) {
+                        container.removeEventListener('click', hijack, false);
+                    }
+                    else {
+                        container.detachEvent('onclick', hijack);
+                    }
+
+                    renderChildAction(url, context.container);
+                }
+            }
+
             // 需要把`container`上的链接点击全部拦截下来，
             // 如果是hash跳转，则转到controller上来
             function hijack(e) {
@@ -319,51 +351,35 @@ define(
                 // `<a>`元素也可能没有`href`属性
                 var href = target.getAttribute('href', 2) || '';
                 // 是hash跳转的链接就取消掉默认的跳转行为
-                if (href.charAt(0) === '#') {
-                    if (e.preventDefault) {
-                        e.preventDefault();
-                    }
-                    else {
-                        e.returnValue = false;
-                    }
+                if (href.charAt(0) !== '#') {
+                    return;
+                }
+
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                else {
+                    e.returnValue = false;
                 }
 
                 // 转到`renderChildAction`上
                 var url = href.substring(1);
 
-                // 去别的Action前记得移掉`hijack`事件，
-                // 如果Action不是继承自ER框架的基类，而是一个普通的对象，
-                // 则可能不提供`leave`事件，所以有可能会跳过移除`hijack`过程。
-                // 
-                // 当然可能根据下面的代码，在当前Action的`leave`中已经移除了，
-                // 不过反正多移除一次也没副作用
-                if (container.removeEventListener) {
-                    container.removeEventListener('click', hijack, false);
-                }
-                else {
-                    container.detachEvent('onclick', hijack);
-                }
-
-                renderChildAction(url, context.container);
+                // 直接使用专供子Action上的`redirect`方法，
+                // 会自动处理`hijack`的解绑定、URL比对、进入子Action等事，
+                // 为免Action重写`redirect`方法，这里用闭包内的这个
+                redirect(url);
             }
-
-            // 需要给Action额外提供一个`redirect`方法，
-            // 以把编码的跳转拦截到controller上来
-            var currentURL = context.url;
-            action.redirect = function (url, options) {
-                var url = require('./locator').resolveURL(url, options);
-
-                var changed = url.toString() !== currentURL.toString();
-                if (changed || options.force) {
-                    renderChildAction(url, container);
-                }
-            };
 
             var container = document.getElementById(context.container);
 
             if (!container) {
                 return;
             }
+
+            // 把子Action的`redirect`方法改掉，以免影响全局主Action，
+            // 这样通过js编码的跳转也会转到`renderChildAction`逻辑上
+            action.redirect = redirect;
 
             if (container.addEventListener) {
                 container.addEventListener('click', hijack, false);
