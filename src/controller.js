@@ -355,7 +355,7 @@ define(
 
                 var changed = url.toString() !== currentURL.toString();
                 if (changed || options.force) {
-                    renderChildAction(url, container);
+                    renderChildAction(url, context.container);
                 }
             };
 
