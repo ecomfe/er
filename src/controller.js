@@ -354,6 +354,9 @@ define(
                 if (href.charAt(0) !== '#') {
                     return;
                 }
+                else if(!href || /^javascript:/i.test(href)) {
+                    return;
+                } 
 
                 if (e.preventDefault) {
                     e.preventDefault();
