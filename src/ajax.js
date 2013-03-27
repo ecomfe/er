@@ -35,10 +35,6 @@ define(
          * @param {Object=} options.data 请求的数据
          * @param {string=} options.dataType 返回数据的类型，
          * 可以为**json**或**text**，默认为**json**
-         * @param {function=} options.done 请求成功后的回调函数
-         * @param {function=} options.fail 请求失败后的回调函数
-         * @param {function=} options.complete 请求完成时的回调函数，
-         * 无论成功与否均会触发，且在`done`和`fail`之后
          * @param {number=} options.timeout 超时时间
          * @param {boolean=} options.cache 决定是否允许缓存
          * @return {FakeXHR} 一个`FakeXHR`对象，
@@ -67,11 +63,30 @@ define(
             var xhrWrapper = {
                 abort: function () {
                     xhr.abort();
-                    fakeXHR.status = 408; // HTTP 408: Request Timeout
                     fakeXHR.readyState = xhr.readyState;
                     fakeXHR.responseText = '';
                     fakeXHR.responseXML = '';
                     requesting.reject(fakeXHR);
+                    
+                },
+                setRequestHeader: function (name, value) {
+                    xhr.setRequestHeader(name, value);
+                }
+            };
+            util.mix(fakeXHR, xhrWrapper);
+
+            fakeXHR.then(
+                function () {
+                    /**
+                     * 任意一个XMLHttpRequest请求失败时触发
+                     *
+                     * @event fail
+                     * @param {Object} e 事件对象
+                     * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
+                     */
+                    ajax.on('done', { xhr: fakeXHR });
+                },
+                function () {
                     /**
                      * 任意一个XMLHttpRequest请求失败时触发
                      *
@@ -80,12 +95,8 @@ define(
                      * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
                      */
                     ajax.on('fail', { xhr: fakeXHR });
-                },
-                setRequestHeader: function (name, value) {
-                    xhr.setRequestHeader(name, value);
                 }
-            };
-            util.mix(fakeXHR, xhrWrapper);
+            );
 
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
@@ -113,38 +124,18 @@ define(
                             // 服务器返回的数据不符合JSON格式，认为请求失败
                             fakeXHR.error = ex;
                             requesting.reject(fakeXHR);
-                            ajax.on('fail', { xhr: fakeXHR });
                             return;
                         }
                     }
 
                     if (status >= 200 && status < 300 || status === 304) {
                         requesting.resolve(data);
-                        /**
-                         * 任意一个XMLHttpRequest请求失败时触发
-                         *
-                         * @event fail
-                         * @param {Object} e 事件对象
-                         * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
-                         */
-                        ajax.on('done', { xhr: fakeXHR });
                     }
                     else {
                         requesting.reject(fakeXHR);
-                        ajax.on('fail', { xhr: fakeXHR });
                     }
                 }
             };
-
-            if (typeof options.done === 'function') {
-                fakeXHR.done(options.done);
-            }
-            if (typeof options.fail === 'function') {
-                fakeXHR.fail(options.fail);
-            }
-            if (typeof options.complete === 'function') {
-                fakeXHR.ensure(options.complete);   
-            }
 
             var method = options.method.toUpperCase();
             var data = {};
@@ -168,7 +159,14 @@ define(
             }
 
             if (options.timeout > 0) {
-                setTimeout(util.bind(fakeXHR.abort, fakeXHR), options.timeout);
+                var tick = setTimeout(
+                    function () {
+                        fakeXHR.status = 408; // HTTP 408: Request Timeout
+                        fakeXHR.abort();
+                    },
+                    options.timeout
+                );
+                fakeXHR.ensure(function () { clearTimeout(tick); });
             }
 
             return fakeXHR;
