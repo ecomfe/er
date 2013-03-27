@@ -2,11 +2,13 @@
 <table id="cart-list">
     <col id="product-column" />
     <col id="price-column" />
+    <col id="count-column" />
     <col id="action-column" />
     <thead>
         <tr>
             <td>商品</td>
-            <td>价格</td>
+            <td>单价</td>
+            <td>数量</td>
             <td>操作</td>
         </tr>
     </thead>
@@ -25,6 +27,7 @@
                 </a>
             </td>
             <td><span class="price">${book.price}</span></td>
+            <td><span class="minus">-</span><span class="count">${book.count}</span><span class="plus">+</span></td>
             <td>
                 <span class="remove interactive">删除</span>
             </td>

@@ -6,14 +6,16 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
+        var silent = { silent: true };
+
         /**
          * 加载一个数据
          *
          * @param {Model} model 用于存放数据的`Model`对象
          * @param {Object} options 数据获取配置项，详见`load`方法说明
          * @param {function} options.retrieve 获取数据的函数
-         * @param {string=} options.key 获取数据后添加到`Model`对象时的键名
+         * @param {string=} options.name 获取数据后添加到`Model`对象时的属性名
          * @param {boolean=} options.dump 决定数据是否完整添加到`Model`对象
          * @return {Promise} 对应的`Promise`对象，数据加载完成后触发
          */
@@ -21,21 +23,21 @@ define(
             var value = options.retrieve(model);
             var Deferred = require('./Deferred');
 
+            function addDataToModel(value) {
+                if (options.dump) {
+                    model.fill(value, silent);
+                }
+                else {
+                    model.set(options.name, value, silent);
+                }
+            }
+
             if (Deferred.isPromise(value)) {
-                var util = require('./util');
-                var addDataToModel = options.dump
-                    ? util.bindFn(model.set, model)
-                    : util.bindFn(model.set, model, options.key);
                 value.done(addDataToModel);
                 return value;
             }
             else {
-                if (options.dump) {
-                    model.set(value);
-                }
-                else {
-                    model.set(options.key, value);
-                }
+                addDataToModel(value);
                 return Deferred.resolved();
             }
         }
@@ -54,7 +56,7 @@ define(
             for (var i = 0; i < datasource.length; i++) {
                 var unit = datasource[i];
                 var util = require('./util');
-                var task = util.bindFn(load, null, model, unit);
+                var task = util.bind(load, null, model, unit);
                 loading = loading.done(task);
             }
             return loading;
@@ -69,18 +71,18 @@ define(
          */
         function loadParallel(model, datasource) {
             var workers = [];
-            for (var key in datasource) {
-                if (datasource.hasOwnProperty(key)) {
-                    var unit = datasource[key];
+            for (var name in datasource) {
+                if (datasource.hasOwnProperty(name)) {
+                    var unit = datasource[name];
 
                     // 如果直接表达获取数据的内容（函数或数据获取配置项），
-                    // 则需要加上对应的键名。
-                    // 其它情况下（值为嵌套的数组或对象），键名将没有意义
+                    // 则需要加上对应的属性名。
+                    // 其它情况下（值为嵌套的数组或对象），属性名将没有意义
                     if (typeof unit === 'function') {
-                        unit = { retrieve: unit, key: key };
+                        unit = { retrieve: unit, name: name };
                     }
                     else if (typeof unit.retrieve === 'function') {
-                        unit = require('./util').mix({ key: key }, unit);
+                        unit = require('./util').mix({ name: name }, unit);
                     }
 
                     workers.push(load(model, unit));
@@ -151,12 +153,10 @@ define(
          * @param {Object=} context 初始化的数据
          */
         function Model(context) {
-            Observable.apply(this, arguments);
-
             this._store = {};
 
             if (context) {
-                this.set(context);
+                this.fill(context, silent);
             }
         }
 
@@ -176,7 +176,7 @@ define(
          * ### 并发请求数据
          * 
          * 通过一个对象配置并发的数据获取。对象中每一个属性对应一个获取函数，
-         * 当数据获取后，会调用`this.set(key, result)`，以属性名为键值添加
+         * 当数据获取后，会调用`this.set(name, result)`，以属性名为键值添加
          * 
          *     // 并发请求多个URL
          *     datasource = {
@@ -227,9 +227,9 @@ define(
          * 上文所述的各种方案，均是数据获取配置项的一种简写，
          * 一个数据获取配置项包含以下内容：
          * 
-         * - `key`：数据加载后添加到`Model`对象时用的键值
+         * - `name`：数据加载后添加到`Model`对象时用的键值
          * - `retrieve`：获取数据的函数
-         * - `dump`：如果该值为**true**，则`key`配置无效，完整添加获取的对象
+         * - `dump`：如果该值为**true**，则`name`配置无效，完整添加获取的对象
          * 
          * 因此，可以使用数据获取配置项来处理一些例外情况，比如并行加载2个对象，
          * 且2个对象均无对应的键值，需要完整添加到`Model`对象：
@@ -249,7 +249,7 @@ define(
          * 对于不同的简写，其与数据获取配置项的对应关系如下：
          * 
          * - 普通的函数，映射为`{ retrieve: {fn}, dump: true }`
-         * - 对象中的一个属性，映射为`{ retrieve: {fn}, key: {key} }`
+         * - 对象中的一个属性，映射为`{ retrieve: {fn}, name: {name} }`
          *
          * @type {?Object | ?Array | ?function}
          * @protected
@@ -262,11 +262,11 @@ define(
          * @return {Promise} `Promise`对象，在数据加载且`prepare`方法执行后触发
          * @public
          */
-        Model.prototype.load = function() {
+        Model.prototype.load = function () {
             try {
                 var loading = load(this, this.datasource);
                 var util = require('./util');
-                return loading.done(util.bindFn(this.prepare, this));
+                return loading.done(util.bind(this.prepare, this));
             }
             catch (ex) {
                 var Deferred = require('./Deferred');
@@ -290,62 +290,147 @@ define(
          * 则返回一个`Promise`对象，通知调用者等待
          * @protected
          */
-        Model.prototype.prepare = function() {
+        Model.prototype.prepare = function () {
         };
 
         /**
          * 获取对应键的值
          *
-         * @param {string} key 键名
-         * @return {*} `key`对应的值
+         * @param {string} name 属性名
+         * @return {*} `name`对应的值
          * @public
          */
-        Model.prototype.get = function(key) {
-            return this._store[key];
+        Model.prototype.get = function (name) {
+            return this._store[name];
         };
+
+        /**
+         * 设置单个属性值
+         *
+         * @param {Model} 作为容器的Model对象
+         * @param {string} name 属性名
+         * @param {*} value 对应的值
+         * @param {Object} 一个变化记录项
+         */
+        function setProperty(model, name, value) {
+            var type = model._store.hasOwnProperty(name) ? 'change' : 'add';
+            var oldValue = model._store[name];
+            model._store[name] = value;
+
+            // 只在新旧值不同的情况下才有变化记录项
+            if (oldValue !== value) {
+                return {
+                    type: type,
+                    name: name,
+                    oldValue: oldValue,
+                    newValue: value
+                };
+            }
+
+            return null;
+        }
 
         /**
          * 设置值
          *
-         * @param {string | Object} key 键名，如果是对象，则把对象里的每个键加入
-         * @param {*=} value 对应的值，如果`key`是对象，则没有此参数
+         * @param {string} name 属性名
+         * @param {*} value 对应的值
+         * @param {Object=} options 相关选项
+         * @param {boolean=} options.silent 如果该值为true则不触发`change`事件
          * @public
          */
-        Model.prototype.set = function(key, value) {
-            if (arguments.length >= 2) {
-                this._store[key] = value;
+        Model.prototype.set = function (name, value, options) {
+            options = options || {};
+
+            var record = setProperty(this, name, value);
+            if (record && !options.silent) {
+                var event = {
+                    changes: [record]
+                };
+                this.fire('change', event);
             }
-            else {
-                var extension = key;
-                for (var name in extension) {
-                    this.set(name, extension[name]);
+        };
+
+        /**
+         * 批量设置值
+         *
+         * @param {Object} extension 批量值的存放对象
+         * @param {Object=} options 相关选项
+         * @param {boolean=} options.silent 如果该值为true则不触发`change`事件
+         * @public
+         */
+        Model.prototype.fill = function (extension, options) {
+            options = options || {};
+
+            var changes = [];
+            for (var name in extension) {
+                if (extension.hasOwnProperty(name)) {
+                    var record = setProperty(this, name, extension[name]);
+                    if (record) {
+                        changes.push(record);
+                    }
                 }
+            }
+
+            if (changes.length && !options.silent) {
+                var event = {
+                    changes: changes
+                };
+                this.fire('change', event);
             }
         };
 
         /**
          * 删除对应键的值
          *
-         * @param {string} key 键名
-         * @return {*} 在删除前`key`对应的值
+         * @param {string} name 属性名
+         * @return {*} 在删除前`name`对应的值
+         * @param {Object=} options 相关选项
+         * @param {boolean=} options.silent 如果该值为true则不触发`change`事件
          * @public
          */
-        Model.prototype.remove = function(key) {
-            var value = this._store[key];
-            delete this._store[key];
+        Model.prototype.remove = function (name, options) {
+            // 如果原来就没这个值，就不触发`change`事件了
+            if (!this._store.hasOwnProperty(name)) {
+                return;
+            }
+
+            options = options || {};
+            var value = this._store[name];
+            delete this._store[name];
+
+            if (!options.silent) {
+                var event = {
+                    changes: [
+                        {
+                            type: 'remove',
+                            name: name,
+                            oldValue: value,
+                            newValue: undefined
+                        }
+                    ]
+                };
+                this.fire('change', event);
+            }
+
             return value;
         };
 
         /**
          * 获取对应键的值并组装为一个新的`Model`对象后返回
          *
-         * @param {string} key 键名
-         * @return {Model} `key`对应的值组装成的新的`Model`对象
+         * @param {string} name 属性名
+         * @return {Model} `name`对应的值组装成的新的`Model`对象
          * @public
          */
-        Model.prototype.getAsModel = function(key) {
-            var value = this.get(key);
-            return new Model(value);
+        Model.prototype.getAsModel = function (name) {
+            var value = this.get(name);
+            if (!value || {}.toString.call(value) !== '[object Object]') {
+                return new Model();
+            }
+            else {
+                return new Model(value);
+            }
         };
 
         /**
@@ -355,7 +440,7 @@ define(
          * @public
          * @override
          */
-        Model.prototype.valueOf = function() {
+        Model.prototype.valueOf = function () {
             // 为保证`valueOf`获取对象后修改不会影响到当前`Model`对象，
             // 需要做一次克隆的操作
             var util = require('./util');
@@ -368,7 +453,7 @@ define(
          * @return {Model} 克隆后的新`Model`对象
          * @public
          */
-        Model.prototype.clone = function() {
+        Model.prototype.clone = function () {
             return new Model(this._store);
         };
 

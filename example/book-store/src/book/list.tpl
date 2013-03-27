@@ -43,3 +43,14 @@
     </li>
     <!-- /for -->
 </ol>
+<div id="list-page">
+    <a data-page="${page}-1" class="previous <!-- if: ${page} == 1 -->disable<!-- /if -->">上一页</a>
+    <!-- for: ${pages} as ${p} -->
+    <a data-page="${p}" class="index <!-- if: ${p} == ${page} -->disable current<!-- /if -->">${p}</a>
+    <!-- /for -->
+    <a data-page="${page}+1" class="next <!-- if: ${page} == ${pageCount} -->disable<!-- /if -->">下一页</a>
+</div>
+<div id="book-info">
+    <span id="close-book-info">关闭</span>
+    <div id="book-info-panel"></div>
+</div>

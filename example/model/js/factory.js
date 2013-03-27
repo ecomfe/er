@@ -13,7 +13,7 @@ define(
                     },
                     time
                 );
-                return loading.promise();
+                return loading.promise;
             };
         },
 
@@ -29,7 +29,7 @@ define(
                     },
                     time
                 );
-                return loading.promise();
+                return loading.promise;
             };
         },
 

@@ -5,7 +5,11 @@
     width: 480px;
 }
 #price-column {
-    width: 360px;
+    width: 260px;
+    text-align: center;
+}
+#count-column {
+    width: 100px;
     text-align: center;
 }
 #cart-list .name {
@@ -14,10 +18,26 @@
 #cart-list .price::before {
     content: "￥";
 }
-
+#cart-list .plus,
+#cart-list .minus {
+    border: 1px solid #dadada;
+    padding: 0 3px;    
+    cursor: pointer;
+}
+#cart-list .plus:hover,
+#cart-list .minus:hover {
+    background-color: #ffdd99; 
+}
+#cart-list .minus{
+    margin-right: 8px;
+}
+#cart-list .plus{
+    margin-left: 8px;
+}
 #total-price {
     font-weight: bold;
 }
 #total-price::before {
     content: "￥";
 }
+

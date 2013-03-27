@@ -54,3 +54,61 @@
 #book-list .buy {
     padding: 6px 10px;
 }
+#list-page .previous,
+#list-page .next,
+#list-page .index{
+    color: #0000ff;
+}
+
+#list-page .disable {
+    color: #cccccc;
+}
+
+#list-page .current {
+    color: #BB6622;
+}
+
+#list-page :not(.disable):hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#book-info {
+    width: 610px;
+    height: 450px;
+    border: 2px solid #000;
+    padding: 13px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 999;
+    margin: -320px 0 0 -240px;
+    background-color: #fff;
+    display: none;
+    opacity: 0;
+}
+#book-info.focused {
+    opacity: 1;
+    display: block;
+    -webkit-transition: .3s linear opacity;
+    -moz-transition: .3s linear opacity;
+    -ms-transition: .3s linear opacity;
+    -o-transition: .3s linear opacity;
+    transition: .3s linear opacity;
+}
+#close-book-info {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+    font-size: 18px;
+    padding: 4px 6px;
+    cursor: default;
+}
+#close-book-info:hover {
+    background-color: #ccc;
+}
+#close-book-info::before {
+    font-family: "FontAwesome";
+    content: "\f00d";
+}

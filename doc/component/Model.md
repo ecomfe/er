@@ -16,27 +16,27 @@ Model在ER框架中，定位于对 **数据的结构、加载、存储** 的封�
 
 `get`方法用于获取当前Model对象的指定属性，其签名如下：
 
-    get({string} key)
+    get({string} name)
 
 #### 参数
 
-- `{string} key`：需要获取的属性名称。
+- `{string} name`：需要获取的属性名称。
 
 #### 返回值
 
-返回`key`对应的属性的值。如果不存在该属性，会返回 **undefined** 。
+返回`name`对应的属性的值。如果不存在该属性，会返回 **undefined** 。
 
 ### set方法
 
 `set`方法用于向当前Model对象设置属性，其有2种签名如下：
 
     set({Object} extension)
-    set({string} key, {Any} value)
+    set({string} name, {Any} value)
 
 #### 参数
 
 - `{Object} extension`：当`set`方法只传递一个参数时，将会把该参数中的所有属性依次添加到当前的Model中。
-- `{string} key`：需要设置的属性的名称。
+- `{string} name`：需要设置的属性的名称。
 - `{Any} value`：需要设置的属性的值。
 
 ### remove方法
@@ -45,25 +45,25 @@ Model在ER框架中，定位于对 **数据的结构、加载、存储** 的封�
 
 #### 参数
 
-- `{string} key`：需要移除的属性名称。
+- `{string} name`：需要移除的属性名称。
 
 #### 返回值
 
-返回在属性被移除前，`key`对应的属性的值。如果不存在该属性，会返回 **undefined** 。
+返回在属性被移除前，`name`对应的属性的值。如果不存在该属性，会返回 **undefined** 。
 
 ### getAsModel方法
 
 `getAsModel`用于获取当前Model对象的一个属性，并且会将这个属性包装成为一个新的Model对象后返回，其签名如下：
 
-    getAsModel({string} key)
+    getAsModel({string} name)
 
 #### 参数
 
-- `{string} key`：需要获取的属性名称。
+- `{string} name`：需要获取的属性名称。
 
 #### 返回值
 
-`key`对应的属性的值被包装为一个新的Model对象返回。如果不存在该属性，会返回一个空（不包含任何属性）的Model对象。
+`name`对应的属性的值被包装为一个新的Model对象返回。如果不存在该属性，会返回一个空（不包含任何属性）的Model对象。
 
 ### valueOf方法
 
@@ -98,7 +98,7 @@ Model对象重写了`valueOf`方法，该方法会返回一个对象，包含当
 
 ### 并发请求数据
 
-通过一个对象配置并发的数据获取。对象中每一个属性对应一个获取函数，当数据获取后，会调用`this.set(key, result)`，以属性名为键值添加
+通过一个对象配置并发的数据获取。对象中每一个属性对应一个获取函数，当数据获取后，会调用`this.set(name, result)`，以属性名为键值添加
 
     // 并发请求多个URL
     datasource = {
@@ -143,9 +143,9 @@ Model对象重写了`valueOf`方法，该方法会返回一个对象，包含当
 
 上文所述的各种方案，均是数据获取配置项的一种简写，一个数据获取配置项包含以下内容：
 
-- `{string} key`：数据加载后添加到`Model`对象时用的键值。
+- `{string} name`：数据加载后添加到`Model`对象时用的键值。
 - `{function} retrieve`：获取数据的函数。
-- `{boolean} dump`：如果该值为**true**，则`key`配置无效，完整添加获取的对象。
+- `{boolean} dump`：如果该值为**true**，则`name`配置无效，完整添加获取的对象。
 
 因此，可以使用数据获取配置项来处理一些例外情况，比如并行加载2个对象，且2个对象均无对应的键值，需要完整添加到`Model`对象：
 
@@ -164,6 +164,6 @@ Model对象重写了`valueOf`方法，该方法会返回一个对象，包含当
 对于不同的简写，其与数据获取配置项的对应关系如下：
 
 - 普通的函数，映射为`{ retrieve: {fn}, dump: true }`
-- 对象中的一个属性，映射为`{ retrieve: {fn}, key: {key} }`
+- 对象中的一个属性，映射为`{ retrieve: {fn}, name: {name} }`
 
 [Model加载示例](../../example/model)提供了一个简单的示例，展示如何使用配置式的方式进行数据的加载。

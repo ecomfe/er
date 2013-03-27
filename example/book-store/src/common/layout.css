@@ -23,11 +23,15 @@ ul, ol {
 .interactive:hover {
     background-color: #d73;
 }
-
+#nav-wrap {
+    height: 40px;
+    line-height: 40px;
+    padding: 10px 0;
+    background-color: #fff;
+}
 #nav {
     overflow: hidden;
     background-color: #fff;
-    padding: 10px 0;
 }
 #nav li {
     float: left;
@@ -37,8 +41,7 @@ ul, ol {
     background-color: #ccc;
     display: block;
     width: 180px;
-    height: 40px;
-    line-height: 40px;
+    height: 100%;
     font-size: 24px;
     text-align: center;
     text-decoration: none;

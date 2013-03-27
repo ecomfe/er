@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function() {
+    function () {
         if (window.DEBUG) {
             /**
              * 断言函数
@@ -14,7 +14,7 @@ define(
              * @param {boolean} condition 断言结果
              * @param {string} message 断言结果为**false**时提示的信息
              */
-            var assert = function(condition, message) {
+            var assert = function (condition, message) {
                 if (!condition) {
                     throw new Error(message);
                 }
@@ -26,7 +26,7 @@ define(
              * @param {*} obj 用于判断的对象
              * @param {string} message 断言结果为**false**时提示的信息
              */
-            assert.has = function(obj, message) {
+            assert.has = function (obj, message) {
                 assert(obj != null, message);
             };
 
@@ -38,7 +38,7 @@ define(
              * @param {*} y 用于判断相等的右值
              * @param {string} message 断言结果为**false**时提示的信息
              */
-            assert.equals = function(x, y, message) {
+            assert.equals = function (x, y, message) {
                 assert(x === y, message);
             };
 
@@ -49,7 +49,7 @@ define(
              * @param {string} propertyName 属性的名称
              * @param {string} message 断言结果为**false**时提示的信息
              */
-            assert.hasProperty = function(obj, propertyName, message) {
+            assert.hasProperty = function (obj, propertyName, message) {
                 assert(obj[propertyName] != null, message);
             };
 
@@ -60,7 +60,7 @@ define(
              * @param {*} max 用于判断的右值
              * @param {string} message 断言结果为**false**时提示的信息
              */
-            assert.lessThan = function(value, max, message) {
+            assert.lessThan = function (value, max, message) {
                 assert(value < max, message);
             };
 
@@ -71,7 +71,7 @@ define(
              * @param {*} min 用于判断的右值
              * @param {string} message 断言结果为**false**时提示的信息
              */
-            assert.greaterThan = function(value, min, message) {
+            assert.greaterThan = function (value, min, message) {
                 assert(value > max, message);
             };
 
@@ -82,7 +82,7 @@ define(
              * @param {*} max 用于判断的右值
              * @param {string} message 断言结果为**false**时提示的信息
              */
-            assert.lessThanOrEquals = function(value, max, message) {
+            assert.lessThanOrEquals = function (value, max, message) {
                 assert(value <= max, message);
             };
 
@@ -93,14 +93,14 @@ define(
              * @param {*} min 用于判断的右值
              * @param {string} message 断言结果为**false**时提示的信息
              */
-            assert.greaterThanOrEquals = function(value, min, message) {
+            assert.greaterThanOrEquals = function (value, min, message) {
                 assert(value >= max, message);
             };
 
             return asssert;
         }
         else {
-            var assert = function() {};
+            var assert = function () {};
             assert.has = assert;
             assert.equals = assert;
             assert.hasProperty = assert;

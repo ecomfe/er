@@ -6,13 +6,13 @@
  * @author otakustay
  */
 define(
-    function() {
+    function () {
         var authorities = {};
 
         /**
          * 权限管理器，提供权限的注册和判断功能
          */
-        return {
+        var permssion = {
             /**
              * 添加权限说明
              * 
@@ -28,7 +28,7 @@ define(
              *
              * @param {Object} data 权限说明
              */
-            add: function(data) {
+            add: function (data) {
                 for (var key in data) {
                     if (data.hasOwnProperty(key)) {
                         var value = data[key];
@@ -48,9 +48,11 @@ define(
              * @param {string} name 权限名称
              * @return {boolean} 是否拥有`name`表示的权限
              */
-            isAllow: function(name) {
+            isAllow: function (name) {
                 return !!authorities[name];
             }
         };
+
+        return permssion;
     }
 );

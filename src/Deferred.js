@@ -6,9 +6,10 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         var util = require('./util');
         var assert = require('./assert');
+
 
         /**
          * 尝试执行相关的回调函数
@@ -19,20 +20,21 @@ define(
          * @param {Deferred} deferred 需要处理的`Deferred`实例
          */
         function tryFlush(deferred) {
-            if (deferred._state === 'pending') {
+            if (deferred.state === 'pending') {
                 return;
             }
 
-            var callbacks = deferred._state === 'resolved'
+            var callbacks = deferred.state === 'resolved'
                 ? deferred._doneCallbacks.slice()
                 : deferred._failCallbacks.slice();
 
             setTimeout(
-                function() {
+                function () {
                     for (var i = 0; i < callbacks.length; i++) {
                         var callback = callbacks[i];
                         try {
-                            callback.apply(deferred, deferred._args);
+                            // 回调时的this应该是`Promise`，没有`resolve`等方法
+                            callback.apply(deferred.promise, deferred._args);
                         }
                         catch (ex) {
                         }
@@ -57,7 +59,7 @@ define(
          * @return {function} 关联函数，可注册在`original`的相关回调函数上
          */
         function pipe(original, deferred, callback, actionType) {
-            return function() {
+            return function () {
                 // `.then(done)`及`.then(null, fail)`时使用
                 // 
                 // 根据`callback`的行为，进行以下处理：
@@ -65,25 +67,20 @@ define(
                 // - 如果`callback`返回值，则用该值改`deferred`为**resolved**
                 // - 如果`callback`抛出异常，则用异常改`deferred`为**rejected**
                 if (typeof callback === 'function') {
+                    var resolver = deferred.resolver;
                     try {
-                        var returnValue = callback.apply(this, arguments);
+                        var returnValue = 
+                            callback.apply(original.promise, arguments);
 
                         if (Deferred.isPromise(returnValue)) {
-                            returnValue.then(
-                                function() {
-                                    deferred.resolve.apply(deferred, arguments);
-                                },
-                                function() {
-                                    deferred.reject.apply(deferred, arguments);
-                                }
-                            );
+                            returnValue.then(resolver.resolve, resolver.reject);
                         }
                         else {
-                            deferred.resolve.call(deferred, returnValue);
+                            resolver.resolve(returnValue);
                         }
                     }
                     catch (error) {
-                        deferred.reject(error);
+                        resolver.reject(error);
                     }
                 }
                 // `.then()`及`.then(done, null)`时使用
@@ -103,20 +100,55 @@ define(
          * @constructor
          */
         function Deferred() {
-            this._state = 'pending';
+            this.state = 'pending';
             this._args = null;
             this._doneCallbacks = [];
             this._failCallbacks = [];
 
-            this._promise =  {
-                done: util.bindFn(this.done, this),
-                fail: util.bindFn(this.fail, this),
-                always: util.bindFn(this.always, this),
-                then: util.bindFn(this.then, this),
-                state: util.bindFn(this.state, this),
-                isRejected: util.bindFn(this.isRejected, this),
-                isResolved: util.bindFn(this.isResolved, this),
-                promise: util.bindFn(this.promise, this)
+            /**
+             * 与当前对象关联的`Promise`对象
+             * 
+             * 一个`Promise`对象是对`Deferred`对象的**只读**状态的表达，
+             * `Promise`对象拥有所有添加回调函数的方法，包括：
+             * 
+             * - `done`
+             * - `fail`
+             * - `ensure`
+             * - `then`
+             * 
+             * 但`Promise`对象并不包改变`Deferred`对象的方法，包括：
+             * 
+             * - `resolve`
+             * - `reject`
+             *
+             * @type {Promise}
+             * @public
+             */
+            this.promise =  {
+                done: util.bind(this.done, this),
+                fail: util.bind(this.fail, this),
+                ensure: util.bind(this.ensure, this),
+                then: util.bind(this.then, this)
+            };
+            // 形成环引用，保证`.promise.promise`能运行
+            this.promise.promise = this.promise;
+
+
+            /**
+             * 与当前对象关联的`Resolver`对象
+             * 
+             * 一个`Resolver`对象是对`Deferred`对象的**只写**状态的表达，
+             * `Resolver`对象拥有所有改变状态的方法，包括：
+             * 
+             * - `resolve`
+             * - `reject
+             *
+             * @type {Resolver}
+             * @public
+             */
+            this.resolver = {
+                resolve: util.bind(this.resolve, this),
+                reject: util.bind(this.reject, this)
             };
         }
         
@@ -128,7 +160,7 @@ define(
          * @param {*} value 需要判断的对象
          * @return {boolean} 如果`value`是`Promise`对象，则返回true
          */
-        Deferred.isPromise = function(value) {
+        Deferred.isPromise = function (value) {
             return value && typeof value.then === 'function';
         };
 
@@ -138,12 +170,12 @@ define(
          * @param {...*} args 执行回调时的参数
          * @public
          */
-        Deferred.prototype.resolve = function() {
-            if (this._state !== 'pending') {
+        Deferred.prototype.resolve = function () {
+            if (this.state !== 'pending') {
                 return;
             }
 
-            this._state = 'resolved';
+            this.state = 'resolved';
             this._args = [].slice.call(arguments);
 
             tryFlush(this);
@@ -155,12 +187,12 @@ define(
          * @param {...*} args 执行回调时的参数
          * @public
          */
-        Deferred.prototype.reject = function() {
-            if (this._state !== 'pending') {
+        Deferred.prototype.reject = function () {
+            if (this.state !== 'pending') {
                 return;
             }
 
-            this._state = 'rejected';
+            this.state = 'rejected';
             this._args = [].slice.call(arguments);
 
             tryFlush(this);
@@ -169,13 +201,13 @@ define(
         /**
          * 添加一个成功回调函数
          * 
-         * 本方法相当于`.then(callback, null)，具体参考`then`方法的说明
+         * 本方法相当于`.then(callback, null)，具体参考`then`方法的说明al
          *
          * @param {function} callback 需要添加的回调函数
          * @return {Promise} 新的`Promise`对象
          * @public
          */
-        Deferred.prototype.done = function(callback) {
+        Deferred.prototype.done = function (callback) {
             return this.then(callback);
         };
 
@@ -188,7 +220,7 @@ define(
          * @return {Promise} 新的`Promise`对象
          * @public
          */
-        Deferred.prototype.fail = function(callback) {
+        Deferred.prototype.fail = function (callback) {
             return this.then(null, callback);
         };
 
@@ -202,7 +234,7 @@ define(
          * @return {Promise} 新的`Promise`对象
          * @public
          */
-        Deferred.prototype.always = function(callback) {
+        Deferred.prototype.ensure = function (callback) {
             return this.then(callback, callback);
         };
 
@@ -231,7 +263,7 @@ define(
          * @return {Promise} 新的`Promise`对象
          * @public
          */
-        Deferred.prototype.then = function(done, fail) {
+        Deferred.prototype.then = function (done, fail) {
             var deferred = new Deferred();
 
             this._doneCallbacks.push(pipe(this, deferred, done, 'resolve'));
@@ -239,58 +271,7 @@ define(
 
             tryFlush(this);
 
-            return deferred.promise();
-        };
-
-        /**
-         * 获取当前对象的状态
-         *
-         * @return {string} 返回**pending**、**resolved**或**rejected**
-         * @public
-         */
-        Deferred.prototype.state = function() {
-            return this._state;
-        };
-
-        /**
-         * 判断当前对象是否处在**resolved**状态
-         *
-         * @return {boolean} 表示当前对象是否处在**resolved**状态
-         * @public
-         */
-        Deferred.prototype.isResolved = function() {
-            return this._state === 'resolved';
-        };
-
-        /**
-         * 判断当前对象是否处在**rejected**状态
-         *
-         * @return {boolean} 表示当前对象是否处在**rejected**状态
-         * @public
-         */
-        Deferred.prototype.isRejected = function() {
-            return this._state === 'rejected';
-        };
-
-        /**
-         * 返回与当前对象关联的`Promise`对象
-         * 
-         * 一个`Promise`对象是对`Deferred`对象的**只读**状态的表达，
-         * `Promise`对象拥有所有读取状态及添加回调函数的方法，包括：
-         * 
-         * - `done` / `fail` / `always` / `then`
-         * - `state` / `isRejected` / `isResolved`
-         * 
-         * 但`Promise`对象并不包改变`Deferred`对象的方法，包括：
-         * 
-         * - `resolve`
-         * - `reject`
-         *
-         * @return {Promise} 一个Promise对象
-         * @public
-         */
-        Deferred.prototype.promise = function() {
-            return this._promise;
+            return deferred.promise;
         };
 
         // 暂不支持`progress`，
@@ -318,7 +299,7 @@ define(
          * @param {...Promise | ...Array.<Promise>} 需要组合的`Promise`对象
          * @return {Promise} 一个新的`Promise`对象
          */
-        Deferred.join = function() {
+        Deferred.join = function () {
             // 典型的异步并发归并问题，使用计数器来解决
             var workingUnits = [].concat.apply([], arguments);
             var workingCount = workingUnits.length;
@@ -354,12 +335,12 @@ define(
             for (var i = 0; i < workingUnits.length; i++) {
                 var unit = workingUnits[i];
                 unit.then(
-                    util.bindFn(resolveOne, unit, i),
-                    util.bindFn(rejectOne, unit, i)
+                    util.bind(resolveOne, unit, i),
+                    util.bind(rejectOne, unit, i)
                 );
             }
 
-            return jointDeferred.promise();
+            return jointDeferred.promise;
         };
 
         /**
@@ -368,10 +349,10 @@ define(
          * @param {...*} 用于调用`resolve`方法的参数
          * @return {Promise} 一个已经处于**resolved**状态的`Promise`对象
          */
-        Deferred.resolved = function() {
+        Deferred.resolved = function () {
             var deferred = new Deferred();
             deferred.resolve.apply(deferred, arguments);
-            return deferred.promise();
+            return deferred.promise;
         };
 
         /**
@@ -380,10 +361,10 @@ define(
          * @param {...*} 用于调用`reject`方法的参数
          * @return {Promise} 一个已经处于**rejected**状态的`Promise`对象
          */
-        Deferred.rejected = function() {
+        Deferred.rejected = function () {
             var deferred = new Deferred();
             deferred.reject.apply(deferred, arguments);
-            return deferred.promise();
+            return deferred.promise;
         };
 
         return Deferred;

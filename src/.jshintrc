@@ -62,7 +62,7 @@
     "nomen": false,
     "onevar": false,
     "passfail": false,
-    "white": false,
+    "white": true,
 
     "predef": [
         "er",

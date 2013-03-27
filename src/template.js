@@ -30,13 +30,13 @@
 
 
 // 这货是个状态机，所以特别放开一些限制
-/*jshint maxdepth: 10, unused: false */
+/*jshint maxdepth: 10, unused: false, white: false */
 
 /**
  * 简易的模板解析器
  */
 define(
-    function(require) {
+    function (require) {
         var util = require('./util');
 
         /**
@@ -55,7 +55,7 @@ define(
              *
              * @return {Any}
              */
-            current: function() {
+            current: function () {
                 return this.container[this.index];
             },
 
@@ -64,7 +64,7 @@ define(
              *
              * @param {Any} elem
              */
-            push: function(elem) {
+            push: function (elem) {
                 this.container[++this.index] = elem;
             },
 
@@ -73,7 +73,7 @@ define(
              *
              * @return {Any}
              */
-            pop: function() {
+            pop: function () {
                 if (this.index < 0) {
                     return null;
                 }
@@ -89,7 +89,7 @@ define(
              *
              * @return {Any}
              */
-            bottom: function() {
+            bottom: function () {
                 return this.container[0];
             }
         };
@@ -110,14 +110,14 @@ define(
              *
              * @param {Any} elem 添加项
              */
-            push: function(elem) {
+            push: function (elem) {
                 this.raw[this.idx++] = elem;
             },
 
             /**
              * 添加多个元素到数组末端
              */
-            pushMore: function() {
+            pushMore: function () {
                 for (var i = 0, l = arguments.length; i < l; i++) {
                     this.push(arguments[i]);
                 }
@@ -129,7 +129,7 @@ define(
              * @param {string} split 分隔串
              * @return {string}
              */
-            join: function(split) {
+            join: function (split) {
                 return this.raw.join(split);
             },
 
@@ -138,7 +138,7 @@ define(
              *
              * @return {Array}
              */
-            getRaw: function() {
+            getRaw: function () {
                 return this.raw;
             }
         };
@@ -160,7 +160,7 @@ define(
              *
              * @return {Object}
              */
-            next: function() {
+            next: function () {
                 return this.stream[++this.index];
             },
 
@@ -169,7 +169,7 @@ define(
              *
              * @return {Object}
              */
-            prev: function() {
+            prev: function () {
                 return this.stream[--this.index];
             },
 
@@ -178,19 +178,19 @@ define(
              *
              * @return {Object}
              */
-            current: function() {
+            current: function () {
                 return this.stream[this.index];
             }
         };
 
         function Scope(parent) {
-            this.context = {};
+            this._store = {};
             this.parent = parent;
         }
 
         Scope.prototype = {
-            get: function(name) {
-                var value = this.context[name];
+            get: function (name) {
+                var value = this._store[name];
                 if (value == null && this.parent) {
                     return this.parent.get(name);
                 }
@@ -202,8 +202,8 @@ define(
                 return null;
             },
 
-            set: function(name, value) {
-                this.context[name] = value;
+            set: function (name, value) {
+                this._store[name] = value;
             }
         };
 
@@ -422,7 +422,7 @@ define(
          * @inner
          * @param {Array} stream 构造单元流
          */
-        var syntaxAnalyse = (function() {
+        var syntaxAnalyse = (function () {
             var astParser = {};
             var targetCache;
             var masterCache;
@@ -486,7 +486,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.TARGET] = function() {
+            astParser[TYPE.TARGET] = function () {
                 var node = nodeIterator.current();
                 node.block = [];
                 node.content = {};
@@ -520,7 +520,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.MASTER] = function() {
+            astParser[TYPE.MASTER] = function () {
                 var node = nodeIterator.current();
                 node.block = [];
 
@@ -567,7 +567,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.CONTENTPLACEHOLDER] = function() {
+            astParser[TYPE.CONTENTPLACEHOLDER] = function () {
                 analyseStack.current()
                     .block.push(nodeIterator.current());
             };
@@ -577,7 +577,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.CONTENT] = function() {
+            astParser[TYPE.CONTENT] = function () {
                 var node = nodeIterator.current();
                 node.block = [];
 
@@ -622,7 +622,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.FOR] = function() {
+            astParser[TYPE.FOR] = function () {
                 var node = nodeIterator.current();
                 node.block = [];
 
@@ -664,7 +664,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.IF] = function() {
+            astParser[TYPE.IF] = function () {
                 var node = nodeIterator.current();
                 node.block = [];
 
@@ -704,7 +704,7 @@ define(
              *
              * @inner
              */
-            astParser[TYPE.ELIF] = function() {
+            astParser[TYPE.ELIF] = function () {
                 var node = nodeIterator.current();
                 node.type = TYPE.IF;
                 node.block = [];
@@ -744,7 +744,7 @@ define(
              * @inner
              */
             astParser[TYPE.
-            ELSE] = function() {
+            ELSE] = function () {
                 var unit = nodeIterator.current();
                 var node = analyseStack.current();
                 var nodeType;
@@ -790,7 +790,7 @@ define(
                 }
             };
 
-            return function(stream) {
+            return function (stream) {
                 var unit;
                 var key;
                 var target;
@@ -877,7 +877,7 @@ define(
          *
          * @inner
          */
-        var condExpr = (function() {
+        var condExpr = (function () {
             // 表达式类型
             var EXPR_T = {
                 or: 1,
@@ -897,7 +897,7 @@ define(
                  * @inner
                  * @param {string} source 表达式源
                  */
-                parse: function(source) {
+                parse: function (source) {
                     source = util.trim(source);
                     var arr;
                     var str;
@@ -1164,88 +1164,10 @@ define(
                     case EXPR_T.number:
                         return eval(expr.text);
                     case EXPR_T.variable:
-                        return getVariableValue(scope, expr.text);
+                        return getVariableValue(scope, expr.text, 'raw');
                 }
             }
         }());
-
-        /**
-         * 解析带有类型的模板变量的值
-         * 
-         * @inner
-         * @param {string} varName 变量名
-         * @param {string} type 变量类型，暂时为lang|config
-         * @return {string}
-         */
-        function getVariableValueByType(varName, type) {
-            var packs = varName.split('.'),
-                len = packs.length - 1,
-                topPackageName = packs.shift(),
-                win = window,
-                objOnDef = require('./config').defaultModule,
-                variable,
-                objOnSelf,
-                objOnBase;
-
-            type = type.toLowerCase();
-
-            // 多层示例假设: ${package.sub.test:lang}
-            // 如果getConfig('DEFAULT_PACKAGE')的值为 "project" 
-            // 查找对象:
-            // project.package.sub.lang.test
-            // package.sub.lang.test
-            // lang.package.sub.test
-            // object:project
-            objOnDef && (objOnDef = win[objOnDef]); 
-            // object:package
-            objOnSelf = win[topPackageName]; 
-            // object:lang.package
-            objOnBase = win[type] && win[type][topPackageName]; 
-            // 对于单层的值，如: ${test:lang}
-            // 查找对象 project.lang.test 和 lang.test
-            if (len === 0) {
-                objOnDef = objOnDef && objOnDef[type];
-                return ((objOnDef && objOnDef[topPackageName]) 
-                    || objOnBase 
-                    || '');
-            }
-
-            // object: project.package
-            objOnDef = objOnDef && objOnDef[topPackageName]; 
-            varName = packs.pop();
-            len--;
-
-            while (len--) {
-                variable = packs.shift();
-                objOnDef = objOnDef && objOnDef[variable];
-                objOnSelf = objOnSelf && objOnSelf[variable];
-                objOnBase = objOnBase && objOnBase[variable];
-            }
-
-            // object: project.package.sub.lang
-            objOnDef = objOnDef && objOnDef[type]; 
-            // object: package.sub.lang
-            objOnSelf = objOnSelf && objOnSelf[type]; 
-
-            // object: project.package.sub.lang.test
-            objOnDef = objOnDef && objOnDef[varName]; 
-            // object: package.sub.lang.test
-            objOnSelf = objOnSelf && objOnSelf[varName]; 
-            // object: lang.package.sub.test
-            objOnBase = objOnBase && objOnBase[varName]; 
-
-            if (objOnDef != null) {
-                return objOnDef;
-            }
-            else if (objOnSelf != null) {
-                return objOnSelf;
-            }
-            else if (objOnBase != null) {
-                return objOnBase;
-            }
-
-            return '';
-        }
 
         /**
          * 解析模板变量的值
@@ -1257,47 +1179,34 @@ define(
          * @return {string}
          */
         function getVariableValue(scope, varName, filterName) {
-            var typeRule = /:([a-z]+)$/i;
-            var match = varName.match(typeRule);
-            var value = '';
-            var i, len;
-            var variable, propName, propLen;
+            varName = varName.split(/[\.\[]/);
+            var variable = scope.get(varName[0]);
+            varName.shift();
 
-            varName = varName.replace(typeRule, '');
-            if (match && match.length > 1) {
-                value = getVariableValueByType(varName, match[1]);
+            for (var i = 0, len = varName.length; i < len; i++) {
+                if (variable == null) {
+                    break;
+                }
+
+                var propName = varName[i].replace(/\]$/, '');
+                var propLen = propName.length;
+                if (/^(['"])/.test(propName) 
+                    && propName.lastIndexOf(RegExp.$1) === --propLen
+                ) {
+                    propName = propName.slice(1, propLen);
+                }
+
+                variable = variable[propName];
             }
-            else {
-                varName = varName.split(/[\.\[]/);
-                variable = scope.get(varName[0]);
-                varName.shift();
 
-                for (i = 0, len = varName.length; i < len; i++) {
-                    if (variable == null) {
-                        break;
-                    }
-
-                    propName = varName[i].replace(/\]$/, '');
-                    propLen = propName.length;
-                    if (/^(['"])/.test(propName) 
-                        && propName.lastIndexOf(RegExp.$1) === --propLen
-                    ) {
-                        propName = propName.slice(1, propLen);
-                    }
-
-                    variable = variable[propName];
-                }
-
-                if (variable != null) {
-                    value = variable;
-                }
+            var value = '';
+            if (variable != null) {
+                value = variable;
             }
 
             // 过滤处理
-            if (filterName) {
-                filterName = filterContainer[filterName.substr(1)];
-                filterName && (value = filterName(value));
-            }
+            var filter = filterContainer[filterName || 'html'];
+            filter && (value = filter(value));
 
             return value;
         }
@@ -1379,13 +1288,12 @@ define(
          */
         function replaceVariable(text, scope) {
             return text.replace(
-                /\$\{([.:a-z0-9\[\]'"_]+)\s*(\|[a-z]+)?\s*\}/ig,
-                function($0, $1, $2) {
-                    return getVariableValue(scope, $1, $2);
+                /\$\{([.a-z0-9\[\]'"_]+)\s*(\|([a-z]+))?\s*\}/ig,
+                function ($0, $1, $2, $3) {
+                    return getVariableValue(scope, $1, $3);
                 }
             );
         }
-
 
         /**
          * 执行import
@@ -1478,16 +1386,16 @@ define(
          * @inner
          * @param {HTMLElement} output 要输出到的容器元素
          * @param {string} tplName 模板名
-         * @param {Model} context 获取数据的对象，实现`get`方法即可
+         * @param {Model} model 获取数据的对象，实现`get({string}dataName):{*}`方法即可
          */
-        function merge(output, tplName, context) {
+        function merge(output, tplName, model) {
             var html = '';
             var target;
 
             if (output) {
                 try {
                     target = getTarget(tplName);
-                    html = exec(target, context);
+                    html = exec(target, new Scope(model));
                 }
                 catch (ex) {}
 
@@ -1496,7 +1404,7 @@ define(
         }
 
         // 返回暴露的方法
-        return {
+        var template = {
             /**
              * 添加过滤器
              * 
@@ -1504,7 +1412,7 @@ define(
              * @param {string} type 过滤器类型
              * @param {Function} filter 过滤器
              */
-            addFilter: function(type, filter) {
+            addFilter: function (type, filter) {
                 filterContainer[type] = filter;
             },
 
@@ -1531,9 +1439,11 @@ define(
              * @public
              * @param {HTMLElement} output 要输出到的容器元素
              * @param {string} tplName 视图模板
-             * @param {string} opt_privateContextId 私用context环境的id
+             * @param {Model} model 获取数据的对象，实现`get({string}dataName):{*}`方法即可
              */
             merge: merge
         };
+
+        return template;
     }
 );

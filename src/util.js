@@ -3,19 +3,24 @@
  * Copyright 2013 Baidu Inc. All rights reserved.
  * 
  * @file 杂而乱的工具对象
- * @author otakustay
+ * @author otakustay, errorrik
  */
 define(
-    function(require, exports) {
+    function () {
         var now = +new Date();
+
+        /**
+         * 工具模块，放一些杂七杂八的东西
+         */
+        var util = {};
 
         /**
          * 获取一个唯一的ID
          *
          * @return {number} 一个唯一的ID
          */
-        exports.guid = function() {
-            return now++;
+        util.guid = function () {
+            return 'er' + now++;
         };
 
         /**
@@ -25,9 +30,17 @@ define(
          * @param {...Object} destinations 用于混合的对象
          * @return 返回混合了`destintions`属性的`source`对象
          */
-        exports.mix = function(source) {
+        util.mix = function (source) {
             for (var i = 1; i < arguments.length; i++) {
                 var destination = arguments[i];
+
+                // 就怕有人传**null**之类的进来
+                if (!destination) {
+                    continue;
+                }
+
+                // 这里如果`destination`是字符串的话，会遍历出下标索引来，
+                // 认为这是调用者希望的效果，所以不作处理
                 for (var key in destination) {
                     if (destination.hasOwnProperty(key)) {
                         source[key] = destination[key];
@@ -37,6 +50,9 @@ define(
             return source;
         };
 
+        // `bind`的实现特别使用引擎原生的，
+        // 因为自己实现的`bind`很会影响调试时的单步调试，
+        // 跳进一个函数的时候还要经过这个`bind`几步很烦，原生的就不会
         var nativeBind = Function.prototype.bind;
         /**
          * 固定函数的`this`变量和若干参数
@@ -46,13 +62,13 @@ define(
          * @param {...*} args 固定的参数
          * @return {function} 固定了`this`变量和若干参数后的新函数对象
          */
-        exports.bindFn = nativeBind
-            ? function(fn) {
+        util.bind = nativeBind
+            ? function (fn) {
                 return nativeBind.apply(fn, [].slice.call(arguments, 1));
             }
-            : function(fn, context) {
+            : function (fn, context) {
                 var extraArgs = [].slice.call(arguments, 2);
-                return function() {
+                return function () {
                     var args = extraArgs.concat(arguments);
                     return fn.apply(context, args);
                 };
@@ -64,7 +80,7 @@ define(
          * @type {function}
          * @const
          */
-        exports.noop = function() {};
+        util.noop = function () {};
 
         /**
          * 设置继承关系
@@ -73,8 +89,8 @@ define(
          * @param {function} superType 父类
          * @return {function} 子类
          */
-        exports.inherits = function(type, superType) {
-            var Empty = function() {};
+        util.inherits = function (type, superType) {
+            var Empty = function () {};
             Empty.prototype = superType.prototype;
             var proto = new Empty();
 
@@ -95,7 +111,7 @@ define(
          * @param {string} text 文本内容
          * @return {*} 对应的JSON对象
          */
-        exports.parseJSON = function(text) {
+        util.parseJSON = function (text) {
             if (window.JSON && typeof JSON.parse === 'function') {
                 return JSON.parse(text);
             }
@@ -112,7 +128,7 @@ define(
          * @param {string} source 源字符串
          * @return {string} 移除前后空格后的字符串
          */
-        exports.trim = function(source) {
+        util.trim = function (source) {
             return source.replace(whitespace, '');
         };
 
@@ -122,16 +138,16 @@ define(
          * @param {string} 源字符串
          * @param {string} HTML编码后的字符串
          */
-        exports.encodeHTML = function(source) {
+        util.encodeHTML = function (source) {
             source = source + '';
             return source
-                .replace(/&/g,'&amp;')
-                .replace(/</g,'&lt;')
-                .replace(/>/g,'&gt;')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
         };
 
-        return exports;
+        return util;
     }
 );

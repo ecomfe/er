@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         var util = require('./util');
 
         /**
@@ -39,7 +39,7 @@ define(
              * @public
              * @override
              */
-            this.toString = function() {
+            this.toString = function () {
                 return search ? (path + searchSeparator + search) : path;
             };
 
@@ -49,7 +49,7 @@ define(
              * @return {string} URL中的path部分
              * @public
              */
-            this.getPath = function() {
+            this.getPath = function () {
                 return path;
             };
 
@@ -59,7 +59,7 @@ define(
              * @return {string} URL中的search部分
              * @public
              */
-            this.getSearch = function() {
+            this.getSearch = function () {
                 return search;
             };
 
@@ -71,7 +71,7 @@ define(
              * @return {string | Object} 如果有`key`参数则返回对应值，
              * 否则返回参数对象的副本
              */
-            this.getQuery = function(key) {
+            this.getQuery = function (key) {
                 if (!query) {
                     query = URL.parseQuery(search);
                 }
@@ -89,7 +89,7 @@ define(
          * @param {string=} options.querySeparator 用于分隔path和search的字符
          * @return {URL} 一个URL对象
          */
-        URL.parse = function(url, options) {
+        URL.parse = function (url, options) {
             var defaults = { querySeparator: '~' };
             options = util.mix(defaults, options);
 
@@ -110,13 +110,14 @@ define(
         /**
          * 根据path和给定的query对象生成URL对象
          *
-         * @param {string} path URL的path部分
+         * @param {string|URL} path 已经存在的URL
          * @param {Object} query URL的参数对象
          * @param {Object=} options 控制解析行为的相关参数
          * @param {string=} options.querySeparator 用于分隔path和search的字符
          * @return {URL} 一个URL对象
          */
-        URL.withQuery = function(path, query, options) {
+        URL.withQuery = function (path, query, options) {
+            path = path + '';
             var defaults = { querySeparator: '~' };
             options = util.mix(defaults, options);
 
@@ -135,7 +136,7 @@ define(
          * @param {string} str query字符串，不能有起始的**?**或**#**字符
          * @return {Object} 从`str`解析得到的参数对象
          */
-        URL.parseQuery = function(str) {
+        URL.parseQuery = function (str) {
             var pairs = str.split('&');
             var query = {};
             for (var i = 0; i < pairs.length; i++) {
@@ -173,7 +174,7 @@ define(
          * @param {Object} query 参数对象
          * @return {string} 转换后的URL字符串，相当于search部分
          */
-        URL.serialize = function(query) {
+        URL.serialize = function (query) {
             if (!query) {
                 return '';
             }

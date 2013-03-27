@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         var util = require('./util');
         var Observable = require('./Observable');
 
@@ -22,7 +22,6 @@ define(
          * @extends Observable
          */
         function Action() {
-            Observable.apply(this, arguments);
         }
 
         /**
@@ -58,7 +57,7 @@ define(
          * @param {string} container 用来展现当前Action的DOM容器的id
          * @public
          */
-        Action.prototype.enter = function(context) {
+        Action.prototype.enter = function (context) {
             /**
              * 进入Action生命周期
              *
@@ -76,8 +75,8 @@ define(
                 var loadingModel = this.model.load();
                 var events = require('./events');
                 return loadingModel.then(
-                    util.bindFn(this.forwardToView, this),
-                    util.bindFn(events.notifyError, events)
+                    util.bind(this.forwardToView, this),
+                    util.bind(events.notifyError, events)
                 );
             }
             else {
@@ -96,7 +95,7 @@ define(
          * @return {Object} 当前Action需要使用的Model对象
          * @protected
          */
-        Action.prototype.createModel = function(context) {
+        Action.prototype.createModel = function (context) {
             return this.modelType ? new this.modelType(context) : {};
         };
 
@@ -105,7 +104,7 @@ define(
          *
          * @private
          */
-        Action.prototype.forwardToView = function() {
+        Action.prototype.forwardToView = function () {
             /**
              * Model加载完成时触发
              *
@@ -116,7 +115,8 @@ define(
             this.view = this.createView();
             if (this.view) {
                 this.view.model = this.model;
-                if (this.context) {
+                // 如果创建View的时候已经设置了`container`，就不要强行干扰了
+                if (this.context && !this.view.container) {
                     this.view.container = this.context.container;
                 }
 
@@ -157,7 +157,7 @@ define(
          * @return {Object} 当前Action需要使用的View对象
          * @public
          */
-        Action.prototype.createView = function() {
+        Action.prototype.createView = function () {
             return this.viewType ? new this.viewType() : null;
         };
 
@@ -166,7 +166,7 @@ define(
          *
          * @protected
          */
-        Action.prototype.initBehavior = function() {
+        Action.prototype.initBehavior = function () {
         };
 
         /**
@@ -174,7 +174,7 @@ define(
          *
          * @protected
          */
-        Action.prototype.leave = function() {
+        Action.prototype.leave = function () {
             /**
              * 准备离开Action时触发
              *
@@ -202,6 +202,26 @@ define(
              * @event leave
              */
             this.fire('leave');
+        };
+
+        /**
+         * 重定向到另一个URL
+         * 
+         * 通常会使用`require('./locator').redirect`来重定向，
+         * 但locator对象存在一些问题：
+         * 
+         * - 严重依赖浏览器实现，因此无法在脱离浏览器的环境下做单元测试
+         * - 无法应对子Action的跳转场景
+         * 
+         * 因此由Action直接提供一个`redirect`方法来实现跳转功能，方便替换和扩展
+         *
+         * @param {string | URL} url 需要重定向的目标URL
+         * @param {Object=} options 额外附加的参数对象
+         * @param {boolean=} options.force 确定当跳转地址不变时是否强制刷新
+         */
+        Action.prototype.redirect = function (url, options) {
+            var locator = require('./locator');
+            locator.redirect(url, options);
         };
 
         util.inherits(Action, Observable);

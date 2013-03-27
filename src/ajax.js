@@ -6,7 +6,7 @@
  * @author otakustay
  */
 define(
-    function(require) {
+    function (require) {
         /**
          * 生成XMLHttpRequest请求的最终URL
          *
@@ -35,16 +35,12 @@ define(
          * @param {Object=} options.data 请求的数据
          * @param {string=} options.dataType 返回数据的类型，
          * 可以为**json**或**text**，默认为**json**
-         * @param {function=} options.done 请求成功后的回调函数
-         * @param {function=} options.fail 请求失败后的回调函数
-         * @param {function=} options.complete 请求完成时的回调函数，
-         * 无论成功与否均会触发，且在`done`和`fail`之后
          * @param {number=} options.timeout 超时时间
          * @param {boolean=} options.cache 决定是否允许缓存
          * @return {FakeXHR} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及`XMLHTTPRequest`对象的相应方法
          */
-        ajax.request = function(options) {
+        ajax.request = function (options) {
             var assert = require('./assert');
             assert.hasProperty(options, url, 'url property is required');
 
@@ -63,11 +59,34 @@ define(
                 ? new XMLHttpRequest()
                 : new ActiveXObject('Microsoft.XMLHTTP');
 
-            var fakeXHR = requesting.promise();
+            var fakeXHR = requesting.promise;
             var xhrWrapper = {
-                abort: function() {
+                abort: function () {
                     xhr.abort();
+                    fakeXHR.readyState = xhr.readyState;
+                    fakeXHR.responseText = '';
+                    fakeXHR.responseXML = '';
                     requesting.reject(fakeXHR);
+                    
+                },
+                setRequestHeader: function (name, value) {
+                    xhr.setRequestHeader(name, value);
+                }
+            };
+            util.mix(fakeXHR, xhrWrapper);
+
+            fakeXHR.then(
+                function () {
+                    /**
+                     * 任意一个XMLHttpRequest请求失败时触发
+                     *
+                     * @event fail
+                     * @param {Object} e 事件对象
+                     * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
+                     */
+                    ajax.on('done', { xhr: fakeXHR });
+                },
+                function () {
                     /**
                      * 任意一个XMLHttpRequest请求失败时触发
                      *
@@ -76,14 +95,10 @@ define(
                      * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
                      */
                     ajax.on('fail', { xhr: fakeXHR });
-                },
-                setRequestHeader: function(name, value) {
-                    xhr.setRequestHeader(name, value);
                 }
-            };
-            util.mix(fakeXHR, xhrWrapper);
+            );
 
-            xhr.onreadystatechange = function() {
+            xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     var status = xhr.status;
                     // `file://`协议下状态码始终为0
@@ -102,36 +117,25 @@ define(
 
                     var data = xhr.responseText;
                     if (options.dataType === 'json') {
-                        data = util.parseJSON(data);
+                        try {
+                            data = util.parseJSON(data);
+                        }
+                        catch (ex) {
+                            // 服务器返回的数据不符合JSON格式，认为请求失败
+                            fakeXHR.error = ex;
+                            requesting.reject(fakeXHR);
+                            return;
+                        }
                     }
 
                     if (status >= 200 && status < 300 || status === 304) {
-                        requesting.resolve(data, fakeXHR);
-                        /**
-                         * 任意一个XMLHttpRequest请求失败时触发
-                         *
-                         * @event fail
-                         * @param {Object} e 事件对象
-                         * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
-                         */
-                        ajax.on('done', { xhr: fakeXHR });
+                        requesting.resolve(data);
                     }
                     else {
-                        requesting.reject(data, fakeXHR);
-                        ajax.on('fail', { xhr: fakeXHR });
+                        requesting.reject(fakeXHR);
                     }
                 }
             };
-
-            if (typeof options.done === 'function') {
-                fakeXHR.done(options.done);
-            }
-            if (typeof options.fail === 'function') {
-                fakeXHR.fail(options.fail);
-            }
-            if (typeof options.complete === 'function') {
-                fakeXHR.always(options.complete);   
-            }
 
             var method = options.method.toUpperCase();
             var data = {};
@@ -155,7 +159,14 @@ define(
             }
 
             if (options.timeout > 0) {
-                setTimeout(util.bind(fakeXHR.abort, fakeXHR), options.timeout);
+                var tick = setTimeout(
+                    function () {
+                        fakeXHR.status = 408; // HTTP 408: Request Timeout
+                        fakeXHR.abort();
+                    },
+                    options.timeout
+                );
+                fakeXHR.ensure(function () { clearTimeout(tick); });
             }
 
             return fakeXHR;
@@ -171,12 +182,34 @@ define(
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        ajax.get = function(url, data, done, cache) {
+        ajax.get = function (url, data, done, cache) {
             var options = {
                 method: 'GET',
                 url: url,
                 data: data,
                 done: done,
+                cache: cache || false
+            };
+            return ajax.request(options);
+        };
+
+        /**
+         * 发起一个GET请求并获取JSON数据
+         *
+         * @param {string} url 请求的地址
+         * @param {Object=} data 请求的数据
+         * @param {function=} done 请求成功后的回调函数
+         * @param {boolean=} cache 决定是否允许缓存
+         * @return {Object} 一个`FakeXHR`对象，
+         * 该对象有Promise的所有方法，以及一个`abort`方法
+         */
+        ajax.getJSON = function (url, data, done, cache) {
+            var options = {
+                method: 'GET',
+                url: url,
+                data: data,
+                done: done,
+                dataType: 'json',
                 cache: cache || false
             };
             return ajax.request(options);
@@ -189,14 +222,16 @@ define(
          * @param {string} url 请求的地址
          * @param {Object=} data 请求的数据
          * @param {function=} done 请求成功后的回调函数
+         * @param {string=} dataType 指定w响应的数据格式，可为**text**或**json**
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        ajax.post = function(url, data, done) {
+        ajax.post = function (url, data, done, dataType) {
             var options = {
                 method: 'POST',
                 url: url, 
                 data: data,
+                dataType: dataType || 'json',
                 done: done
             };
             return ajax.request(options);
@@ -208,13 +243,13 @@ define(
          * @param {string} url 发送的目标URL
          * @param {Object=} data 额外添加的参数
          */
-        ajax.log = function(url, data) {
+        ajax.log = function (url, data) {
             var img = new Image();
             var pool = window.ER_LOG_POOL || (window.ER_LOG_POOL = {});
             var id = +new Date();
             pool[id] = img;
 
-            img.onload = img.onerror = img.onabort = function() {
+            img.onload = img.onerror = img.onabort = function () {
                 // 如果这个img很不幸正好加载了一个存在的资源，又是个gif动画，
                 // 则在gif动画播放过程中，img会多次触发onload，因此一定要清空
                 img.onload = img.onerror = img.onabort = null;
