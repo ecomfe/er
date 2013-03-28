@@ -136,7 +136,17 @@ define(
                     }
                 }
             };
-
+            
+            if (typeof options.done === 'function') {
+                fakeXHR.done(options.done);
+            }
+            if (typeof options.fail === 'function') {
+                fakeXHR.fail(options.fail);
+            }
+            if (typeof options.complete === 'function') {
+                fakeXHR.ensure(options.complete);   
+            }
+            
             var method = options.method.toUpperCase();
             var data = {};
             if (method === 'GET') {
