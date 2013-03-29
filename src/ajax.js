@@ -177,17 +177,15 @@ define(
          *
          * @param {string} url 请求的地址
          * @param {Object=} data 请求的数据
-         * @param {function=} done 请求成功后的回调函数
          * @param {boolean=} cache 决定是否允许缓存
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        ajax.get = function (url, data, done, cache) {
+        ajax.get = function (url, data, cache) {
             var options = {
                 method: 'GET',
                 url: url,
                 data: data,
-                done: done,
                 cache: cache || false
             };
             return ajax.request(options);
@@ -198,17 +196,15 @@ define(
          *
          * @param {string} url 请求的地址
          * @param {Object=} data 请求的数据
-         * @param {function=} done 请求成功后的回调函数
          * @param {boolean=} cache 决定是否允许缓存
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        ajax.getJSON = function (url, data, done, cache) {
+        ajax.getJSON = function (url, data, cache) {
             var options = {
                 method: 'GET',
                 url: url,
                 data: data,
-                done: done,
                 dataType: 'json',
                 cache: cache || false
             };
@@ -221,18 +217,16 @@ define(
          *
          * @param {string} url 请求的地址
          * @param {Object=} data 请求的数据
-         * @param {function=} done 请求成功后的回调函数
          * @param {string=} dataType 指定w响应的数据格式，可为**text**或**json**
          * @return {Object} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及一个`abort`方法
          */
-        ajax.post = function (url, data, done, dataType) {
+        ajax.post = function (url, data, dataType) {
             var options = {
                 method: 'POST',
                 url: url, 
                 data: data,
-                dataType: dataType || 'json',
-                done: done
+                dataType: dataType || 'json'
             };
             return ajax.request(options);
         };
