@@ -42,7 +42,7 @@ define(function() {
                 c = {
                     "a" : 1,
                     "b" : 2
-                }
+                };
                 expect(util.mix(a, b)).toEqual(c);
                 expect(util.mix(a, b)).not.toBe(c);
             });
@@ -77,13 +77,13 @@ define(function() {
         });
         describe('`trim` method', function() {
             it('str should not be whitespace in start or end', function() {
-                var str = "   abc  "
+                var str = "   abc  ";
                 expect(util.trim(str)).toEqual("abc");
             });
         });
         describe('`encodeHTML` method', function() {
             it('some mark should be encoded (such as <, >, &, \", \' )', function() {
-                var str = "<\"\'&>"
+                var str = "<\"\'&>";
                 expect(util.encodeHTML(str).indexOf("<")).toEqual(-1);
                 expect(util.encodeHTML(str).indexOf(">")).toEqual(-1);
                 expect(util.encodeHTML(str).indexOf("\"")).toEqual(-1);
