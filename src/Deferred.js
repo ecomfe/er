@@ -28,23 +28,19 @@ define(
                 ? deferred._doneCallbacks.slice()
                 : deferred._failCallbacks.slice();
 
-            setTimeout(
-                function () {
-                    for (var i = 0; i < callbacks.length; i++) {
-                        var callback = callbacks[i];
-                        try {
-                            // 回调时的this应该是`Promise`，没有`resolve`等方法
-                            callback.apply(deferred.promise, deferred._args);
-                        }
-                        catch (ex) {
-                        }
-                    }
-                },
-                0
-            );
 
             deferred._doneCallbacks = [];
             deferred._failCallbacks = [];
+            
+            for (var i = 0; i < callbacks.length; i++) {
+                var callback = callbacks[i];
+                try {
+                    // 回调时的this应该是`Promise`，没有`resolve`等方法
+                    callback.apply(deferred.promise, deferred._args);
+                }
+                catch (ex) {
+                }
+            }
         }
 
         /**
