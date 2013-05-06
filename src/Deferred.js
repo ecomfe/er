@@ -10,6 +10,9 @@ define(
         var util = require('./util');
         var assert = require('./assert');
 
+        var setImmediate = typeof window.setImmediate === 'function'
+            ? function (fn) { setImmediate(fn); }
+            : function (fn) { setTimeout(fn, 0); };
 
         /**
          * 尝试执行相关的回调函数
@@ -28,20 +31,24 @@ define(
                 ? deferred._doneCallbacks.slice()
                 : deferred._failCallbacks.slice();
 
-            setTimeout(
-                function () {
-                    for (var i = 0; i < callbacks.length; i++) {
-                        var callback = callbacks[i];
-                        try {
-                            // 回调时的this应该是`Promise`，没有`resolve`等方法
-                            callback.apply(deferred.promise, deferred._args);
-                        }
-                        catch (ex) {
-                        }
+            function flush() {
+                for (var i = 0; i < callbacks.length; i++) {
+                    var callback = callbacks[i];
+                    try {
+                        // 回调时的this应该是`Promise`，没有`resolve`等方法
+                        callback.apply(deferred.promise, deferred._args);
                     }
-                },
-                0
-            );
+                    catch (ex) {
+                    }
+                }
+            }
+
+            if (deferred.syncModeEnabled) {
+                flush();
+            }
+            else {
+                setImmediate(flush, 0);
+            }
 
             deferred._doneCallbacks = [];
             deferred._failCallbacks = [];
@@ -165,6 +172,18 @@ define(
         };
 
         /**
+         * 是否启用同步模式。
+         * 
+         * 在同步模式下，`Deferred`对象并不符合Promise/A规范，
+         * 当对象进入或处于**resolved**或**rejected**状态时，
+         * 添加的回调函数会**立即**、**同步**地被执行。
+         *
+         * @type {boolean}
+         * @public
+         */
+        Deferred.prototype.syncModeEnabled = false;
+
+        /**
          * 将当前对象状态设置为**resolved**，并执行所有成功回调函数
          *
          * @param {...*} args 执行回调时的参数
@@ -265,6 +284,7 @@ define(
          */
         Deferred.prototype.then = function (done, fail) {
             var deferred = new Deferred();
+            deferred.syncModeEnabled = this.syncModeEnabled;
 
             this._doneCallbacks.push(pipe(this, deferred, done, 'resolve'));
             this._failCallbacks.push(pipe(this, deferred, fail, 'reject'));

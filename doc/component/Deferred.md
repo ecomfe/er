@@ -73,6 +73,12 @@ Deferred对象是一个通用对象，该对象是对[Promise/A规范](http://wi
 - `resolve`
 - `reject`
 
+### syncModeEnabled属性
+
+`syncModeEnabled`属性控制当前`Deferred`对象进入同步模式。
+
+在同步模式下，`Deferred`对象并不符合Promise/A规范，当对象进入或处于**resolved**或**rejected**状态时，添加的回调函数会**立即**、**同步**地被执行。
+
 ### all静态方法
 
 `all`方法接受多个Promise对象，用于管理并发的异步操作，其签名如下：

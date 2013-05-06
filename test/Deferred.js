@@ -97,24 +97,78 @@ define(function() {
                 expect(Deferred.isPromise({})).toBeFalsy();
             });
         });
-        describe('`Deferred.all` method', function() {
-            it('Deferred.all() should return a promise object', function() {
+        describe('`all` method', function() {
+            it('should return a promise object', function() {
                 expect(Deferred.isPromise(Deferred.all())).toBeTruthy();
             });
         });
-        describe('`Deferred.resolved` method', function() {
+        describe('`resolved` method', function() {
             var def = Deferred.resolved();
-            it('Deferred.resolved should return a promise object with the state of "resolved"', 
+            it('should return a promise object with the state of "resolved"', 
                 function() {
                     expect(Deferred.isPromise(def)).toBeTruthy();
             });
         });
-        describe('`Deferred.rejected` method', function() {
+        describe('`rejected` method', function() {
             var def = Deferred.rejected();
-            it('Deferred.rejected should return a promise object with the state of "rejected"',
+            it('should return a promise object with the state of "rejected"',
                  function() {
                     expect(Deferred.isPromise(def)).toBeTruthy();
             });
         });
+        describe('when sync mode is enabled', function () {
+            it('should invoke `done` callbacks immediately when resolved', function () {
+                var deferred = new Deferred();
+                deferred.syncModeEnabled = true;
+                var callback = jasmine.createSpy();
+                deferred.promise.done(callback);
+                deferred.resolver.resolve(1);
+                expect(callback).toHaveBeenCalled();
+                expect(callback.mostRecentCall.args[0]).toBe(1);
+            });
+
+            it('should invoke `fail` callbacks immediately when resolved', function () {
+                var deferred = new Deferred();
+                deferred.syncModeEnabled = true;
+                var callback = jasmine.createSpy();
+                deferred.promise.fail(callback);
+                deferred.resolver.reject(1);
+                expect(callback).toHaveBeenCalled();
+                expect(callback.mostRecentCall.args[0]).toBe(1);
+            });
+
+            it('should invoke `done` callbacks attached after resolution immediately', function () {
+                var deferred = new Deferred();
+                deferred.syncModeEnabled = true;
+                var callback = jasmine.createSpy();
+                deferred.resolver.resolve(1);
+                deferred.promise.done(callback);
+                expect(callback).toHaveBeenCalled();
+                expect(callback.mostRecentCall.args[0]).toBe(1);
+            });
+
+            it('should invoke `fail` callbacks attached after rejection immediately', function () {
+                var deferred = new Deferred();
+                deferred.syncModeEnabled = true;
+                var callback = jasmine.createSpy();
+                deferred.resolver.reject(1);
+                deferred.promise.fail(callback);
+                expect(callback).toHaveBeenCalled();
+                expect(callback.mostRecentCall.args[0]).toBe(1);
+            });
+
+            it('should spawn a promise object with sync mode enabled from its `then` method', function () {
+                var deferred = new Deferred();
+                deferred.syncModeEnabled = true;
+
+                var promise = deferred.then(function () { return 1; });
+                var callback = jasmine.createSpy();
+                promise.fail(callback);
+
+                deferred.resolver.reject(1);
+                expect(callback).toHaveBeenCalled();
+                expect(callback.mostRecentCall.args[0]).toBe(1);
+            });
+        })
     });
 });
