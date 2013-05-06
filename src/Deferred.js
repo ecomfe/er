@@ -299,7 +299,7 @@ define(
          * @param {...Promise | ...Array.<Promise>} 需要组合的`Promise`对象
          * @return {Promise} 一个新的`Promise`对象
          */
-        Deferred.join = function () {
+        Deferred.all = function () {
             // 典型的异步并发归并问题，使用计数器来解决
             var workingUnits = [].concat.apply([], arguments);
             var workingCount = workingUnits.length;

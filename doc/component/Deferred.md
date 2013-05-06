@@ -73,11 +73,11 @@ Deferred对象是一个通用对象，该对象是对[Promise/A规范](http://wi
 - `resolve`
 - `reject`
 
-### join静态方法
+### all静态方法
 
-`join`方法接受多个Promise对象，用于管理并发的异步操作，其签名如下：
+`all`方法接受多个Promise对象，用于管理并发的异步操作，其签名如下：
 
-    join({Promise=} promise1, {Promise=} promise2, ... {Promise=} promiseN)
+    all({Promise=} promise1, {Promise=} promise2, ... {Promise=} promiseN)
 
 #### 返回值
 
@@ -91,7 +91,7 @@ Deferred对象是一个通用对象，该对象是对[Promise/A规范](http://wi
 - 如果给定参数只有一个，使用这一个参数。
 - 如果给定多个参数，则提供一个数组包含这些参数。
 
-需要注意的是，哪怕有一个Promise进入了 **rejected** 状态，`join`方法返回的Promise对象依旧会等待其它所有Promise对象完成才进行状态的迁移，以保证逻辑执行的顺序性。
+需要注意的是，哪怕有一个Promise进入了 **rejected** 状态，`all`方法返回的Promise对象依旧会等待其它所有Promise对象完成才进行状态的迁移，以保证逻辑执行的顺序性。
 
 ### isPromise静态方法
 

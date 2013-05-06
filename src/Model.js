@@ -90,7 +90,7 @@ define(
             }
 
             var Deferred = require('./Deferred');
-            return Deferred.join(workers);
+            return Deferred.all(workers);
         }
 
         /**

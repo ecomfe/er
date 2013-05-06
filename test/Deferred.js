@@ -24,8 +24,8 @@ define(function() {
         it('should export `Deferred.isPromise` method', function() {
             expect(Deferred.isPromise).toBeOfType('function');
         });
-        it('should export `Deferred.join` method', function() {
-            expect(Deferred.join).toBeOfType('function');
+        it('should export `Deferred.all` method', function() {
+            expect(Deferred.all).toBeOfType('function');
         });
         it('should export `Deferred.resolved` Object', function() {
             expect(Deferred.resolved).toBeOfType('function');
@@ -97,9 +97,9 @@ define(function() {
                 expect(Deferred.isPromise({})).toBeFalsy();
             });
         });
-        describe('`Deferred.join` method', function() {
-            it('Deferred.join() should return a promise object', function() {
-                expect(Deferred.isPromise(Deferred.join())).toBeTruthy();
+        describe('`Deferred.all` method', function() {
+            it('Deferred.all() should return a promise object', function() {
+                expect(Deferred.isPromise(Deferred.all())).toBeTruthy();
             });
         });
         describe('`Deferred.resolved` method', function() {
