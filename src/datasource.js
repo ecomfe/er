@@ -35,7 +35,10 @@ define(
          */
         datasource.remote = function (url, options) {
             return function () {
-                options = require('./util').mix({ url: url }, options);
+                options = require('./util').mix(
+                    { url: url, dataType: 'json' }, 
+                    options
+                );
                 var ajax = require('./ajax');
                 return ajax.request(options);
             };
