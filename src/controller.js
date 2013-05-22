@@ -132,6 +132,13 @@ define(
                     'no action configured for url ' + args.url.getPath());
             }
 
+            // 可在`registerAction`的时候通过`args`属性添加固定的参数，
+            // 在`Action`中就可以通过`enter`时的`context`参数里拿到，
+            // 对应用框架的话就可以在`model`中拿到
+            if (actionConfig.args) {
+                require('./util').mix(args, actionConfig.args);
+            }
+
             var events = require('./events');
             var loading = new Deferred();
 
