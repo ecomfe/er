@@ -16,8 +16,13 @@ define(
         function resolveURL(url, data) {
             var URL = require('./URL');
             var query = URL.serialize(data);
-            var delimiter = (url.indexOf('?') >= 0 ? '&' : '?');
-            return url + delimiter + query;
+            if (query) {
+                var delimiter = (url.indexOf('?') >= 0 ? '&' : '?');
+                return url + delimiter + query;
+            }
+            else {
+                return url;
+            }
         }
 
         /**
