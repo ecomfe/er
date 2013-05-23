@@ -8,7 +8,6 @@
 define(
     function (require) {
         var actionPathMapping = {}; // 用于根据URL找Action配置
-        var actionTypeMapping = {}; // 用户根据Action类型生成URL
         var currentURL = null;
         var currentAction = null;
 
@@ -486,25 +485,6 @@ define(
                 );
 
                 actionPathMapping[config.path] = config;
-                if (config.type) {
-                    actionTypeMapping[config.type] = config;
-                }
-            },
-
-            /**
-             * 根据Action的类型获取对应的URL，用于生成访问Action的URL
-             *
-             * @param {string} actionTeyp Action对应模块的id
-             * @param {Object=} query 访问Action时的参数
-             * @return {URL} 对应的URL对象
-             */
-            getPathByAction: function (actionType, query) {
-                var actionConfig = actionTypeMapping[actionType];
-                if (!actionConfig) {
-                    return URL.empty;
-                }
-
-                return URL.withQuery(actionConfig.path, query);
             },
 
             renderChildAction: renderChildAction,

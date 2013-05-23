@@ -30,12 +30,6 @@ controller对象同时还负责根据Action和访问参数反向生成URL，以�
 - `{string} noAuthorityLocation`：指定当用户无权限访问该Action时，跳转的路径，controller对象将再将根据该属性指定的路径寻找Action。
 - `{string} movedTo`：指定Action的跳转关系，常用于系统的迁移和升级，controller发现有该属性时，将根据该属性指定的路径寻找Action。
 
-### getPathByAction方法
-
-`getPathByAction`方法用于根据指定的Action类型和访问的参数，反向生成一个URL对象，其签名如下：
-
-    getPathByAction({string} actionType, {Object=} query)
-
 #### 参数
 
 - `{string} actionType`：Action实现的模块id，与`registerAction`中的`config`配置项中的`path`路径相同。
