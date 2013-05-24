@@ -18,6 +18,54 @@ define(
         var assert = require('./assert');
 
         /**
+         * URL与Action的调度器
+         */
+        var controller = {
+            /**
+             * 注册一个Action
+             *
+             * @param {Object} config Action的相关配置
+             * @param {string} config.type Action对应模块的id
+             * @param {string} config.path 对应的URL的path部分
+             * @param {string=} config.movedTo 设定Action跳转至其它路径
+             * @param {Array.<string>= | string=} config.authority 访问权限
+             * @param {string=} noAuthorityLocation 无权限时的跳转路径
+             */
+            registerAction: function (config) {
+                assert.hasProperty(
+                    config, 'path', 
+                    'action config should contains a "path" property'
+                );
+
+                actionPathMapping[config.path] = config;
+            },
+
+            /**
+             * 开始`controller`对象的工作
+             *
+             * @public
+             */
+            start: function () {
+                // 干脆接管所有路由
+                require('./router').setBackup(renderAction);
+            },
+
+            /**
+             * 处理Action配置，在`controller`按默认逻辑查找Action配置后，
+             * 会将查找到的配置，以及进入时的参数一同交给该方法，
+             * 该方法可以额外进行一些操作，如在未找到配置时提供默认的映射规则
+             *
+             * @param {Object | null} config 按默认逻辑找到的Action配置
+             * @param {Object} args 进入流程时提供的参数
+             * @return {Object | null} 一个有效的Action配置对象，或返回null
+             * @public
+             */
+            resolveActionConfig: function (config, args) {
+                return config;
+            }
+        };
+
+        /**
          * 检查是否拥有权限
          * 
          * - 权限可以是一个数组，此时用户拥有数组中任意一项权限即认为有权限
@@ -126,6 +174,11 @@ define(
          */
         function loadAction(args) {
             var actionConfig = findActionConfig(args);
+            // 通过`resolveActionConfig`可以配置默认映射关系等，提供扩展点
+            if (typeof controller.resolveActionConfig === 'function') {
+                actionConfig = 
+                    controller.resolveActionConfig(actionConfig, args);
+            }
             if (!actionConfig) {
                 return Deferred.rejected(
                     'no action configured for url ' + args.url.getPath());
@@ -373,7 +426,7 @@ define(
                     // 因此在这里再解绑一次，重复解绑不会出错
                     removeHijack(container);
 
-                    renderChildAction(url, context.container);
+                    controller.renderChildAction(url, context.container);
                 }
             }
 
@@ -442,7 +495,7 @@ define(
          * @return {Promise} 一个Promise对象，
          * 当渲染完成后进行**resolved**状态，但可在之前调用`cancel()`取消
          */
-        function renderChildAction(url, container, options) {
+        controller.renderChildAction = function (url, container, options) {
             var assert = require('./assert');
             assert.has(container);
 
@@ -456,41 +509,8 @@ define(
                 enterChildAction,
                 util.bind(events.notifyError, events)
             );
+
             return loader;
-        }
-
-        /**
-         * URL与Action的调度器
-         */
-        var controller = {
-            /**
-             * 注册一个Action
-             *
-             * @param {Object} config Action的相关配置
-             * @param {string} config.type Action对应模块的id
-             * @param {string} config.path 对应的URL的path部分
-             * @param {string=} config.movedTo 设定Action跳转至其它路径
-             * @param {Array.<string>= | string=} config.authority 访问权限
-             * @param {string=} noAuthorityLocation 无权限时的跳转路径
-             */
-            registerAction: function (config) {
-                assert.hasProperty(
-                    config, 'path', 
-                    'action config should contains a "path" property'
-                );
-
-                actionPathMapping[config.path] = config;
-            },
-
-            renderChildAction: renderChildAction,
-
-            /**
-             * 开始`controller`对象的工作
-             */
-            start: function () {
-                // 干脆接管所有路由
-                require('./router').setBackup(renderAction);
-            }
         };
 
         return controller;

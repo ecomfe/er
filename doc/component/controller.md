@@ -39,6 +39,53 @@ controller对象同时还负责根据Action和访问参数反向生成URL，以�
 
 返回一个URL对象，通过该URL对象可以访问指定的Action。如果没有找到`actionType`参数对应的Action，则会返回一个空的URL对象。
 
+### resolveActionConfig方法
+
+`resolveActionConfig`用于处理系统找到的Action配置对象。
+
+在系统通过默认的逻辑查找Action配置后，会将查找到的配置对象，以及进入当前路径时的参数传递给这个方法，可以重写该方法以进一步处理。
+
+如下代码，实现一种默认的映射，按路径来获得模块名，可以免除Action的配置：
+
+    controller.resolveActionConfig = function (config, args) {
+        // 如果已经找到了就不用特别处理了
+        if (config) {
+            return config;
+        }
+
+        var path = args.url.getPath(); // 找到路径
+        if (path.indexOf('/') === 0) {
+            path = path.substring(1);
+        }
+
+        var parts = path.split('/');
+        // 由于Action是个类，模块名是大写开始的，而路径是小写开始的，因此转换一下
+        var moduleName = parts[parts.length - 1];
+        moduleName = moduleName.charAt(0).toUpperCase() + moduleName.substring(1);
+        parts[parts.length - ] = moduleName;
+
+        // 返回的对象中必须有type属性以便加载对应的模块
+        return {
+            path: '/' + path,
+            type: parts.join('/')
+        };
+    }
+
+#### 参数
+
+- `{Object | null} config`：系统通过默认逻辑找到的配置项对象，如未找到对应的配置则会是null。
+- `{Object} args`：进入当前路径时的参数，包含以下内容：
+    - `{URL} url`：当前路径对应的URL对象
+    - `{URL} referer`：前一次的路径，如果没有则是`null`。
+    - `{string} container`：放置Action的DOM容器的id。
+    - `{boolean} isChildAction`：是否子Action。
+
+#### 返回值
+
+方法 **必须** 返回一个合法的Action配置对象，或返回`null`表示无对应的Action配置。
+
+一个 **合法的Action配置对象** 至少包含`type`属性用于指定对应的模块路径。具体参考以下章节。
+
 ## 关于Action配置
 
 ### 普通Action
@@ -48,6 +95,25 @@ controller对象同时还负责根据Action和访问参数反向生成URL，以�
     {
         path: '/user/list', // 路径
         type: 'user/List' // AMD模块id
+    }
+
+### 静态参数
+
+在配置中使用`args`属性可以指定一些静态参数，这些参数会传递给Action，可在`Action.context`中获得。由于Action默认会将`context`推送到`Model`对象中，因此也可以使用`model.get`获取，如：
+
+    {                                   {
+        path: '/user/create',               path: 'user/update',
+        type: 'user/Form',                  type: 'user/Form', // 共用一个模块
+        args: { formType: 'create' }        args: { formType: 'update' } // 用参数来区分
+    }                                   }
+
+则可以在Action的代码中：
+
+    if (this.model.get('formType') === 'create') {
+        // 向服务器发送PUT请求
+    }
+    else {
+        // 发送POST请求
     }
 
 ### 权限配置
