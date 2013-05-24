@@ -69,7 +69,7 @@ define(
             : function (fn, context) {
                 var extraArgs = [].slice.call(arguments, 2);
                 return function () {
-                    var args = extraArgs.concat(arguments);
+                    var args = extraArgs.concat([].slice.call(arguments));
                     return fn.apply(context, args);
                 };
             };
