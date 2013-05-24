@@ -14,6 +14,7 @@ define(
         var Deferred = require('./Deferred');
         var URL = require('./URL');
         var config = require('./config');
+        var events = require('./events');
         var assert = require('./assert');
 
         /**
@@ -46,7 +47,6 @@ define(
         function findActionConfig(args) {
             var path = args.url.getPath();
             var actionConfig = actionPathMapping[path];
-            var events = require('./events');
 
             // 关于actionConfig配置项：
             // 
@@ -138,7 +138,6 @@ define(
                 require('./util').mix(args, actionConfig.args);
             }
 
-            var events = require('./events');
             var loading = new Deferred();
 
             // 让loadAction返回一个特殊的Promise，
@@ -232,8 +231,6 @@ define(
          * @param {Object} context `Action`对象执行的上下文
          */
         function enterAction(action, context) {
-            var events = require('./events');
-
             if (!context.isChildAction) {
                 // 未防止在加载Action模块的时候，用户的操作导致进入其它模块，
                 // 这里需要判断当前的URL是否依旧是加载时指定的URL。
@@ -259,7 +256,7 @@ define(
                 currentAction = action;
             }
 
-            require('./events').fire(
+            events.fire(
                 'enteraction',
                 require('./util').mix({}, context)
             );
@@ -304,7 +301,6 @@ define(
         function renderAction(url) {
             var loader = 
                 forward(url, require('./config').mainElement, null, false);
-            var events = require('./events');
             var util = require('./util');
             loader.then(enterAction, util.bind(events.notifyError, events));
         }
@@ -455,7 +451,6 @@ define(
             }
 
             var loader = forward(url, container, options, true);
-            var events = require('./events');
             var util = require('./util');
             loader.then(
                 enterChildAction,
