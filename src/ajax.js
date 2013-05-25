@@ -32,6 +32,32 @@ define(
         require('./Observable').enable(ajax);
 
         /**
+         * 每次请求流程的勾子，包含以下属性：
+         * 
+         * - `beforeExecute`：在执行逻辑以前
+         *     - `{Object} options`：请求时的参数
+         * - `beforeCreate`：在创建`XMLHttpRequest`前
+         *     - `{Object} options`：请求时的参数外加默认参数融合后的对象
+         *     - `{Deferred} request`：控制请求的`Deferred`对象
+         *     - 返回**true**表示请求已经处理，ajax模块将不再进行后续的逻辑
+         * - `beforeSend`：链接打开但没发送数据
+         *     - `{FakeXHR} xhr`：伪造的`XMLHttpRequest`对象
+         *     - `{Object} options`：请求时的参数外加默认参数融合后的对象
+         * - `afterReceive`：在收到返回后
+         *     - `{FakeXHR} xhr`：伪造的`XMLHttpRequest`对象
+         *     - `{Object} options`：请求时的参数外加默认参数融合后的对象
+         * - `afterParse`：在按数据类型处理完响应后
+         *     - `{*} data`：返回的数据
+         *     - `{FakeXHR} xhr`：伪造的`XMLHttpRequest`对象
+         *     - `{Object} options`：请求时的参数外加默认参数融合后的对象
+         *     - 返回值将被作为最终触发回调时的数据
+         *
+         * @type {Object}
+         * @public
+         */
+        ajax.hooks = {};
+
+        /**
          * 发起XMLHttpRequest请求
          *
          * @param {Object} options 相关配置
@@ -39,13 +65,17 @@ define(
          * @param {string=} options.method 请求的类型
          * @param {Object=} options.data 请求的数据
          * @param {string=} options.dataType 返回数据的类型，
-         * 可以为**json**或**text**，默认为**json**
+         * 可以为**json**或**text**，默认为**responseText**
          * @param {number=} options.timeout 超时时间
          * @param {boolean=} options.cache 决定是否允许缓存
          * @return {FakeXHR} 一个`FakeXHR`对象，
          * 该对象有Promise的所有方法，以及`XMLHTTPRequest`对象的相应方法
          */
         ajax.request = function (options) {
+            if (typeof ajax.hooks.beforeExecute === 'function') {
+                ajax.hooks.beforeExecute(options);
+            }
+
             var assert = require('./assert');
             assert.hasProperty(options, url, 'url property is required');
 
@@ -60,6 +90,16 @@ define(
             var Deferred = require('./Deferred');
             var requesting = new Deferred();
 
+            if (typeof ajax.hooks.beforeCreate === 'function') {
+                var canceled = ajax.hooks.beforeCreate(options, requesting);
+                if (canceled === true) {
+                    var fakeXHR = requesting.promise;
+                    fakeXHR.abort = function () {};
+                    fakeXHR.setRequestHeader = function () {};
+                    return fakeXHR;
+                }
+            }
+
             var xhr = window.XMLHttpRequest
                 ? new XMLHttpRequest()
                 : new ActiveXObject('Microsoft.XMLHTTP');
@@ -72,7 +112,6 @@ define(
                     fakeXHR.responseText = '';
                     fakeXHR.responseXML = '';
                     requesting.reject(fakeXHR);
-                    
                 },
                 setRequestHeader: function (name, value) {
                     xhr.setRequestHeader(name, value);
@@ -85,11 +124,11 @@ define(
                     /**
                      * 任意一个XMLHttpRequest请求失败时触发
                      *
-                     * @event fail
+                     * @event done
                      * @param {Object} e 事件对象
                      * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
                      */
-                    ajax.on('done', { xhr: fakeXHR });
+                    ajax.fire('done', { xhr: fakeXHR });
                 },
                 function () {
                     /**
@@ -99,7 +138,7 @@ define(
                      * @param {Object} e 事件对象
                      * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
                      */
-                    ajax.on('fail', { xhr: fakeXHR });
+                    ajax.fire('fail', { xhr: fakeXHR });
                 }
             );
 
@@ -115,10 +154,20 @@ define(
                         status = 204;
                     }
 
-                    fakeXHR.status = xhr.status;
+                    fakeXHR.status = status;
                     fakeXHR.readyState = xhr.readyState;
                     fakeXHR.responseText = xhr.responseText;
                     fakeXHR.responseXML = xhr.responseXML;
+
+                    if (typeof ajax.hooks.afterReceive === 'function') {
+                        ajax.hooks.afterReceive(fakeXHR, options);
+                    }
+
+                    // 如果请求不成功，也就不用再分解数据了，直接丢回去就好
+                    if (status < 200 || (status >= 300 && status !== 304)) {
+                        requesting.reject(fakeXHR);
+                        return;
+                    }
 
                     var data = xhr.responseText;
                     if (options.dataType === 'json') {
@@ -133,12 +182,20 @@ define(
                         }
                     }
 
-                    if (status >= 200 && status < 300 || status === 304) {
-                        requesting.resolve(data);
+                    if (typeof ajax.hooks.afterParse === 'function') {
+                        try {
+                            data = 
+                                ajax.hooks.afterParse(data, fakeXHR, options);
+                        }
+                        catch (ex) {
+                            fakeXHR.error = ex;
+                            requesting.reject(fakeXHR);
+                            return;
+                        }
                     }
-                    else {
-                        requesting.reject(fakeXHR);
-                    }
+
+                    // 数据处理成功后，进行回调
+                    requesting.resolve(data);
                 }
             };
 
@@ -153,6 +210,11 @@ define(
             var url = resolveURL(options.url, data);
 
             xhr.open(method, url, true);
+
+            if (typeof ajax.hooks.beforeSend === 'function') {
+                ajax.hooks.beforeSend(fakeXHR, options);
+            }
+
             if (method === 'GET') {
                 xhr.send();
             }
