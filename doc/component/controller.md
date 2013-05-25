@@ -29,6 +29,7 @@ controller对象同时还负责根据Action和访问参数反向生成URL，以�
 - `{string} type`：指定Action对应实现的模块id，controller将使用AMD规范加载该id代表的模块。
 - `{string} noAuthorityLocation`：指定当用户无权限访问该Action时，跳转的路径，controller对象将再将根据该属性指定的路径寻找Action。
 - `{string} movedTo`：指定Action的跳转关系，常用于系统的迁移和升级，controller发现有该属性时，将根据该属性指定的路径寻找Action。
+- `{boolean} childActionOnly`：指定只能作为子Action加载，当主Action访问该路径时，此配置会被忽略。可以用`childActionOnly: !window.DEBUG`来设定允许调试状态下直接访问，但生产环境中不能访问。
 
 #### 参数
 

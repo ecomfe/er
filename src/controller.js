@@ -96,6 +96,11 @@ define(
             var path = args.url.getPath();
             var actionConfig = actionPathMapping[path];
 
+            // 如果只允许子Action访问但当前是主Action，就当没找到
+            if (actionConfig.childActionOnly && args.isChildAction) {
+                actionConfig = null;
+            }
+
             // 关于actionConfig配置项：
             // 
             // - `{string} type`：指定对应Action的模块id
@@ -104,6 +109,7 @@ define(
             // - `{string} noAuthorityLocation`：用户没有权限时的跳转URL
             // - `{string} movedTo`：表示该Action已经被移动到另一个路径，
             //     controller将根据该配置指定的路径加载对应的Action
+            // - `{boolean} childActionOnly`：指定只能在子Action时加载
 
             // 以下所有和跳转相关的逻辑均不能用`redirect`，
             // 因为一但有重定向，会在历史记录里多一帧，
