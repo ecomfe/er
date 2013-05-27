@@ -88,11 +88,17 @@ define(
          * 
          * 事件处理函数有去重功能，同一个事件处理函数只会执行一次
          *
-         * @param {string} type 事件类型
-         * @param {Object} event 事件对象
+         * @param {string=} type 事件类型
+         * @param {Object=} event 事件对象
          * @public
          */
         Observable.prototype.fire = function (type, event) {
+            // `.fire({ type: click, data: 'data' })`这样的情况
+            if (arguments.length === 1 && typeof type === 'object') {
+                event = type;
+                type = event.type;
+            }
+
             // 无论`this._events`有没有被初始化，
             // 如果有直接挂在对象上的方法是要触发的
             var inlineHandler = this['on' + type];

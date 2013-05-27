@@ -35,12 +35,55 @@ define(function() {
             });
         });
         describe('`fire` method', function() {
-            it('function foo1 execute, the variable ,isAttach is true', function() {
-                evtObj.on("test", foo1);
-                evtObj.fire("test");
-                expect(isAttach).toBeTruthy();
+            var o = new Observable();
+            var handler = jasmine.createSpy('test');
+            var allHandler = jasmine.createSpy('*');
+            var arg = { type: 'what', x: 1 };
+            o.on('test', handler);
+            o.on('*', allHandler);
+            o.fire('test', arg);
+
+            it('should execute the event handler attached to the actual event type', function () {
+                expect(handler).toHaveBeenCalled();
+            });
+
+            it('should execute the event handler attached to the event type `*`', function () {
+                expect(allHandler).toHaveBeenCalled();
+            });
+
+            it('should execute the event handler with correct arguments', function () {
+                expect(handler.mostRecentCall.args.length).toBe(1);
+                expect(allHandler.mostRecentCall.args.length).toBe(1);
+                expect(handler.mostRecentCall.args[0]).toBe(arg);
+                expect(allHandler.mostRecentCall.args[0]).toBe(arg);
+            });
+
+            it('should override the `type` property if it exists', function () {
+                expect(handler.mostRecentCall.args[0].type).toBe('test');
+                expect(allHandler.mostRecentCall.args[0].type).toBe('test');
+            });
+
+            it('should give an empty object as event object if it is not given when firing', function () {
+                var o = new Observable();
+                var handler = jasmine.createSpy();
+                o.on('test', handler);
+                o.fire('test');
+                expect(handler).toHaveBeenCalled();
+                expect(handler.mostRecentCall.args[0]).toBeOfType('object');
+                expect(handler.mostRecentCall.args[0].type).toBe('test');
+            });
+
+            it('should accept one argument, with `type` property in it', function () {
+                var o = new Observable();
+                var handler = jasmine.createSpy();
+                o.on('test', handler);
+                o.fire({ type: 'test', data: 1 });
+                expect(handler).toHaveBeenCalled();
+                expect(handler.mostRecentCall.args[0].type).toBe('test');
+                expect(handler.mostRecentCall.args[0].data).toBe(1);
             });
         });
+
         describe('`enable` method', function() {
             it('make a Object has the function of Class Observable without inherit', function() {
                 var obj = {};
