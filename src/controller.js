@@ -96,8 +96,29 @@ define(
             var path = args.url.getPath();
             var actionConfig = actionPathMapping[path];
 
+            // 判断优先级：
+            // movedTo > childActionOnly > 404 > authority
+
+            // 检查Action的跳转，类似302跳转，用于系统升级迁移
+            if (actionConfig && actionConfig.movedTo) {
+                events.fire(
+                    'actionmoved', 
+                    {
+                        url: args.url, 
+                        config: actionConfig, 
+                        movedTo: actionConfig.movedTo
+                    }
+                );
+
+                var forwardURL = URL.parse(actionConfig.movedTo);
+                args.url = forwardURL;
+                return findActionConfig(args);
+            }
+
             // 如果只允许子Action访问但当前是主Action，就当没找到
-            if (actionConfig.childActionOnly && args.isChildAction) {
+            if (actionConfig && 
+                (actionConfig.childActionOnly && args.isChildAction)
+            ) {
                 actionConfig = null;
             }
 
@@ -148,22 +169,6 @@ define(
                 var location = actionConfig.noAuthorityLocation 
                     || config.noAuthorityLocation;
                 args.url = URL.parse(location);
-                return findActionConfig(args);
-            }
-
-            // 检查Action的跳转，类似302跳转，用于系统升级迁移
-            if (actionConfig.movedTo) {
-                events.fire(
-                    'actionmoved', 
-                    {
-                        url: args.url, 
-                        config: actionConfig, 
-                        movedTo: actionConfig.movedTo
-                    }
-                );
-
-                var forwardURL = URL.parse(actionConfig.movedTo);
-                args.url = forwardURL;
                 return findActionConfig(args);
             }
 
