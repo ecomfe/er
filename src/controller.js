@@ -191,8 +191,11 @@ define(
                     controller.resolveActionConfig(actionConfig, args);
             }
             if (!actionConfig) {
-                return Deferred.rejected(
+                var failed = new Deferred();
+                failed.syncModeEnabled = false;
+                failed.reject(
                     'no action configured for url ' + args.url.getPath());
+                return failed;
             }
 
             // 可在`registerAction`的时候通过`args`属性添加固定的参数，
@@ -203,6 +206,19 @@ define(
             }
 
             var loading = new Deferred();
+            // 别的地方无所谓，但`controller`用的`Deferred`对象必须是异步的，
+            // 否则已经加载的Action会变成同步加载，造成不一致性，
+            // 导致有些地方等Action加载完触发个事件的，很可能在事件绑上以前就触发了，
+            // 比如这种：
+            // 
+            //     function ActionLoader() {
+            //          var loading = controller.renderChildAction(...);
+            //          loading.done(this.fire.bind(this, 'actionloaded'));
+            //     }
+            //     
+            //     var loader = new ActionLoader();
+            //     loader.on('actionloaded', ...); // 这里会错过触发
+            loading.syncModeEnabled = false;
 
             // 让loadAction返回一个特殊的Promise，
             // 可以通过调用`cancel()`取消Action加载完的后续执行
