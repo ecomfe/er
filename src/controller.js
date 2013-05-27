@@ -270,7 +270,7 @@ define(
                     events.fire(
                         'actionloaded',
                         {
-                            url: acrgs.url,
+                            url: args.url,
                             config: actionConfig,
                             action: SpecificAction
                         }
