@@ -230,5 +230,97 @@ define(function (require) {
                 });
             });
         });
+
+        describe('`serializeData` hook', function () {
+            it('should be implemented by default', function () {
+                expect(ajax.hooks.serializeData).toBeOfType('function');
+            });
+
+            it('should be called for a non-get request', function (done) {
+                var old = ajax.hooks.serializeData;
+                ajax.hooks.serializeData = jasmine.createSpy('serializeData');
+                var data = { x: 1 };
+                var options = {
+                    url: './asset/res/x.json',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: data
+                };
+                var loading = ajax.request(options);
+                loading.ensure(function () {
+                    expect(ajax.hooks.serializeData).toHaveBeenCalled();
+                    expect(ajax.hooks.serializeData.mostRecentCall.args.length).toBe(3);
+                    expect(ajax.hooks.serializeData.mostRecentCall.args[0]).toBe(data);
+                    expect(ajax.hooks.serializeData.mostRecentCall.args[1]).toBe('application/json');
+                    expect(ajax.hooks.serializeData.mostRecentCall.args[2]).toBe(loading);
+                    ajax.hooks.serializeData = old;
+                    done();
+                });
+            });
+
+            it('should give a default value of `contentType` parameter if not specified in ajax options', function (done) {
+                var old = ajax.hooks.serializeData;
+                ajax.hooks.serializeData = jasmine.createSpy('serializeData');
+                var options = {
+                    url: './asset/res/x.json',
+                    method: 'POST'
+                };
+                var loading = ajax.request(options);
+                loading.ensure(function () {
+                    expect(ajax.hooks.serializeData).toHaveBeenCalled();
+                    expect(ajax.hooks.serializeData.mostRecentCall.args[1]).toBe('application/x-www-form-urlencoded');
+                    ajax.hooks.serializeData = old;
+                    done();
+                });
+            });
+
+            it('should correctly serialize a number', function () {
+                expect(ajax.hooks.serializeData(1)).toBe('1');
+                expect(ajax.hooks.serializeData(1.2)).toBe('1.2');
+            });
+
+            it('should correctly serialize a boolean', function () {
+                expect(ajax.hooks.serializeData(true)).toBe('true');
+                expect(ajax.hooks.serializeData(false)).toBe('false');
+            });
+
+            it('should correctly serialize a string and encode it', function () {
+                expect(ajax.hooks.serializeData('abc')).toBe('abc');
+                expect(ajax.hooks.serializeData('&=_1%234')).toBe(encodeURIComponent('&=_1%234'));
+            });
+
+            it('should correctly serialize an array', function () {
+                expect(ajax.hooks.serializeData([1, 2, 3])).toBe('1,2,3');
+                expect(ajax.hooks.serializeData(['a', '&', '='])).toBe('a,%26,%3D');
+            });
+
+            it('should correctly serialize an object', function () {
+                var o = {
+                    x: 1,
+                    y: 'test',
+                    z: ['a', '&', 'c']
+                };
+                expect(ajax.hooks.serializeData(o)).toBe('x=1&y=test&z=a,%26,c');
+            });
+
+            it('should correctly serialize a deep object', function () {
+                var o = {
+                    x: 1,
+                    y: {
+                        a: 1,
+                        b: 'test',
+                        c: ['a', '&', 'c']
+                    },
+                    z: false
+                };
+                expect(ajax.hooks.serializeData(o)).toBe('x=1&y.a=1&y.b=test&y.c=a,%26,c&z=false');
+            });
+
+            it('should serialize null and undefined to an empty string', function () {
+                expect(ajax.hooks.serializeData(null)).toBe('');
+                expect(ajax.hooks.serializeData(undefined)).toBe('');
+                expect(ajax.hooks.serializeData({ x: null })).toBe('x=');
+            })
+        });
     });
 });

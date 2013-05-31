@@ -57,6 +57,48 @@ define(
          */
         ajax.hooks = {};
 
+        ajax.hooks.serializeData = function (data) {
+            return serializeValue('', data);
+        };
+
+        function serializeValue(key, value) {
+            if (value == null) {
+                value = '';
+            }
+            var getKey = ajax.hooks.serializeData.getKey;
+            var encodedKey = key ? encodeURIComponent(key) : '';
+
+            var type = Object.prototype.toString.call(value);
+            switch (type) {
+                case '[object Array]':
+                    var encoded = [];
+                    for (var i = 0; i < value.length; i++) {
+                        var item = value[i];
+                        encoded[i] = serializeValue('', item);
+                    }
+                    return encodedKey
+                        ? encodedKey + '=' + encoded.join(',')
+                        : encoded.join(',');
+                case '[object Object]':
+                    var result = [];
+                    for (var name in value) {
+                        var propertyKey = getKey(name, key);
+                        var propertyValue = 
+                            serializeValue(propertyKey, value[name]);
+                        result.push(propertyValue);
+                    }
+                    return result.join('&');
+                default:
+                    return encodedKey 
+                        ? encodedKey + '=' + encodeURIComponent(value)
+                        : encodeURIComponent(value);
+            }
+        }
+
+        ajax.hooks.serializeData.getKey = function (propertyName, parentKey) {
+            return parentKey ? parentKey + '.' + propertyName : propertyName;
+        };
+
         /**
          * 发起XMLHttpRequest请求
          *
@@ -219,9 +261,11 @@ define(
                 xhr.send();
             }
             else {
-                xhr.setRequestHeader(
-                    'Content-type', 'application/x-www-form-urlencoded');
-                var query = require('./URL').serialize(options.data);
+                var contentType = 
+                    options.contentType || 'application/x-www-form-urlencoded';
+                xhr.setRequestHeader('Content-type', contentType);
+                var query = ajax.hooks.serializeData(
+                    options.data, contentType, fakeXHR);
                 xhr.send(query);
             }
 

@@ -88,7 +88,7 @@ define(
             }
 
             // 未给定url时，指向起始页
-            if (!url) {
+            if (!url || url === '/') {
                 url = require('./config').indexURL;
             }
 
