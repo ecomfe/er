@@ -327,7 +327,7 @@ define(
 
                 // 是主Action的话，要销毁前面用的那个，并设定当前Action实例
                 if (currentAction) {
-                    events.fire('leaveaction', { action: action });
+                    events.fire('leaveaction', { action: currentAction });
                     
                     if (typeof currentAction.leave === 'function') {
                         currentAction.leave();
@@ -385,42 +385,68 @@ define(
             loader.then(enterAction, util.bind(events.notifyError, events));
         }
 
-        var hijackMapping = {};
+        var childActionMapping = {};
 
-        // 把挂在容器上的拦截`click`事件的处理函数去掉
-        function removeHijack(container) {
-            var hijack = hijackMapping[container.id];
-
-            if (!hijack) {
+        function removeChildAction(container) {
+            var info = childActionMapping[container.id];
+            if (!info) {
                 return;
             }
 
-            hijackMapping[container.id] = undefined;
+            childActionMapping[container.id] = undefined;
 
-            if (container.removeEventListener) {
-                container.removeEventListener('click', hijack, false);
+            // 把挂在容器上的拦截`click`事件的处理函数去掉
+            if (info.hijack) {
+                if (container.removeEventListener) {
+                    container.removeEventListener('click', info.hijack, false);
+                }
+                else {
+                    container.detachEvent('onclick', info.hijack);
+                }
             }
-            else {
-                container.detachEvent('onclick', hijack);
+
+            if (info.action) {
+                events.fire('leaveaction', { action: info.action });
+
+                if (typeof info.action.leave === 'function') {
+                    info.action.leave();
+                }
             }
         }
 
-        // 添加拦截`click`事件的处理函数
-        function addHijack(container, hijack) {
-            // 如果发现还有老的`hijack`绑在容器上，先去掉，这个老的不能留，
-            // 一般来说，因为`redirect`和`leave`上都有了解除绑定的逻辑，
+        function addChildAction(container, action, hijack) {
+            // 如果发现还有老的信息绑在容器上，先去掉，这个老的不能留，
+            // 一般来说，因为`redirect`和`leave`上都有销毁原Action的逻辑，
             // 所以一般上面不会留着东西了。
             // 唯一留着的可能性是，Action是一个普通对象（没有`leave`事件），
-            // 而且不是使用`redirect`跳转，而是直接销毁了那个Action。
-            removeHijack(container);
+            // 而且不是使用`redirect`跳转或用`renderChildAction`再次在这个容器上渲染，
+            // 而是直接销毁了那个Action。
+            removeChildAction(container);
 
+            // 添加拦截`click`事件的处理函数
             if (container.addEventListener) {
                 container.addEventListener('click', hijack, false);
             }
             else {
                 container.attachEvent('onclick', hijack);
             }
-            hijackMapping[container.id] = hijack;
+
+            var info = {
+                action: action,
+                hijack: hijack
+            };
+            childActionMapping[container.id] = info;
+
+            var Observable = require('./Observable');
+            if (action instanceof Observable) {
+                // 在Action销毁的时候要取消掉
+                action.on(
+                    'leave', 
+                    function () {
+                        removeChildAction(container);
+                    }
+                );
+            }
         }
 
         function enterChildAction(action, context) {
@@ -441,18 +467,7 @@ define(
 
                 var changed = url.toString() !== currentURL.toString();
                 if (changed || options.force) {
-                    events.fire('leaveaction', { action: action });
-
-                    if (typeof action.leave === 'function') {
-                        action.leave();
-                    }
-
-                    // 如果Action是个普通对象而非继承框架的基类，
-                    // 那可能没有`leave`方法及`leave`事件，
-                    // 所以在`leave`事件中解绑事件会不执行，
-                    // 因此在这里再解绑一次，重复解绑不会出错
-                    removeHijack(container);
-
+                    // `renderChildAction`中会把原来的Action销毁
                     controller.renderChildAction(url, context.container);
                 }
             }
@@ -496,19 +511,7 @@ define(
             // 这样通过js编码的跳转也会转到`renderChildAction`逻辑上
             action.redirect = redirect;
 
-            // 拦截掉`click`事件
-            addHijack(container, hijack);
-
-            var Observable = require('./Observable');
-            if (action instanceof Observable) {
-                // 在Action销毁的时候要取消掉
-                action.on(
-                    'leave', 
-                    function () {
-                        removeHijack(container);
-                    }
-                );
-            }
+            addChildAction(container, action, hijack);
 
             enterAction(action, context);
         }
