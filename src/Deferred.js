@@ -11,8 +11,8 @@ define(
         var assert = require('./assert');
 
         var setImmediate = typeof window.setImmediate === 'function'
-            ? function (fn) { setImmediate(fn); }
-            : function (fn) { setTimeout(fn, 0); };
+            ? function (fn) { window.setImmediate(fn); }
+            : function (fn) { window.setTimeout(fn, 0); };
 
         /**
          * 尝试执行相关的回调函数
