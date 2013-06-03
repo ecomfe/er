@@ -110,7 +110,8 @@ define(
                 return;
             }
             
-            if (Object.prototype.toString.call(event) === '[object Object]') {
+            // 到了这里，有`.fire(type)`和`.fire(type, event)`两种情况
+            if (event) {
                 event.type = type;
             }
             else {
