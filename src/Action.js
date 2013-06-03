@@ -81,7 +81,7 @@ define(
             }
             else {
                 this.forwardToView();
-                return require('./Deferred').resolved();
+                return require('./Deferred').resolved(this);
             }
         };
 
@@ -149,6 +149,8 @@ define(
                 var events = require('./events');
                 events.notifyError('No view attached to this action');
             }
+
+            return this;
         };
 
         /**

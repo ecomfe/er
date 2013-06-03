@@ -341,7 +341,7 @@ define(
                 require('./util').mix({}, context)
             );
 
-            action.enter(context);
+            return action.enter(context);
         }
 
         /**
@@ -513,7 +513,7 @@ define(
 
             addChildAction(container, action, hijack);
 
-            enterAction(action, context);
+            return enterAction(action, context);
         }
 
         /**
@@ -535,12 +535,10 @@ define(
 
             var loader = forward(url, container, options, true);
             var util = require('./util');
-            loader.then(
+            return loader.then(
                 enterChildAction,
                 util.bind(events.notifyError, events)
             );
-
-            return loader;
         };
 
         return controller;

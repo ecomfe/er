@@ -26,6 +26,8 @@ define(
                  * @param {*} e.error 抛出的错误对象
                  */
                 this.fire('error', { error: error });
+
+                return error;
             }
         };
 
