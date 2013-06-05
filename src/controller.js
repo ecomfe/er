@@ -15,6 +15,7 @@ define(
         var URL = require('./URL');
         var config = require('./config');
         var events = require('./events');
+        var util = require('./util');
         var assert = require('./assert');
 
         /**
@@ -202,7 +203,7 @@ define(
             // 在`Action`中就可以通过`enter`时的`context`参数里拿到，
             // 对应用框架的话就可以在`model`中拿到
             if (actionConfig.args) {
-                require('./util').mix(args, actionConfig.args);
+                util.mix(args, actionConfig.args);
             }
 
             var loading = new Deferred();
@@ -327,7 +328,10 @@ define(
 
                 // 是主Action的话，要销毁前面用的那个，并设定当前Action实例
                 if (currentAction) {
-                    events.fire('leaveaction', { action: currentAction });
+                    events.fire(
+                        'leaveaction', 
+                        { action: currentAction, to: util.mix({}, context) }
+                    );
                     
                     if (typeof currentAction.leave === 'function') {
                         currentAction.leave();
@@ -338,11 +342,13 @@ define(
 
             events.fire(
                 'enteraction',
-                require('./util').mix({}, context)
+                util.mix({ action: action }, context)
             );
 
             return action.enter(context);
         }
+
+        var childActionMapping = {};
 
         /**
          * 将URL变更转换到Action的加载
@@ -358,12 +364,18 @@ define(
             // 如果想要把这个方法暴露出去的话，
             // 需要判断URL与currentURL是否相同（正常情况下`locator`层有判断）
             var context = {
-                referrer: currentURL,
                 url: url,
                 container: container,
                 isChildAction: !!isChildAction
             };
-            var util = require('./util');
+            if (isChildAction) {
+                var referrerInfo = childActionMapping[container];
+                context.referrer = referrerInfo ? referrerInfo.url : null;
+            }
+            else {
+                container.referrer = currentURL;
+            }
+
             util.mix(context, options);
 
 
@@ -381,13 +393,10 @@ define(
         function renderAction(url) {
             var loader = 
                 forward(url, require('./config').mainElement, null, false);
-            var util = require('./util');
             loader.then(enterAction, util.bind(events.notifyError, events));
         }
 
-        var childActionMapping = {};
-
-        function removeChildAction(container) {
+        function removeChildAction(container, targetContext) {
             var info = childActionMapping[container.id];
             if (!info) {
                 return;
@@ -406,7 +415,18 @@ define(
             }
 
             if (info.action) {
-                events.fire('leaveaction', { action: info.action });
+                if (!targetContext) {
+                    targetContext = {
+                        url: null,
+                        referrer: info.url,
+                        container: container.id,
+                        isChildAction: true
+                    };
+                }
+                events.fire(
+                    'leaveaction', 
+                    { action: info.action, to: targetContext }
+                );
 
                 if (typeof info.action.leave === 'function') {
                     info.action.leave();
@@ -414,14 +434,14 @@ define(
             }
         }
 
-        function addChildAction(container, action, hijack) {
+        function addChildAction(container, action, hijack, context) {
             // 如果发现还有老的信息绑在容器上，先去掉，这个老的不能留，
             // 一般来说，因为`redirect`和`leave`上都有销毁原Action的逻辑，
             // 所以一般上面不会留着东西了。
             // 唯一留着的可能性是，Action是一个普通对象（没有`leave`事件），
             // 而且不是使用`redirect`跳转或用`renderChildAction`再次在这个容器上渲染，
             // 而是直接销毁了那个Action。
-            removeChildAction(container);
+            removeChildAction(container, context);
 
             // 添加拦截`click`事件的处理函数
             if (container.addEventListener) {
@@ -432,6 +452,7 @@ define(
             }
 
             var info = {
+                url: context.url,
                 action: action,
                 hijack: hijack
             };
@@ -511,7 +532,7 @@ define(
             // 这样通过js编码的跳转也会转到`renderChildAction`逻辑上
             action.redirect = redirect;
 
-            addChildAction(container, action, hijack);
+            addChildAction(container, action, hijack, context);
 
             return enterAction(action, context);
         }
@@ -534,11 +555,15 @@ define(
             }
 
             var loader = forward(url, container, options, true);
-            var util = require('./util');
-            return loader.then(
+            var loadingChildAction = loader.then(
                 enterChildAction,
                 util.bind(events.notifyError, events)
             );
+            // `then`方法会返回一个新的`Promise`，
+            // 但原来的`loader`上有个`cancel`方法，
+            // 要把这个方法留下来
+            loadingChildAction.cancel = loader.cancel;
+            return loadingChildAction;
         };
 
         return controller;
