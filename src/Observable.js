@@ -111,12 +111,14 @@ define(
             }
             
             // 到了这里，有`.fire(type)`和`.fire(type, event)`两种情况
-            if (event) {
-                event.type = type;
+            if (event == null) {
+                event = {};
             }
-            else {
-                event = { type: type, data: event };
+            if (Object.prototype.toString.call(event) !== '[object Object]') {
+                event = { data: event };
             }
+            event.type = type;
+            event.target = this;
 
             var alreadyInvoked = {};
             var pool = this._events[type];
