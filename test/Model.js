@@ -504,6 +504,68 @@ define(function (require) {
                     done();
                 });
             });
+
+            describe('worker management mechanism', function () {
+                it('should cancel a cancellable Promise if model is disposed before it resolves', function () {
+                    var model = new Model();
+                    var spy = jasmine.createSpy('cancel');
+                    model.datasource = function () {
+                        var promise = delayed(1, 1)();
+                        promise.cancel = spy;
+                        return promise;
+                    };
+                    model.load();
+                    model.dispose();
+                    expect(spy).toHaveBeenCalled();
+                });
+
+                it('should cancel a cancellable Promise in sequence config if model is disposed before it resolves', function (done) {
+                    var model = new Model();
+                    var spy = jasmine.createSpy('cancel');
+                    model.datasource = [
+                        function () {
+                            var promise = delayed(1, 10)();
+                            promise.cancel = spy;
+                            return promise;
+                        }
+                    ];
+                    model.load();
+                    setTimeout(function () {
+                        model.dispose();
+                        expect(spy).toHaveBeenCalled();
+                        done();
+                    }, 1);
+                });
+
+                it('should cancel a cancellable Promise in parallel config if model is disposed before it resolves', function () {
+                    var model = new Model();
+                    var spy = jasmine.createSpy('cancel');
+                    model.datasource = {
+                        a: function () {
+                            var promise = delayed(1, 1)();
+                            promise.cancel = spy;
+                            return promise;
+                        }
+                    };
+                    model.load();
+                    model.dispose();
+                    expect(spy).toHaveBeenCalled();
+                });
+
+                it('should not call `cancel` after it resolves', function (done) {
+                    var model = new Model();
+                    var spy = jasmine.createSpy('cancel');
+                    model.datasource = function () {
+                        var promise = delayed(1, 1)();
+                        promise.cancel = spy;
+                        return promise;
+                    };
+                    model.load().done(function () {
+                        expect(spy).not.toHaveBeenCalled();
+                        done();
+                    });
+                });
+            });
         });
     });
 });

@@ -7,6 +7,8 @@
  */
 define(
     function (require) {
+        var util = require('./util');
+        var Deferred = require('./Deferred');
         var silent = { silent: true };
 
         /**
@@ -21,7 +23,6 @@ define(
          */
         function loadData(model, options) {
             var value = options.retrieve(model);
-            var Deferred = require('./Deferred');
 
             function addDataToModel(value) {
                 if (options.dump) {
@@ -33,6 +34,11 @@ define(
             }
 
             if (Deferred.isPromise(value)) {
+                if (typeof value.cancel === 'function') {
+                    model.addPendingWorker(value);
+                    value.done(
+                        util.bind(model.removePendingWorker, model, value));
+                }
                 value.done(addDataToModel);
                 return value;
             }
@@ -51,11 +57,9 @@ define(
          */ 
         function loadSequence(model, datasource) {
             // 第一个Promise是直接成功的，以便开始第一块的加载
-            var Deferred = require('./Deferred');
             var loading = Deferred.resolved();
             for (var i = 0; i < datasource.length; i++) {
                 var unit = datasource[i];
-                var util = require('./util');
                 var task = util.bind(load, null, model, unit);
                 loading = loading.done(task);
             }
@@ -82,14 +86,13 @@ define(
                         unit = { retrieve: unit, name: name };
                     }
                     else if (typeof unit.retrieve === 'function') {
-                        unit = require('./util').mix({ name: name }, unit);
+                        unit = util.mix({ name: name }, unit);
                     }
 
                     workers.push(load(model, unit));
                 }
             }
 
-            var Deferred = require('./Deferred');
             return Deferred.all(workers);
         }
 
@@ -106,7 +109,6 @@ define(
             // 允许datasource是null或undefined，
             // 这样根据权限灵活的配置某个数据是否加载很方便
             if (!datasource) {
-                var Deferred = require('./Deferred');
                 return Deferred.resolved();
             }
 
@@ -153,12 +155,36 @@ define(
          * @param {Object=} context 初始化的数据
          */
         function Model(context) {
-            this._store = {};
+            this.store = {};
+            this.pendingWorkers = [];
 
             if (context) {
                 this.fill(context, silent);
             }
         }
+
+        /**
+         * 添加一个未完成的工作对象
+         *
+         * @param {Promise} worker 工作对象
+         */
+        Model.prototype.addPendingWorker = function (worker) {
+            this.pendingWorkers.push(worker);
+        };
+
+        /**
+         * 移除一个已完成的工作对象
+         *
+         * @param {Promise} worker 工作对象
+         */
+        Model.prototype.removePendingWorker = function (worker) {
+            for (var i = 0; i < this.pendingWorkers.length; i++) {
+                if (this.pendingWorkers[i] === worker) {
+                    this.pendingWorkers.splice(i, 1);
+                    return;
+                }
+            }
+        };
 
         /**
          * 当前Model的数据源
@@ -265,11 +291,9 @@ define(
         Model.prototype.load = function () {
             try {
                 var loading = load(this, this.datasource);
-                var util = require('./util');
                 return loading.done(util.bind(this.prepare, this));
             }
             catch (ex) {
-                var Deferred = require('./Deferred');
                 return Deferred.rejected(ex);
             }
         };
@@ -301,7 +325,7 @@ define(
          * @public
          */
         Model.prototype.get = function (name) {
-            return this._store[name];
+            return this.store[name];
         };
 
         /**
@@ -313,9 +337,9 @@ define(
          * @param {Object} 一个变化记录项
          */
         function setProperty(model, name, value) {
-            var type = model._store.hasOwnProperty(name) ? 'change' : 'add';
-            var oldValue = model._store[name];
-            model._store[name] = value;
+            var type = model.store.hasOwnProperty(name) ? 'change' : 'add';
+            var oldValue = model.store[name];
+            model.store[name] = value;
 
             // 只在新旧值不同的情况下才有变化记录项
             if (oldValue !== value) {
@@ -391,13 +415,13 @@ define(
          */
         Model.prototype.remove = function (name, options) {
             // 如果原来就没这个值，就不触发`change`事件了
-            if (!this._store.hasOwnProperty(name)) {
+            if (!this.store.hasOwnProperty(name)) {
                 return;
             }
 
             options = options || {};
-            var value = this._store[name];
-            delete this._store[name];
+            var value = this.store[name];
+            delete this.store[name];
 
             if (!options.silent) {
                 var event = {
@@ -443,8 +467,7 @@ define(
         Model.prototype.valueOf = function () {
             // 为保证`valueOf`获取对象后修改不会影响到当前`Model`对象，
             // 需要做一次克隆的操作
-            var util = require('./util');
-            return util.mix({}, this._store);
+            return util.mix({}, this.store);
         };
 
         /**
@@ -454,10 +477,29 @@ define(
          * @public
          */
         Model.prototype.clone = function () {
-            return new Model(this._store);
+            return new Model(this.store);
         };
 
-        require('./util').inherits(Model, Observable);
+        /**
+         * 销毁当前`Model`对象，会尝试停止所有正在加载的数据
+         *
+         * @public
+         */
+        Model.prototype.dispose = function () {
+            for (var i = 0; i < this.pendingWorkers.length; i++) {
+                var worker = this.pendingWorkers[i];
+                if (typeof worker.cancel === 'function') {
+                    try {
+                        worker.cancel();
+                    }
+                    catch (ex) {
+                    }
+                }
+            }
+            this.pendingWorkers = null;
+        };
+
+        util.inherits(Model, Observable);
 
         return Model;
     }
