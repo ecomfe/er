@@ -47,6 +47,10 @@ define(
              * @public
              */
             start: function () {
+                if (!config.systemName) {
+                    config.systemName = document.title;
+                }
+
                 // 干脆接管所有路由
                 require('./router').setBackup(renderAction);
             },
@@ -355,9 +359,7 @@ define(
                 util.mix({ action: action }, context)
             );
 
-            if (context.title) {
-                document.title = context.title;
-            }
+            document.title = context.title || config.systemName;
             return action.enter(context);
         }
 
@@ -398,8 +400,7 @@ define(
         }
 
         function renderAction(url) {
-            var loader = 
-                forward(url, require('./config').mainElement, null, false);
+            var loader = forward(url, config.mainElement, null, false);
             loader.then(enterAction, util.bind(events.notifyError, events));
         }
 

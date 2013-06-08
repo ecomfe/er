@@ -3,8 +3,7 @@ define(
         var actions = [
             {
                 path: '/404',
-                type: 'common/NotFound',
-                title: '未找到该页'
+                type: 'common/NotFound'
             }
         ];
 

@@ -13,18 +13,28 @@ define(
          * @type {string}
          */
         mainElement: 'main',
+
         /**
          * 起始路径
          *
          * @type {string}
          */
         indexURL: '/',
+
+        /**
+         * 系统名称
+         *
+         * @type {string}
+         */
+        systemName: '',
+
         /**
          * 无权限访问某个Action时的跳转路径
          *
          * @type {string}
          */
         noAuthorityLocation: '/401',
+
         /**
          * 找不到Action时的跳转路径
          *
