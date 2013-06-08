@@ -196,7 +196,7 @@ define(
                         status = 204;
                     }
 
-                    fakeXHR.status = status;
+                    fakeXHR.status = fakeXHR.status || status;
                     fakeXHR.readyState = xhr.readyState;
                     fakeXHR.responseText = xhr.responseText;
                     fakeXHR.responseXML = xhr.responseXML;
