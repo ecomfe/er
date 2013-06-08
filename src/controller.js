@@ -112,6 +112,7 @@ define(
                 );
 
                 var forwardURL = URL.parse(actionConfig.movedTo);
+                args.originalURL = args.url;
                 args.url = forwardURL;
                 return findActionConfig(args);
             }
@@ -146,6 +147,7 @@ define(
             if (!actionConfig) {
                 events.fire('actionnotfound', { url: args.url });
 
+                args.originalURL = args.url;
                 args.url = URL.parse(config.notFoundLocation);
 
                 // 对于404页面，是一切未找到的URL最终归宿，
@@ -169,6 +171,7 @@ define(
 
                 var location = actionConfig.noAuthorityLocation 
                     || config.noAuthorityLocation;
+                args.originalURL = args.url;
                 args.url = URL.parse(location);
                 return findActionConfig(args);
             }
@@ -231,6 +234,10 @@ define(
             loader.cancel = function () {
                 canceled = true;
             };
+
+            if (!args.isChildAction) {
+                currentURL = args.url;
+            }
 
             // local require有可能不支持`callback`参数，
             // 这里强制使用global require
@@ -383,12 +390,6 @@ define(
             }
 
             util.mix(context, options);
-
-
-            if (!isChildAction) {
-                currentURL = url;
-            }
-
             var loader = loadAction(context);
 
             assert.has(loader, 'loadAction should always return a Promise');
