@@ -480,16 +480,22 @@ define(
             // 其中`context.container`是容器的id，是个字符串，
             // `container`是一个容器DOM元素
 
-            var currentURL = context.url;
             // 用于处理子Action中跳转的特殊`redirect`方法，
             // 接口与`locator.redirect`保持一致
             function redirect(url, options) {
                 var url = require('./locator').resolveURL(url, options);
 
-                var changed = url.toString() !== currentURL.toString();
+                var actionContext = childActionMapping[context.container];
+                var changed = url.toString() !== actionContext.url.toString();
                 if (changed || options.force) {
-                    // `renderChildAction`中会把原来的Action销毁
-                    controller.renderChildAction(url, context.container);
+                    // 静默跳转只要改掉原来映射的URL就行，为了下一次跳转的`referrer`
+                    if (options.silent) {
+                        actionContext.url = url;
+                    }
+                    else {
+                        // `renderChildAction`中会把原来的Action销毁
+                        controller.renderChildAction(url, context.container);
+                    }
                 }
             }
 

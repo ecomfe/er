@@ -48,6 +48,43 @@ define(
             locator.redirect(url);
         }
 
+        var rollTimer = 0;
+        var startupTimer = 1;
+
+        function start(firstTime) {
+            // 如果有hashchange事件则使用事件，否则定时监听
+            if (window.addEventListener) {
+                window.addEventListener('hashchange', forwardHash);
+            }
+            else if ('onhashchange' in window) {
+                window.attachEvent('onhashchange', forwardHash);
+            }
+            else {
+                rollTimer = setInterval(forwardHash, 100);
+            }
+
+            // 处理初次进入的hash
+            startupTimer = setTimeout(forwardHash, 0);
+        }
+
+        function stop() {
+            if (rollTimer) {
+                clearInterval(rollTimer);
+                rollTimer = null;
+            }
+            if (startupTimer) {
+                clearTimeout(startupTimer);
+                startupTimer = null;
+            }
+
+            if (window.removeEventListener) {
+                window.removeEventListener('hashchange', forwardHash);
+            }
+            else if ('onhashchange' in window) {
+                window.detachEvent('onhashchange', forwardHash);
+            }
+        }
+
         /**
          * 更新当前的hash值，同时在历史记录中添加该项
          * 
@@ -57,9 +94,10 @@ define(
          * 直接使用`updateURL`修改地址**后果自负**
          *
          * @param {string} url 需要进行更新的hash值
+         * @param {Object} options 配置项
          * @return {boolean} 如果地址有过变更则返回true
          */
-        function updateURL(url) {
+        function updateURL(url, options) {
             var changed = currentLocation !== url;
 
             // 存储当前信息
@@ -67,12 +105,28 @@ define(
             // Opera下，相同的hash重复写入会在历史堆栈中重复记录，
             // 需要再行与当前的hash比较
             if (changed && getLocation() !== url) {
-                location.hash = url;
+                if (options.silent) {
+                    stop();
+                    location.hash = url;
+                    start(false);
+                }
+                else {
+                    location.hash = url;
+                }
             }
 
             currentLocation = url;
             return changed;
         }
+
+        /**
+         * 开始`locator`对象的工作
+         */
+        locator.start = function () {
+            start(true);
+        };
+
+        locator.stop = stop;
 
         /**
          * 根据输入的URL，进行处理后获取真实应该跳转的URL地址
@@ -106,16 +160,18 @@ define(
             options = options || {};
             url = locator.resolveURL(url);
 
-            var isLocationChanged = updateURL(url);
+            var isLocationChanged = updateURL(url, options);
             if (isLocationChanged || options.force) {
-                /**
-                 * URL跳转时触发
-                 *
-                 * @event redirect
-                 * @param {Object} e 事件对象
-                 * @param {string} e.url 当前的URL
-                 */
-                locator.fire('redirect', { url: url });
+                if (!options.silent) {
+                    /**
+                     * URL跳转时触发
+                     *
+                     * @event redirect
+                     * @param {Object} e 事件对象
+                     * @param {string} e.url 当前的URL
+                     */
+                    locator.fire('redirect', { url: url });
+                }
 
                 require('./events').fire('redirect', { url: url });
             }
@@ -128,25 +184,6 @@ define(
             if (currentLocation) {
                 locator.redirect(currentLocation, { force: true });
             }
-        };
-
-        /**
-         * 开始`locator`对象的工作
-         */
-        locator.start = function () {
-            // 如果有hashchange事件则使用事件，否则定时监听
-            if (window.addEventListener) {
-                window.addEventListener('hashchange', forwardHash);
-            }
-            else if ('onhashchange' in window) {
-                window.attachEvent('onhashchange', forwardHash);
-            }
-            else {
-                setInterval(forwardHash, 100);
-            }
-
-            // 处理初次进入的hash
-            setTimeout(forwardHash, 0);
         };
 
         require('./Observable').enable(locator);
