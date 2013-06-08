@@ -3,7 +3,8 @@ define(
         var actions = [
             {
                 path: '/cart/list',
-                type: 'cart/List'
+                type: 'cart/List',
+                title: '购物车'
             }
         ];
 

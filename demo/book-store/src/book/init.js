@@ -3,11 +3,13 @@ define(
         var actions = [
             {
                 path: '/book/list',
-                type: 'book/List'
+                type: 'book/List',
+                title: '图书列表'
             },
             {
                 path: '/book/view',
-                type: 'book/Read'
+                type: 'book/Read',
+                title: '图书详情'
             }
         ];
 
