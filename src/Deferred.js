@@ -47,7 +47,7 @@ define(
                 flush();
             }
             else {
-                setImmediate(flush, 0);
+                setImmediate(flush);
             }
 
             deferred._doneCallbacks = [];

@@ -36,8 +36,6 @@ define(
             if (Deferred.isPromise(value)) {
                 if (typeof value.cancel === 'function') {
                     model.addPendingWorker(value);
-                    value.done(
-                        util.bind(model.removePendingWorker, model, value));
                 }
                 value.done(addDataToModel);
                 return value;
@@ -164,26 +162,27 @@ define(
         }
 
         /**
+         * 移除一个已完成的工作对象
+         *
+         * @param {Promise} worker 工作对象
+         */
+        function removePendingWorker(model, worker) {
+            for (var i = 0; i < model.pendingWorkers.length; i++) {
+                if (model.pendingWorkers[i] === worker) {
+                    model.pendingWorkers.splice(i, 1);
+                    return;
+                }
+            }
+        }
+
+        /**
          * 添加一个未完成的工作对象
          *
          * @param {Promise} worker 工作对象
          */
         Model.prototype.addPendingWorker = function (worker) {
             this.pendingWorkers.push(worker);
-        };
-
-        /**
-         * 移除一个已完成的工作对象
-         *
-         * @param {Promise} worker 工作对象
-         */
-        Model.prototype.removePendingWorker = function (worker) {
-            for (var i = 0; i < this.pendingWorkers.length; i++) {
-                if (this.pendingWorkers[i] === worker) {
-                    this.pendingWorkers.splice(i, 1);
-                    return;
-                }
-            }
+            worker.ensure(util.bind(removePendingWorker, null, this, worker));
         };
 
         /**
