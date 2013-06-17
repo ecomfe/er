@@ -54,9 +54,9 @@ define(
         function start(firstTime) {
             // 如果有hashchange事件则使用事件，否则定时监听
             if (window.addEventListener) {
-                window.addEventListener('hashchange', forwardHash);
+                window.addEventListener('hashchange', forwardHash, false);
             }
-            else if ('onhashchange' in window) {
+            else if ('onhashchange' in window && document.documentMode > 7) {
                 window.attachEvent('onhashchange', forwardHash);
             }
             else {
@@ -64,7 +64,9 @@ define(
             }
 
             // 处理初次进入的hash
-            startupTimer = setTimeout(forwardHash, 0);
+            if (firstTime) {
+                startupTimer = setTimeout(forwardHash, 0);
+            }
         }
 
         function stop() {
@@ -78,9 +80,9 @@ define(
             }
 
             if (window.removeEventListener) {
-                window.removeEventListener('hashchange', forwardHash);
+                window.removeEventListener('hashchange', forwardHash, false);
             }
-            else if ('onhashchange' in window) {
+            else if ('onhashchange' in window && document.documentMode > 7) {
                 window.detachEvent('onhashchange', forwardHash);
             }
         }
