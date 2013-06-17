@@ -213,7 +213,16 @@ define(
             // 在`Action`中就可以通过`enter`时的`context`参数里拿到，
             // 对应用框架的话就可以在`model`中拿到
             if (actionConfig.args) {
-                util.mix(args, actionConfig.args);
+                // 由于子Action可以传额外参数，可能会和这里的冲突，
+                // 这种情况下以`renderChildAction`传过来的参数为优先，
+                // 因此不能直接覆盖，要先判断是否存在
+                for (var name in actionConfig.args) {
+                    if (actionConfig.args.hasOwnProperty(name)
+                        && !args.hasOwnProperty(name)
+                    ) {
+                        args[name] = actionConfig.args[name];
+                    }
+                }
             }
 
             var loading = new Deferred();
@@ -489,8 +498,9 @@ define(
             // `container`是一个容器DOM元素
 
             // 用于处理子Action中跳转的特殊`redirect`方法，
-            // 接口与`locator.redirect`保持一致
-            function redirect(url, options) {
+            // 接口与`locator.redirect`保持一致，
+            // 但由于`renderChildAction`可以传额外参数，因此也再加一个参数
+            function redirect(url, options, extra) {
                 var url = require('./locator').resolveURL(url, options);
 
                 var actionContext = childActionMapping[context.container];
@@ -502,7 +512,8 @@ define(
                     }
                     else {
                         // `renderChildAction`中会把原来的Action销毁
-                        controller.renderChildAction(url, context.container);
+                        controller.renderChildAction(
+                            url, context.container, extra);
                     }
                 }
             }
@@ -545,6 +556,10 @@ define(
             // 把子Action的`redirect`方法改掉，以免影响全局主Action，
             // 这样通过js编码的跳转也会转到`renderChildAction`逻辑上
             action.redirect = redirect;
+            // 同样增加`reload`方法
+            action.reload = function (extra) {
+                this.redirect(context.url, { force: true }, extra);
+            };
 
             addChildAction(container, action, hijack, context);
 

@@ -220,10 +220,21 @@ define(
          * @param {string | URL} url 需要重定向的目标URL
          * @param {Object=} options 额外附加的参数对象
          * @param {boolean=} options.force 确定当跳转地址不变时是否强制刷新
+         * @public
          */
         Action.prototype.redirect = function (url, options) {
             var locator = require('./locator');
             locator.redirect(url, options);
+        };
+
+        /**
+         * 重加载当前Action
+         *
+         * @public
+         */
+        Action.prototype.reload = function () {
+            var locator = require('./locator');
+            locator.reload();
         };
 
         util.inherits(Action, Observable);
