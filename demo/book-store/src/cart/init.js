@@ -9,7 +9,7 @@ define(
         ];
 
         var controller = require('er/controller');
-        actions.forEach(controller.registerAction);
+        _.forEach(actions, controller.registerAction);
 
         var cart = {
             boughtBooks: [],
@@ -71,7 +71,8 @@ define(
             },
 
             calculateSum: function() {
-                var sum = this.boughtBooks.reduce(
+                var sum = _.reduce(
+                    this.boughtBooks,
                     function(sum, b) {
                         return sum + b.price * b.count;
                     },

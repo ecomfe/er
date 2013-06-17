@@ -8,6 +8,6 @@ define(
         ];
 
         var controller = require('er/controller');
-        actions.forEach(controller.registerAction);
+        _.forEach(actions, controller.registerAction);
     }
 );
