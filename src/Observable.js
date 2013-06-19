@@ -123,6 +123,13 @@ define(
             var alreadyInvoked = {};
             var pool = this._events[type];
             if (pool) {
+                // 由于在执行过程中，某个处理函数可能会用`un`取消事件的绑定，
+                // 这可能导致循环过程中`i`的不准确，因此复制一份。
+                // 这个策略会使得在事件处理函数中把后续的处理函数取消掉在当前无效。
+                // 
+                // NOTICE: 这个性能不高，有空再改改
+                pool = pool.slice();
+
                 for (var i = 0; i < pool.length; i++) {
                     var handler = pool[i];
                     if (!alreadyInvoked.hasOwnProperty(handler[guidKey])) {
@@ -138,6 +145,8 @@ define(
                     return;
                 }
 
+                allPool = allPool.slice();
+                
                 for (var i = 0; i < allPool.length; i++) {
                     var handler = allPool[i];
                     if (!alreadyInvoked.hasOwnProperty(handler[guidKey])) {
