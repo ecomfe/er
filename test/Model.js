@@ -506,12 +506,12 @@ define(function (require) {
             });
 
             describe('worker management mechanism', function () {
-                it('should cancel a cancellable Promise if model is disposed before it resolves', function () {
+                it('should abort a abortable Promise if model is disposed before it resolves', function () {
                     var model = new Model();
-                    var spy = jasmine.createSpy('cancel');
+                    var spy = jasmine.createSpy('abort');
                     model.datasource = function () {
                         var promise = delayed(1, 1)();
-                        promise.cancel = spy;
+                        promise.abort = spy;
                         return promise;
                     };
                     model.load();
@@ -519,13 +519,13 @@ define(function (require) {
                     expect(spy).toHaveBeenCalled();
                 });
 
-                it('should cancel a cancellable Promise in sequence config if model is disposed before it resolves', function (done) {
+                it('should abort a abortable Promise in sequence config if model is disposed before it resolves', function (done) {
                     var model = new Model();
-                    var spy = jasmine.createSpy('cancel');
+                    var spy = jasmine.createSpy('abort');
                     model.datasource = [
                         function () {
                             var promise = delayed(1, 10)();
-                            promise.cancel = spy;
+                            promise.abort = spy;
                             return promise;
                         }
                     ];
@@ -537,13 +537,13 @@ define(function (require) {
                     }, 1);
                 });
 
-                it('should cancel a cancellable Promise in parallel config if model is disposed before it resolves', function () {
+                it('should abort a abortable Promise in parallel config if model is disposed before it resolves', function () {
                     var model = new Model();
-                    var spy = jasmine.createSpy('cancel');
+                    var spy = jasmine.createSpy('abort');
                     model.datasource = {
                         a: function () {
                             var promise = delayed(1, 1)();
-                            promise.cancel = spy;
+                            promise.abort = spy;
                             return promise;
                         }
                     };
@@ -552,12 +552,12 @@ define(function (require) {
                     expect(spy).toHaveBeenCalled();
                 });
 
-                it('should not call `cancel` after it resolves', function (done) {
+                it('should not call `abort` after it resolves', function (done) {
                     var model = new Model();
-                    var spy = jasmine.createSpy('cancel');
+                    var spy = jasmine.createSpy('abort');
                     model.datasource = function () {
                         var promise = delayed(1, 1)();
-                        promise.cancel = spy;
+                        promise.abort = spy;
                         return promise;
                     };
                     model.load().done(function () {

@@ -241,11 +241,11 @@ define(
             loading.syncModeEnabled = false;
 
             // 让loadAction返回一个特殊的Promise，
-            // 可以通过调用`cancel()`取消Action加载完的后续执行
+            // 可以通过调用`abort()`取消Action加载完的后续执行
             var loader = loading.promise;
-            var canceled = false;
-            loader.cancel = function () {
-                canceled = true;
+            var aborted = false;
+            loader.abort = function () {
+                aborted = true;
             };
 
             if (!args.isChildAction) {
@@ -257,7 +257,7 @@ define(
             window.require(
                 [actionConfig.type],
                 function (SpecificAction) {
-                    if (canceled) {
+                    if (aborted) {
                         return;
                     }
 
@@ -382,7 +382,7 @@ define(
          * @parma {Object} options 额外的参数
          * @param {boolean} isChildAction 标识是否为子Action
          * @return {Promise} 一个特殊的Promise对象，
-         * 该对象可以通过`cancel()`取消Action加载完成后的执行
+         * 该对象可以通过`abort()`取消Action加载完成后的执行
          */
         function forward(url, container, options, isChildAction) {
             // 如果想要把这个方法暴露出去的话，
@@ -573,7 +573,7 @@ define(
          * @param {string} container 指定容器元素的id
          * @parma {Object=} options 额外的参数
          * @return {Promise} 一个Promise对象，
-         * 当渲染完成后进行**resolved**状态，但可在之前调用`cancel()`取消
+         * 当渲染完成后进行**resolved**状态，但可在之前调用`abort()`取消
          */
         controller.renderChildAction = function (url, container, options) {
             var assert = require('./assert');
@@ -589,9 +589,9 @@ define(
                 util.bind(events.notifyError, events)
             );
             // `then`方法会返回一个新的`Promise`，
-            // 但原来的`loader`上有个`cancel`方法，
+            // 但原来的`loader`上有个`abort`方法，
             // 要把这个方法留下来
-            loadingChildAction.cancel = loader.cancel;
+            loadingChildAction.abort = loader.abort;
             return loadingChildAction;
         };
 

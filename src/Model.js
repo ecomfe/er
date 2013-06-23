@@ -34,7 +34,7 @@ define(
             }
 
             if (Deferred.isPromise(value)) {
-                if (typeof value.cancel === 'function') {
+                if (typeof value.abort === 'function') {
                     model.addPendingWorker(value);
                 }
                 value.done(addDataToModel);
@@ -487,9 +487,9 @@ define(
         Model.prototype.dispose = function () {
             for (var i = 0; i < this.pendingWorkers.length; i++) {
                 var worker = this.pendingWorkers[i];
-                if (typeof worker.cancel === 'function') {
+                if (typeof worker.abort === 'function') {
                     try {
-                        worker.cancel();
+                        worker.abort();
                     }
                     catch (ex) {
                     }
