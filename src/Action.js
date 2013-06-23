@@ -96,7 +96,14 @@ define(
          * @protected
          */
         Action.prototype.createModel = function (context) {
-            return this.modelType ? new this.modelType(context) : {};
+            if (this.modelType) {
+                var model = new this.modelType();
+                model.fill(context);
+                return model;
+            }
+            else {
+                return {};
+            }
         };
 
         /**
