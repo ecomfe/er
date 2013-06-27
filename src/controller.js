@@ -410,9 +410,16 @@ define(
             return loader;
         }
 
+        var globalActionLoader;
         function renderAction(url) {
-            var loader = forward(url, config.mainElement, null, false);
-            loader.then(enterAction, util.bind(events.notifyError, events));
+            if (globalActionLoader) {
+                globalActionLoader.abort();
+            }
+            globalActionLoader = forward(url, config.mainElement, null, false);
+            globalActionLoader.then(
+                enterAction, 
+                util.bind(events.notifyError, events)
+            );
         }
 
         function removeChildAction(container, targetContext) {
@@ -489,7 +496,12 @@ define(
             }
         }
 
+        var childActionLoaders = {};
+
         function enterChildAction(action, context) {
+            // 把加载用的`loader`去掉回收内存
+            childActionLoaders[context.container] = null;
+
             var container = document.getElementById(context.container);
             if (!container) {
                 return;
@@ -585,7 +597,12 @@ define(
                 url = require('./URL').parse(url);
             }
 
-            var loader = forward(url, container, options, true);
+            var loader = childActionLoaders[container];
+            if (loader) {
+                loader.abort();
+            }
+            loader = forward(url, container, options, true);
+            childActionLoaders[container] = loader;
             var loadingChildAction = loader.then(
                 enterChildAction,
                 util.bind(events.notifyError, events)
