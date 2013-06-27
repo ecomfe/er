@@ -361,6 +361,9 @@ define(
                     }
                 }
                 currentAction = action;
+
+                // 只有主Action才有资格改`document.title`
+                document.title = context.title || config.systemName;
             }
 
             events.fire(
@@ -368,7 +371,6 @@ define(
                 util.mix({ action: action }, context)
             );
 
-            document.title = context.title || config.systemName;
             return action.enter(context);
         }
 
