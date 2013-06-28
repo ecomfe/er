@@ -219,7 +219,7 @@ define(
                 failed.syncModeEnabled = false;
                 failed.reject(
                     'no action configured for url ' + args.url.getPath());
-                return failed;
+                return failed.promise;
             }
 
             // 几个后续需要使用的配置项
