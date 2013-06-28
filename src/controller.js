@@ -266,14 +266,14 @@ define(
                         var reason = 
                             'No action implement for ' + acrtionConfig.type;
 
-                        events.fire(
-                            'actionfail',
+                        var error = util.mix(
                             {
-                                url: args.url,
                                 config: actionConfig,
                                 reason: reason
-                            }
+                            }, 
+                            args
                         );
+                        events.fire('actionfail', error);
 
                         loading.reject(reason);
                         return;
@@ -297,17 +297,17 @@ define(
                         if (!action) {
                             var reason = 'Action factory returns non-action';
 
-                            events.fire(
-                                'actionfail',
+                            var error = util.mix(
                                 {
-                                    url: args.url,
-                                    config: actionConfig,
-                                    action: action,
-                                    reason: reason
-                                }
+                                    config: actionConfig, 
+                                    reason: reason, 
+                                    action: action
+                                }, 
+                                args
                             );
+                            events.fire('actionfail', error);
 
-                            loading.rejected(reason);
+                            loading.reject(reason);
                             return;
                         }
                     }
