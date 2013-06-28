@@ -149,7 +149,16 @@ define(
 
             // 如果没有Action的配置，则跳转到404页面
             if (!actionConfig) {
-                events.fire('actionnotfound', { url: args.url });
+                events.fire(
+                    'actionnotfound', 
+                    util.mix(
+                        {
+                            failType: 'NotFound',
+                            reason: 'Not found'
+                        }, 
+                        args
+                    )
+                );
 
                 args.originalURL = args.url;
                 args.url = URL.parse(config.notFoundLocation);
@@ -170,7 +179,14 @@ define(
             if (!hasAuthority) {
                 events.fire(
                     'permissiondenied', 
-                    { url: args.url, config: actionConfig }
+                    util.mix(
+                        {
+                            failType: 'PermissionDenied',
+                            reason: 'Permission denied',
+                            config: actionConfig
+                        }, 
+                        args
+                    )
                 );
 
                 var location = actionConfig.noAuthorityLocation 
@@ -271,6 +287,7 @@ define(
 
                         var error = util.mix(
                             {
+                                failType: 'NoModule',
                                 config: actionConfig,
                                 reason: reason
                             }, 
@@ -302,6 +319,7 @@ define(
 
                             var error = util.mix(
                                 {
+                                    failType: 'InvalidFactory',
                                     config: actionConfig, 
                                     reason: reason, 
                                     action: action
