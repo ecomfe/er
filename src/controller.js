@@ -392,7 +392,29 @@ define(
                 util.mix({ action: action }, context)
             );
 
-            return action.enter(context);
+            var entering = action.enter(context);
+            entering.then(
+                function () {
+                    events.fire(
+                        'enteractioncomplete',
+                        util.mix({ action: action }, context)
+                    );
+                },
+                function () {
+                    events.fire(
+                        'enteractionfail',
+                        util.mix(
+                            {
+                                failType: 'EnterFail',
+                                reason: 'Invoke action.enter() causes error'
+                            },
+                            context
+                        )
+                    );
+                }
+            );
+
+            return entering;
         }
 
         var childActionMapping = {};
