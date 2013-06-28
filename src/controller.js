@@ -245,7 +245,10 @@ define(
             var loader = loading.promise;
             var aborted = false;
             loader.abort = function () {
-                aborted = true;
+                if (!aborted) {
+                    aborted = true;
+                    events.fire('actionabort', util.mix({}, args));
+                }
             };
 
             if (!args.isChildAction) {
