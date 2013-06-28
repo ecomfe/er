@@ -618,12 +618,11 @@ define(
                 url = require('./URL').parse(url);
             }
 
-            var loader = childActionLoaders[container];
-            if (loader) {
-                loader.abort();
+            var previousLoader = childActionLoaders[container];
+            if (previousLoader && typeof previousLoader.abort === 'function') {
+                previousLoader.abort();
             }
-            loader = forward(url, container, options, true);
-            childActionLoaders[container] = loader;
+            var loader = forward(url, container, options, true);
             var loadingChildAction = loader.then(
                 enterChildAction,
                 util.bind(events.notifyError, events)
@@ -632,6 +631,7 @@ define(
             // 但原来的`loader`上有个`abort`方法，
             // 要把这个方法留下来
             loadingChildAction.abort = loader.abort;
+            childActionLoaders[container] = loadingChildAction;
             return loadingChildAction;
         };
 
