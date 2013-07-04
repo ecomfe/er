@@ -97,7 +97,7 @@ define(
                 assert(value >= max, message);
             };
 
-            return asssert;
+            return assert;
         }
         else {
             var assert = function () {};
