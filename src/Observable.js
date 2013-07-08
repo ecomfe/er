@@ -162,7 +162,7 @@ define(
          * @param {*} target 需要支持事件处理功能的对象
          */
         Observable.enable = function (target) {
-            target._events = [];
+            target._events = {};
             target.on = Observable.prototype.on;
             target.un = Observable.prototype.un;
             target.fire = Observable.prototype.fire;

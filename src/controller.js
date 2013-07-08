@@ -149,7 +149,16 @@ define(
 
             // 如果没有Action的配置，则跳转到404页面
             if (!actionConfig) {
-                events.fire('actionnotfound', { url: args.url });
+                events.fire(
+                    'actionnotfound', 
+                    util.mix(
+                        {
+                            failType: 'NotFound',
+                            reason: 'Not found'
+                        }, 
+                        args
+                    )
+                );
 
                 args.originalURL = args.url;
                 args.url = URL.parse(config.notFoundLocation);
@@ -170,7 +179,14 @@ define(
             if (!hasAuthority) {
                 events.fire(
                     'permissiondenied', 
-                    { url: args.url, config: actionConfig }
+                    util.mix(
+                        {
+                            failType: 'PermissionDenied',
+                            reason: 'Permission denied',
+                            config: actionConfig
+                        }, 
+                        args
+                    )
                 );
 
                 var location = actionConfig.noAuthorityLocation 
@@ -203,7 +219,7 @@ define(
                 failed.syncModeEnabled = false;
                 failed.reject(
                     'no action configured for url ' + args.url.getPath());
-                return failed;
+                return failed.promise;
             }
 
             // 几个后续需要使用的配置项
@@ -245,7 +261,10 @@ define(
             var loader = loading.promise;
             var aborted = false;
             loader.abort = function () {
-                aborted = true;
+                if (!aborted) {
+                    aborted = true;
+                    events.fire('actionabort', util.mix({}, args));
+                }
             };
 
             if (!args.isChildAction) {
@@ -266,14 +285,15 @@ define(
                         var reason = 
                             'No action implement for ' + acrtionConfig.type;
 
-                        events.fire(
-                            'actionfail',
+                        var error = util.mix(
                             {
-                                url: args.url,
+                                failType: 'NoModule',
                                 config: actionConfig,
                                 reason: reason
-                            }
+                            }, 
+                            args
                         );
+                        events.fire('actionfail', error);
 
                         loading.reject(reason);
                         return;
@@ -297,17 +317,18 @@ define(
                         if (!action) {
                             var reason = 'Action factory returns non-action';
 
-                            events.fire(
-                                'actionfail',
+                            var error = util.mix(
                                 {
-                                    url: args.url,
-                                    config: actionConfig,
-                                    action: action,
-                                    reason: reason
-                                }
+                                    failType: 'InvalidFactory',
+                                    config: actionConfig, 
+                                    reason: reason, 
+                                    action: action
+                                }, 
+                                args
                             );
+                            events.fire('actionfail', error);
 
-                            loading.rejected(reason);
+                            loading.reject(reason);
                             return;
                         }
                     }
@@ -361,6 +382,9 @@ define(
                     }
                 }
                 currentAction = action;
+
+                // 只有主Action才有资格改`document.title`
+                document.title = context.title || config.systemName;
             }
 
             events.fire(
@@ -368,8 +392,29 @@ define(
                 util.mix({ action: action }, context)
             );
 
-            document.title = context.title || config.systemName;
-            return action.enter(context);
+            var entering = action.enter(context);
+            entering.then(
+                function () {
+                    events.fire(
+                        'enteractioncomplete',
+                        util.mix({ action: action }, context)
+                    );
+                },
+                function () {
+                    events.fire(
+                        'enteractionfail',
+                        util.mix(
+                            {
+                                failType: 'EnterFail',
+                                reason: 'Invoke action.enter() causes error'
+                            },
+                            context
+                        )
+                    );
+                }
+            );
+
+            return entering;
         }
 
         var childActionMapping = {};
@@ -408,9 +453,16 @@ define(
             return loader;
         }
 
+        var globalActionLoader;
         function renderAction(url) {
-            var loader = forward(url, config.mainElement, null, false);
-            loader.then(enterAction, util.bind(events.notifyError, events));
+            if (globalActionLoader) {
+                globalActionLoader.abort();
+            }
+            globalActionLoader = forward(url, config.mainElement, null, false);
+            globalActionLoader.then(
+                enterAction, 
+                util.bind(events.notifyError, events)
+            );
         }
 
         function removeChildAction(container, targetContext) {
@@ -487,7 +539,12 @@ define(
             }
         }
 
+        var childActionLoaders = {};
+
         function enterChildAction(action, context) {
+            // 把加载用的`loader`去掉回收内存
+            childActionLoaders[context.container] = null;
+
             var container = document.getElementById(context.container);
             if (!container) {
                 return;
@@ -583,6 +640,10 @@ define(
                 url = require('./URL').parse(url);
             }
 
+            var previousLoader = childActionLoaders[container];
+            if (previousLoader && typeof previousLoader.abort === 'function') {
+                previousLoader.abort();
+            }
             var loader = forward(url, container, options, true);
             var loadingChildAction = loader.then(
                 enterChildAction,
@@ -592,6 +653,7 @@ define(
             // 但原来的`loader`上有个`abort`方法，
             // 要把这个方法留下来
             loadingChildAction.abort = loader.abort;
+            childActionLoaders[container] = loadingChildAction;
             return loadingChildAction;
         };
 
