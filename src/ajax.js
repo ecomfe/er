@@ -99,6 +99,10 @@ define(
             return parentKey ? parentKey + '.' + propertyName : propertyName;
         };
 
+        ajax.config = {
+            cache: false
+        };
+
         /**
          * 发起XMLHttpRequest请求
          *
@@ -297,7 +301,7 @@ define(
                 method: 'GET',
                 url: url,
                 data: data,
-                cache: cache || false
+                cache: cache || ajax.config.cache
             };
             return ajax.request(options);
         };
@@ -317,7 +321,7 @@ define(
                 url: url,
                 data: data,
                 dataType: 'json',
-                cache: cache || false
+                cache: cache || ajax.config.cache
             };
             return ajax.request(options);
         };
