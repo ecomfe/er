@@ -57,46 +57,56 @@ define(
          */
         ajax.hooks = {};
 
-        ajax.hooks.serializeData = function (data) {
-            return serializeValue('', data);
+        ajax.hooks.serializeArray = function (prefix, array) {
+            var encodedKey = prefix ? encodeURIComponent(prefix) : '';
+            var encoded = [];
+            for (var i = 0; i < array.length; i++) {
+                var item = array[i];
+                encoded[i] = ajax.hooks.serializeData('', item);
+            }
+            return encodedKey
+                ? encodedKey + '=' + encoded.join(',')
+                : encoded.join(',');
         };
 
-        function serializeValue(key, value) {
-            if (value == null) {
-                value = '';
+        ajax.hooks.serializeData = function (prefix, data) {
+            if (arguments.length === 1) {
+                data = prefix;
+                prefix = '';
+            }
+
+            if (data == null) {
+                data = '';
             }
             var getKey = ajax.hooks.serializeData.getKey;
-            var encodedKey = key ? encodeURIComponent(key) : '';
+            var encodedKey = prefix ? encodeURIComponent(prefix) : '';
 
-            var type = Object.prototype.toString.call(value);
+            var type = Object.prototype.toString.call(data);
             switch (type) {
                 case '[object Array]':
-                    var encoded = [];
-                    for (var i = 0; i < value.length; i++) {
-                        var item = value[i];
-                        encoded[i] = serializeValue('', item);
-                    }
-                    return encodedKey
-                        ? encodedKey + '=' + encoded.join(',')
-                        : encoded.join(',');
+                    return ajax.hooks.serializeArray(prefix, data);
                 case '[object Object]':
                     var result = [];
-                    for (var name in value) {
-                        var propertyKey = getKey(name, key);
+                    for (var name in data) {
+                        var propertyKey = getKey(name, prefix);
                         var propertyValue = 
-                            serializeValue(propertyKey, value[name]);
+                            ajax.hooks.serializeData(propertyKey, data[name]);
                         result.push(propertyValue);
                     }
                     return result.join('&');
                 default:
                     return encodedKey 
-                        ? encodedKey + '=' + encodeURIComponent(value)
-                        : encodeURIComponent(value);
+                        ? encodedKey + '=' + encodeURIComponent(data)
+                        : encodeURIComponent(data);
             }
-        }
+        };
 
         ajax.hooks.serializeData.getKey = function (propertyName, parentKey) {
             return parentKey ? parentKey + '.' + propertyName : propertyName;
+        };
+
+        ajax.config = {
+            cache: false
         };
 
         /**
@@ -297,7 +307,7 @@ define(
                 method: 'GET',
                 url: url,
                 data: data,
-                cache: cache || false
+                cache: cache || ajax.config.cache
             };
             return ajax.request(options);
         };
@@ -317,7 +327,7 @@ define(
                 url: url,
                 data: data,
                 dataType: 'json',
-                cache: cache || false
+                cache: cache || ajax.config.cache
             };
             return ajax.request(options);
         };
