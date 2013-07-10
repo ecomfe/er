@@ -129,7 +129,7 @@ define(
             }
 
             var assert = require('./assert');
-            assert.hasProperty(options, url, 'url property is required');
+            assert.hasProperty(options, 'url', 'url property is required');
 
             var defaults = {
                 method: 'POST',
