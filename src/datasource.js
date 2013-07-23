@@ -34,11 +34,16 @@ define(
          * @return {function} 数据获取函数
          */
         datasource.remote = function (url, options) {
-            return function () {
+            return function (model) {
                 options = require('./util').mix(
                     { url: url, dataType: 'json' }, 
                     options
                 );
+
+                // 允许使用函数返回请求时的参数
+                if (typeof options.data === 'function') {
+                    options.data = options.data(model);
+                }
                 var ajax = require('./ajax');
                 return ajax.request(options);
             };
