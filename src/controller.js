@@ -455,7 +455,9 @@ define(
 
         var globalActionLoader;
         function renderAction(url) {
-            if (globalActionLoader) {
+            if (globalActionLoader 
+                && typeof globalActionLoader.abort === 'function'
+            ) {
                 globalActionLoader.abort();
             }
             globalActionLoader = forward(url, config.mainElement, null, false);
