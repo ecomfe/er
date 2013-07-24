@@ -400,13 +400,15 @@ define(
                         util.mix({ action: action }, context)
                     );
                 },
-                function () {
+                function (reason) {
                     events.fire(
                         'enteractionfail',
                         util.mix(
                             {
                                 failType: 'EnterFail',
-                                reason: 'Invoke action.enter() causes error'
+                                reason: reason
+                                    ? reason.message + '\n' + reason.stack
+                                    : 'Invoke action.enter() causes error'
                             },
                             context
                         )
