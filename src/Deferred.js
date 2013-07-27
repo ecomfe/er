@@ -387,6 +387,23 @@ define(
             return deferred.promise;
         };
 
+        /**
+         * 返回一个`Promise`对象，当指定的模块被AMD加载器加载后，进入**resolved**状态
+         *
+         * @param {...string} 需要加载的模块列表
+         * @return {Promise} 一个`Promise`对象
+         */
+        Deferred.require = function () {
+            var modules = [].slice.call(arguments);
+            var deferred = new Deferred();
+
+            window.require(modules, deferred.resolver.resolve);
+
+            deferred.promise.abort = deferred.resolver.reject;
+
+            return deferred.promise;
+        };
+
         return Deferred;
     }
 );
