@@ -22,6 +22,7 @@ define(
          * @extends Observable
          */
         function Action() {
+            this.disposed = false;
         }
 
         /**
@@ -112,6 +113,11 @@ define(
          * @private
          */
         Action.prototype.forwardToView = function () {
+            // 如果已经销毁了就别再继续下去
+            if (this.disposed) {
+                return this;
+            }
+
             /**
              * Model加载完成时触发
              *
@@ -184,6 +190,8 @@ define(
          * @protected
          */
         Action.prototype.leave = function () {
+            this.disposed = true;
+
             /**
              * 准备离开Action时触发
              *
