@@ -37,7 +37,7 @@ define(
                 if (typeof value.abort === 'function') {
                     model.addPendingWorker(value);
                 }
-                value.done(addDataToModel);
+                value.then(addDataToModel);
                 return value;
             }
             else {
@@ -59,7 +59,7 @@ define(
             for (var i = 0; i < datasource.length; i++) {
                 var unit = datasource[i];
                 var task = util.bind(load, null, model, unit);
-                loading = loading.done(task);
+                loading = loading.then(task);
             }
             return loading;
         }
@@ -290,7 +290,7 @@ define(
         Model.prototype.load = function () {
             try {
                 var loading = load(this, this.datasource);
-                return loading.done(util.bind(this.prepare, this));
+                return loading.then(util.bind(this.prepare, this));
             }
             catch (ex) {
                 return Deferred.rejected(ex);
