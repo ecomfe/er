@@ -294,6 +294,7 @@ define(
                             args
                         );
                         events.fire('actionfail', error);
+                        events.notifyError(error);
 
                         loading.reject(reason);
                         return;
@@ -327,6 +328,7 @@ define(
                                 args
                             );
                             events.fire('actionfail', error);
+                            events.notifyError(error);
 
                             loading.reject(reason);
                             return;
@@ -401,18 +403,17 @@ define(
                     );
                 },
                 function (reason) {
-                    events.fire(
-                        'enteractionfail',
-                        util.mix(
-                            {
-                                failType: 'EnterFail',
-                                reason: reason
-                                    ? reason.message + '\n' + reason.stack
-                                    : 'Invoke action.enter() causes error'
-                            },
-                            context
-                        )
+                    var error = util.mix(
+                        {
+                            failType: 'EnterFail',
+                            reason: reason
+                                ? reason.message + '\n' + reason.stack
+                                : 'Invoke action.enter() causes error'
+                        },
+                        context
                     );
+                    events.fire('enteractionfail', error);
+                    events.notifyError(error);
                 }
             );
 
