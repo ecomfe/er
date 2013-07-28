@@ -469,6 +469,8 @@ define(
             );
         }
 
+        controller.renderAction = renderAction;
+
         function removeChildAction(container, targetContext) {
             var info = childActionMapping[container.id];
             if (!info) {
