@@ -457,6 +457,9 @@ define(
 
         var globalActionLoader;
         function renderAction(url) {
+            if (typeof url === 'string') {
+                url = URL.parse(url);
+            }
             if (globalActionLoader 
                 && typeof globalActionLoader.abort === 'function'
             ) {
