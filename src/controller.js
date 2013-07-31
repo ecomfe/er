@@ -568,6 +568,7 @@ define(
             // 接口与`locator.redirect`保持一致，
             // 但由于`renderChildAction`可以传额外参数，因此也再加一个参数
             function redirect(url, options, extra) {
+                options = options || {};
                 var url = require('./locator').resolveURL(url, options);
 
                 var actionContext = childActionMapping[context.container];
