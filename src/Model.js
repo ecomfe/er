@@ -22,8 +22,6 @@ define(
          * @return {Promise} 对应的`Promise`对象，数据加载完成后触发
          */
         function loadData(model, options) {
-            var value = options.retrieve(model);
-
             function addDataToModel(value) {
                 if (options.dump) {
                     model.fill(value, silent);
@@ -31,18 +29,57 @@ define(
                 else {
                     model.set(options.name, value, silent);
                 }
+                return {
+                    success: true,
+                    name: options.name,
+                    options: options, 
+                    value: value
+                };
             }
 
-            if (Deferred.isPromise(value)) {
-                if (typeof value.abort === 'function') {
-                    model.addPendingWorker(value);
-                }
-                value.then(addDataToModel);
-                return value;
+            function buildError(error) {
+                return {
+                    success: false,
+                    name: options.name,
+                    options: options,
+                    error: error
+                };
             }
-            else {
-                addDataToModel(value);
-                return Deferred.resolved();
+
+            try {
+                var value = options.retrieve(model);
+                
+                if (Deferred.isPromise(value)) {
+                    if (typeof value.abort === 'function') {
+                        model.addPendingWorker(value);
+                    }
+                    return value.then(
+                        addDataToModel,
+                        function (error) {
+                            error = buildError(error);
+                            try {
+                                var result = model.handleError(error);
+                                return addDataToModel(result);
+                            }
+                            catch (ex) {
+                                if (ex.success === false) {
+                                    throw ex;
+                                }
+                                else {
+                                    throw buildError(ex);
+                                }
+                            }
+                        }
+                    );
+                }
+                else {
+                    var result = addDataToModel(value);
+                    return Deferred.resolved(result);
+                }
+            }
+            catch (ex) {
+                var error = buildError(error);
+                return Deferred.rejected(error);
             }
         }
 
@@ -477,6 +514,22 @@ define(
          */
         Model.prototype.clone = function () {
             return new Model(this.store);
+        };
+
+        /**
+         * 处理加载过程中发生的错误
+         *
+         * 加载过程中的每一个错误都会调用该方法，该方法可以决定错误的处理逻辑：
+         * 
+         * - 如果方法正常返回，则认为错误已经处理完毕，返回值作为数据值加入到当前Model中
+         * - 如果方法抛出异常，则认为错误未经处理，会将该错误继续向上抛出，当前Model加载失败
+         *
+         * @param {Object} error 错误信息
+         * @param {string=} error.name 对应的数据键名
+         * @param {*} error.error 错误对象
+         */
+        Model.prototype.handleError = function (error) {
+            throw error;
         };
 
         /**
