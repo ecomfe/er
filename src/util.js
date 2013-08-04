@@ -112,6 +112,10 @@ define(
          * @return {*} 对应的JSON对象
          */
         util.parseJSON = function (text) {
+            if (!text) {
+                return undefined;
+            }
+            
             if (window.JSON && typeof JSON.parse === 'function') {
                 return JSON.parse(text);
             }
