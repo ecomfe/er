@@ -89,7 +89,8 @@ define(
         };
 
         ajax.config = {
-            cache: false
+            cache: false,
+            timeout: 0
         };
 
         /**
@@ -117,7 +118,8 @@ define(
             var defaults = {
                 method: 'POST',
                 data: {},
-                cache: ajax.config.cache
+                cache: ajax.config.cache,
+                timeout: ajax.config.timeout
             };
             var util = require('./util');
             options = util.mix(defaults, options);
