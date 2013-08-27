@@ -181,7 +181,7 @@ define(
 
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
-                    var status = xhr.status;
+                    var status = fakeXHR.status || xhr.status;
                     // `file://`协议下状态码始终为0
                     if (status === 0) {
                         status = 200;
