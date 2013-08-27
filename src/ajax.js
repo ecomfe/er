@@ -264,7 +264,7 @@ define(
             else {
                 var contentType = 
                     options.contentType || 'application/x-www-form-urlencoded';
-                xhr.setRequestHeader('Content-type', contentType);
+                xhr.setRequestHeader('Content-Type', contentType);
                 var query = ajax.hooks.serializeData(
                     '', options.data, contentType, fakeXHR);
                 xhr.send(query);
