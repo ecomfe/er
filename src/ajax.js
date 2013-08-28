@@ -90,7 +90,8 @@ define(
 
         ajax.config = {
             cache: false,
-            timeout: 0
+            timeout: 0,
+            charset: ''
         };
 
         /**
@@ -119,7 +120,8 @@ define(
                 method: 'POST',
                 data: {},
                 cache: ajax.config.cache,
-                timeout: ajax.config.timeout
+                timeout: ajax.config.timeout,
+                charset: ajax.config.charset
             };
             var util = require('./util');
             options = util.mix(defaults, options);
@@ -264,6 +266,9 @@ define(
             else {
                 var contentType = 
                     options.contentType || 'application/x-www-form-urlencoded';
+                if (options.charset) {
+                    contentType += ';charset=' + options.charset;
+                }
                 xhr.setRequestHeader('Content-Type', contentType);
                 var query = ajax.hooks.serializeData(
                     '', options.data, contentType, fakeXHR);
