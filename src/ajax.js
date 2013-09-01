@@ -250,7 +250,7 @@ define(
                 '', data, 'application/x-www-form-urlencoded');
             var url = options.url;
             if (query) {
-                var delimiter = url.indexOf('?') >= 0 ? ':' : '?';
+                var delimiter = url.indexOf('?') >= 0 ? '&' : '?';
                 url += delimiter + query;
             }
 
