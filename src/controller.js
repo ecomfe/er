@@ -486,10 +486,9 @@ define(
                 globalActionLoader.abort();
             }
             globalActionLoader = forward(url, config.mainElement, null, false);
-            globalActionLoader.then(
-                enterAction, 
-                util.bind(events.notifyError, events)
-            );
+            globalActionLoader
+                .then(enterAction)
+                .fail(util.bind(events.notifyError, events));
         }
 
         controller.renderAction = renderAction;
