@@ -403,12 +403,31 @@ define(
                     );
                 },
                 function (reason) {
+                    var message = '';
+                    if (!reason) {
+                        message = 'Invoke action.enter() causes error';
+                    }
+                    // 普通异常
+                    else if (reason.message) {
+                        message = reason.message;
+                        if (reason.stack) {
+                            message += '\n' + reason.stack;
+                        }
+                    }
+                    // 能够序列化
+                    else if (window.JSON 
+                        && typeof JSON.stringify === 'function'
+                    ) {
+                        message = JSON.stringify(reason);
+                    }
+                    else {
+                        message = reason;
+                    }
+
                     var error = util.mix(
                         {
                             failType: 'EnterFail',
-                            reason: reason
-                                ? reason.message + '\n' + reason.stack
-                                : 'Invoke action.enter() causes error'
+                            reason: message
                         },
                         context
                     );
