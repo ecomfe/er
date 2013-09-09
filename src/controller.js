@@ -123,7 +123,7 @@ define(
 
             // 如果只允许子Action访问但当前是主Action，就当没找到
             if (actionConfig && 
-                (actionConfig.childActionOnly && args.isChildAction)
+                (actionConfig.childActionOnly && !args.isChildAction)
             ) {
                 actionConfig = null;
             }
