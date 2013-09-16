@@ -619,7 +619,9 @@ define(
                 // `<a>`元素也可能没有`href`属性
                 var href = target.getAttribute('href', 2) || '';
                 // 是hash跳转的链接就取消掉默认的跳转行为
-                if (href.charAt(0) !== '#') {
+                if (href.charAt(0) !== '#'
+                    || href.getAttribute('data-redirect') === 'global'
+                ) {
                     return;
                 }
 
