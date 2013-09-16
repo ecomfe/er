@@ -85,7 +85,7 @@ define(
              */
             this.fire('enter');
 
-            this.context = context;
+            this.context = context || {};
 
             var urlQuery = context && context.url && context.url.getQuery();
             var args = util.mix({}, context, urlQuery);
@@ -161,7 +161,7 @@ define(
             if (this.view) {
                 this.view.model = this.model;
                 // 如果创建View的时候已经设置了`container`，就不要强行干扰了
-                if (this.context && !this.view.container) {
+                if (!this.view.container) {
                     this.view.container = this.context.container;
                 }
 
