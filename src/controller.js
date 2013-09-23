@@ -464,7 +464,7 @@ define(
                 context.referrer = referrerInfo ? referrerInfo.url : null;
             }
             else {
-                container.referrer = currentURL;
+                context.referrer = currentURL;
             }
 
             util.mix(context, options);
