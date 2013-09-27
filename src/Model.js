@@ -318,6 +318,31 @@ define(
          */
         Model.prototype.datasource = null;
 
+        function forwardToPrepare() {
+            function processError (ex) {
+                var error = {
+                    success: false,
+                    name: '$prepare',
+                    options: {},
+                    error: ex
+                };
+                throw error;
+            }
+
+            try {
+                var preparing = this.prepare();
+                if (Deferred.isPromise(preparing)) {
+                    return preparing.fail(processError);
+                }
+                else {
+                    return preparing;
+                }
+            }
+            catch (ex) {
+                processError(ex);
+            }
+        }
+
         /**
          * 加载当前Model
          * 
@@ -327,7 +352,7 @@ define(
         Model.prototype.load = function () {
             try {
                 var loading = load(this, this.datasource);
-                return loading.then(util.bind(this.prepare, this));
+                return loading.then(util.bind(forwardToPrepare, this));
             }
             catch (ex) {
                 return Deferred.rejected(ex);
