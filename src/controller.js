@@ -388,7 +388,7 @@ define(
                 // 只有主Action才有资格改`document.title`
                 document.title = context.title || config.systemName;
             }
-
+            
             events.fire(
                 'enteraction',
                 util.mix({ action: action }, context)
@@ -620,7 +620,7 @@ define(
                 var href = target.getAttribute('href', 2) || '';
                 // 是hash跳转的链接就取消掉默认的跳转行为
                 if (href.charAt(0) !== '#'
-                    || href.getAttribute('data-redirect') === 'global'
+                    || target.getAttribute('data-redirect') === 'global'
                 ) {
                     return;
                 }
