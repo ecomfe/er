@@ -47,7 +47,7 @@ define(
             }
 
             try {
-                var value = options.retrieve(model);
+                var value = options.retrieve(model, options);
                 
                 if (Deferred.isPromise(value)) {
                     if (typeof value.abort === 'function') {
