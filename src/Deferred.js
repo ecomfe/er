@@ -323,6 +323,12 @@ define(
             // 典型的异步并发归并问题，使用计数器来解决
             var workingUnits = [].concat.apply([], arguments);
             var workingCount = workingUnits.length;
+
+            // 如果没有任何任务，直接给处理完的
+            if (!workingCount) {
+                return Deferred.resolved();
+            }
+
             var actionType = 'resolve';
             var result = [];
 
