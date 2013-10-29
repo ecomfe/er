@@ -146,7 +146,12 @@ define(
             var fakeXHR = requesting.promise;
             var xhrWrapper = {
                 abort: function () {
+                    // 有些浏览器`abort()`就会把`readyState`变成4，
+                    // 这就会导致进入处理函数变成**resolved**状态，
+                    // 因此事先去掉处理函数，然后直接进入**rejected**状态
+                    xhr.onreadystatechange = null;
                     xhr.abort();
+                    fakeXHR.status = 0;
                     fakeXHR.readyState = xhr.readyState;
                     fakeXHR.responseText = '';
                     fakeXHR.responseXML = '';
