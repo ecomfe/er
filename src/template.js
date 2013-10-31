@@ -1393,19 +1393,20 @@ define(
             var html = '';
             var target;
 
-            if (output) {
-                try {
-                    target = getTarget(tplName);
-                    html = exec(target, new Scope(model));
-                }
-                catch (ex) {}
-
-                if (output) {
-                    output.innerHTML = html;
-                }
-
-                return html;
+            try {
+                target = getTarget(tplName);
+                html = exec(target, new Scope(model));
             }
+            catch (ex) {
+            }
+
+            // 像IE中`<p>`里面不能放`<div>`这种情况是会有异常的，
+            // 但是决定把这个异常抛出去，不静默处理了
+            if (output) {
+                output.innerHTML = html;
+            }
+
+            return html;
         }
 
         // 返回暴露的方法
