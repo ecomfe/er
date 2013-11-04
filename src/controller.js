@@ -589,7 +589,20 @@ define(
             // 但由于`renderChildAction`可以传额外参数，因此也再加一个参数
             function redirect(url, options, extra) {
                 options = options || {};
-                var url = require('./locator').resolveURL(url, options);
+                var locator = require('./locator');
+                var url = locator.resolveURL(url, options);
+
+                // 强制全局跳转，直接使用`locator`即可，
+                // 但在这之前要把原来的`Action`灭掉
+                if (options.global) {
+                    var container = document.getElementById(context.container);
+                    if (container) {
+                        removeChildAction(container);
+                    }
+
+                    locator.redirect(url, options);
+                    return;
+                }
 
                 var actionContext = childActionMapping[context.container];
                 var changed = url.toString() !== actionContext.url.toString();
@@ -609,8 +622,8 @@ define(
             // 需要把`container`上的链接点击全部拦截下来，
             // 如果是hash跳转，则转到controller上来
             function hijack(e) {
+                // 下面两行是以主流浏览器为主，兼容IE的事件属性操作
                 e = e || window.event;
-                //下面两行是以主流浏览器为主，兼容IE的事件属性操作
                 var target = e.target || e.srcElement;
 
                 // 担心有人在`<span>`之类的上面放`href`属性，还是判断一下标签
@@ -621,9 +634,7 @@ define(
                 // `<a>`元素也可能没有`href`属性
                 var href = target.getAttribute('href', 2) || '';
                 // 是hash跳转的链接就取消掉默认的跳转行为
-                if (href.charAt(0) !== '#'
-                    || target.getAttribute('data-redirect') === 'global'
-                ) {
+                if (href.charAt(0) !== '#') {
                     return;
                 }
 
@@ -640,7 +651,8 @@ define(
                 // 直接使用专供子Action上的`redirect`方法，
                 // 会自动处理`hijack`的解绑定、URL比对、进入子Action等事，
                 // 为免Action重写`redirect`方法，这里用闭包内的这个
-                redirect(url);
+                var global = target.getAttribute('data-redirect') === 'global';
+                redirect(url, { global: global });
             }
 
             // 把子Action的`redirect`方法改掉，以免影响全局主Action，
