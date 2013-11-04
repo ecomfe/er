@@ -169,6 +169,62 @@ define(function() {
                 expect(callback).toHaveBeenCalled();
                 expect(callback.mostRecentCall.args[0]).toBe(1);
             });
+        });
+
+        describe('event', function () {
+            it('should have event system enabled', function () {
+                expect(Deferred.on).toBeOfType('function');
+                expect(Deferred.un).toBeOfType('function');
+                expect(Deferred.fire).toBeOfType('function');
+            });
+
+            it('should fire `resolve` event whenver a deferred is resolved', function () {
+                var deferred = new Deferred();
+                var handler = jasmine.createSpy('handler');
+                Deferred.on('resolve', handler);
+                deferred.resolve();
+                expect(handler).toHaveBeenCalled();
+                Deferred.un('resolve', handler);
+            });
+
+            it('should pass arguments to `resolve` event', function () {
+                var deferred = new Deferred();
+                var handler = jasmine.createSpy('handler');
+                Deferred.on('resolve', handler);
+                deferred.resolve(1, 2, 3);
+                expect(handler).toHaveBeenCalled();
+                Deferred.un('resolve', handler);
+                var event = handler.mostRecentCall.args[0];
+                expect(event).toBeOfType('object');
+                expect(event.deferred).toBe(deferred);
+                expect(event.type).toBe('resolve');
+                expect(event.args).toEqual([1, 2, 3]);
+                expect(event.reason).toBe(1);
+            });
+
+            it('should fire `reject` event whenver a deferred is rejected', function () {
+                var deferred = new Deferred();
+                var handler = jasmine.createSpy('handler');
+                Deferred.on('reject', handler);
+                deferred.reject();
+                expect(handler).toHaveBeenCalled();
+                Deferred.un('reject', handler);
+            });
+
+            it('should pass arguments to `reject` event', function () {
+                var deferred = new Deferred();
+                var handler = jasmine.createSpy('handler');
+                Deferred.on('reject', handler);
+                deferred.reject(1, 2, 3);
+                expect(handler).toHaveBeenCalled();
+                Deferred.un('reject', handler);
+                var event = handler.mostRecentCall.args[0];
+                expect(event).toBeOfType('object');
+                expect(event.deferred).toBe(deferred);
+                expect(event.type).toBe('reject');
+                expect(event.args).toEqual([1, 2, 3]);
+                expect(event.reason).toBe(1);
+            });
         })
     });
 });

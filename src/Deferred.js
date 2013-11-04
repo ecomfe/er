@@ -158,6 +158,8 @@ define(
                 reject: util.bind(this.reject, this)
             };
         }
+
+        require('./Observable').enable(Deferred);
         
         /**
          * 判断一个对象是否是一个`Promise`对象
@@ -197,6 +199,15 @@ define(
             this.state = 'resolved';
             this._args = [].slice.call(arguments);
 
+            Deferred.fire(
+                'resolve',
+                {
+                    deferred: this,
+                    args: this._args,
+                    reason: this._args[0]
+                }
+            );
+
             tryFlush(this);
         };
 
@@ -213,6 +224,15 @@ define(
 
             this.state = 'rejected';
             this._args = [].slice.call(arguments);
+
+            Deferred.fire(
+                'reject',
+                {
+                    deferred: this,
+                    args: this._args,
+                    reason: this._args[0]
+                }
+            );
 
             tryFlush(this);
         };
