@@ -163,6 +163,19 @@ define(
                 .replace(/'/g, '&#39;');
         };
 
+        /**
+         * 兼容性获取一个元素
+         *
+         * @param {HTMLElement|string} element 元素或元素的id
+         * @return {HTMLElement}
+         */
+        util.getElement = function (element) {
+            if (typeof element === 'string') {
+                element = document.getElementById(element);
+            }
+            return element;
+        };
+
         return util;
     }
 );
