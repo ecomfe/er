@@ -82,6 +82,8 @@ define(
          */
         util.noop = function () {};
 
+        var dontEnumBug = !(({ toString: 1 }).propertyIsEnumerable('toString'));
+
         /**
          * 设置继承关系
          *
@@ -100,6 +102,15 @@ define(
             for (var key in originalPrototype) {
                 proto[key] = originalPrototype[key];
             }
+            if (dontEnumBug) {
+                // 其实还有好多其它的，但应该不会撞上吧(╯‵□′)╯︵┻━┻
+                if (originalPrototype.hasOwnProperty('toString')) {
+                    proto.toString = originalPrototype.toString;
+                }
+                if (originalPrototype.hasOwnProperty('valueOf')) {
+                    proto.valueOf = originalPrototype.valueOf;
+                }
+            }
             type.prototype.constructor = type;
 
             return type;
@@ -112,6 +123,10 @@ define(
          * @return {*} 对应的JSON对象
          */
         util.parseJSON = function (text) {
+            if (!text) {
+                return undefined;
+            }
+            
             if (window.JSON && typeof JSON.parse === 'function') {
                 return JSON.parse(text);
             }
@@ -146,6 +161,19 @@ define(
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        };
+
+        /**
+         * 兼容性获取一个元素
+         *
+         * @param {HTMLElement|string} element 元素或元素的id
+         * @return {HTMLElement}
+         */
+        util.getElement = function (element) {
+            if (typeof element === 'string') {
+                element = document.getElementById(element);
+            }
+            return element;
         };
 
         return util;

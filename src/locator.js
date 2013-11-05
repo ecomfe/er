@@ -162,6 +162,7 @@ define(
             options = options || {};
             url = locator.resolveURL(url);
 
+            var referrer = currentLocation;
             var isLocationChanged = updateURL(url, options);
             if (isLocationChanged || options.force) {
                 if (!options.silent) {
@@ -172,10 +173,16 @@ define(
                      * @param {Object} e 事件对象
                      * @param {string} e.url 当前的URL
                      */
-                    locator.fire('redirect', { url: url });
+                    locator.fire(
+                        'redirect', 
+                        { url: url, referrer: referrer }
+                    );
                 }
 
-                require('./events').fire('redirect', { url: url });
+                require('./events').fire(
+                    'redirect', 
+                    { url: url, referrer: referrer }
+                );
             }
         };
 

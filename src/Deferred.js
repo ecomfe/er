@@ -158,6 +158,8 @@ define(
                 reject: util.bind(this.reject, this)
             };
         }
+
+        require('./Observable').enable(Deferred);
         
         /**
          * 判断一个对象是否是一个`Promise`对象
@@ -197,6 +199,15 @@ define(
             this.state = 'resolved';
             this._args = [].slice.call(arguments);
 
+            Deferred.fire(
+                'resolve',
+                {
+                    deferred: this,
+                    args: this._args,
+                    reason: this._args[0]
+                }
+            );
+
             tryFlush(this);
         };
 
@@ -213,6 +224,15 @@ define(
 
             this.state = 'rejected';
             this._args = [].slice.call(arguments);
+
+            Deferred.fire(
+                'reject',
+                {
+                    deferred: this,
+                    args: this._args,
+                    reason: this._args[0]
+                }
+            );
 
             tryFlush(this);
         };
@@ -323,6 +343,12 @@ define(
             // 典型的异步并发归并问题，使用计数器来解决
             var workingUnits = [].concat.apply([], arguments);
             var workingCount = workingUnits.length;
+
+            // 如果没有任何任务，直接给处理完的
+            if (!workingCount) {
+                return Deferred.resolved();
+            }
+
             var actionType = 'resolve';
             var result = [];
 
@@ -384,6 +410,23 @@ define(
         Deferred.rejected = function () {
             var deferred = new Deferred();
             deferred.reject.apply(deferred, arguments);
+            return deferred.promise;
+        };
+
+        /**
+         * 返回一个`Promise`对象，当指定的模块被AMD加载器加载后，进入**resolved**状态
+         *
+         * @param {...string} 需要加载的模块列表
+         * @return {Promise} 一个`Promise`对象
+         */
+        Deferred.require = function () {
+            var modules = [].slice.call(arguments);
+            var deferred = new Deferred();
+
+            window.require(modules, deferred.resolver.resolve);
+
+            deferred.promise.abort = deferred.resolver.reject;
+
             return deferred.promise;
         };
 

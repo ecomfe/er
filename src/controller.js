@@ -123,7 +123,7 @@ define(
 
             // 如果只允许子Action访问但当前是主Action，就当没找到
             if (actionConfig && 
-                (actionConfig.childActionOnly && args.isChildAction)
+                (actionConfig.childActionOnly && !args.isChildAction)
             ) {
                 actionConfig = null;
             }
@@ -294,6 +294,7 @@ define(
                             args
                         );
                         events.fire('actionfail', error);
+                        events.notifyError(error);
 
                         loading.reject(reason);
                         return;
@@ -327,6 +328,7 @@ define(
                                 args
                             );
                             events.fire('actionfail', error);
+                            events.notifyError(error);
 
                             loading.reject(reason);
                             return;
@@ -384,9 +386,11 @@ define(
                 currentAction = action;
 
                 // 只有主Action才有资格改`document.title`
-                document.title = context.title || config.systemName;
+                document.title = context.title 
+                    || context.documentTitle 
+                    || config.systemName;
             }
-
+            
             events.fire(
                 'enteraction',
                 util.mix({ action: action }, context)
@@ -400,17 +404,37 @@ define(
                         util.mix({ action: action }, context)
                     );
                 },
-                function () {
-                    events.fire(
-                        'enteractionfail',
-                        util.mix(
-                            {
-                                failType: 'EnterFail',
-                                reason: 'Invoke action.enter() causes error'
-                            },
-                            context
-                        )
+                function (reason) {
+                    var message = '';
+                    if (!reason) {
+                        message = 'Invoke action.enter() causes error';
+                    }
+                    // 普通异常
+                    else if (reason.message) {
+                        message = reason.message;
+                        if (reason.stack) {
+                            message += '\n' + reason.stack;
+                        }
+                    }
+                    // 能够序列化
+                    else if (window.JSON 
+                        && typeof JSON.stringify === 'function'
+                    ) {
+                        message = JSON.stringify(reason);
+                    }
+                    else {
+                        message = reason;
+                    }
+
+                    var error = util.mix(
+                        {
+                            failType: 'EnterFail',
+                            reason: message
+                        },
+                        context
                     );
+                    events.fire('enteractionfail', error);
+                    events.notifyError(error);
                 }
             );
 
@@ -442,7 +466,7 @@ define(
                 context.referrer = referrerInfo ? referrerInfo.url : null;
             }
             else {
-                container.referrer = currentURL;
+                context.referrer = currentURL;
             }
 
             util.mix(context, options);
@@ -455,15 +479,21 @@ define(
 
         var globalActionLoader;
         function renderAction(url) {
-            if (globalActionLoader) {
+            if (typeof url === 'string') {
+                url = URL.parse(url);
+            }
+            if (globalActionLoader 
+                && typeof globalActionLoader.abort === 'function'
+            ) {
                 globalActionLoader.abort();
             }
             globalActionLoader = forward(url, config.mainElement, null, false);
-            globalActionLoader.then(
-                enterAction, 
-                util.bind(events.notifyError, events)
-            );
+            globalActionLoader
+                .then(enterAction)
+                .fail(util.bind(events.notifyError, events));
         }
+
+        controller.renderAction = renderAction;
 
         function removeChildAction(container, targetContext) {
             var info = childActionMapping[container.id];
@@ -558,7 +588,21 @@ define(
             // 接口与`locator.redirect`保持一致，
             // 但由于`renderChildAction`可以传额外参数，因此也再加一个参数
             function redirect(url, options, extra) {
-                var url = require('./locator').resolveURL(url, options);
+                options = options || {};
+                var locator = require('./locator');
+                var url = locator.resolveURL(url, options);
+
+                // 强制全局跳转，直接使用`locator`即可，
+                // 但在这之前要把原来的`Action`灭掉
+                if (options.global) {
+                    var container = document.getElementById(context.container);
+                    if (container) {
+                        removeChildAction(container);
+                    }
+
+                    locator.redirect(url, options);
+                    return;
+                }
 
                 var actionContext = childActionMapping[context.container];
                 var changed = url.toString() !== actionContext.url.toString();
@@ -578,8 +622,8 @@ define(
             // 需要把`container`上的链接点击全部拦截下来，
             // 如果是hash跳转，则转到controller上来
             function hijack(e) {
+                // 下面两行是以主流浏览器为主，兼容IE的事件属性操作
                 e = e || window.event;
-                //下面两行是以主流浏览器为主，兼容IE的事件属性操作
                 var target = e.target || e.srcElement;
 
                 // 担心有人在`<span>`之类的上面放`href`属性，还是判断一下标签
@@ -607,7 +651,8 @@ define(
                 // 直接使用专供子Action上的`redirect`方法，
                 // 会自动处理`hijack`的解绑定、URL比对、进入子Action等事，
                 // 为免Action重写`redirect`方法，这里用闭包内的这个
-                redirect(url);
+                var global = target.getAttribute('data-redirect') === 'global';
+                redirect(url, { global: global });
             }
 
             // 把子Action的`redirect`方法改掉，以免影响全局主Action，

@@ -72,7 +72,7 @@ define(
              * @param {string} message 断言结果为**false**时提示的信息
              */
             assert.greaterThan = function (value, min, message) {
-                assert(value > max, message);
+                assert(value > min, message);
             };
 
             /**
@@ -94,7 +94,7 @@ define(
              * @param {string} message 断言结果为**false**时提示的信息
              */
             assert.greaterThanOrEquals = function (value, min, message) {
-                assert(value >= max, message);
+                assert(value >= min, message);
             };
 
             return assert;

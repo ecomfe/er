@@ -7,23 +7,6 @@
  */
 define(
     function (require) {
-        /**
-         * 生成XMLHttpRequest请求的最终URL
-         *
-         * @param {string} url 请求的目标URL
-         * @param {Object=} data 需要添加的参数
-         */
-        function resolveURL(url, data) {
-            var URL = require('./URL');
-            var query = URL.serialize(data);
-            if (query) {
-                var delimiter = (url.indexOf('?') >= 0 ? '&' : '?');
-                return url + delimiter + query;
-            }
-            else {
-                return url;
-            }
-        }
 
         /**
          * ajax模块
@@ -106,7 +89,9 @@ define(
         };
 
         ajax.config = {
-            cache: false
+            cache: false,
+            timeout: 0,
+            charset: ''
         };
 
         /**
@@ -129,12 +114,14 @@ define(
             }
 
             var assert = require('./assert');
-            assert.hasProperty(options, url, 'url property is required');
+            assert.hasProperty(options, 'url', 'url property is required');
 
             var defaults = {
                 method: 'POST',
                 data: {},
-                cache: ajax.config.cache
+                cache: ajax.config.cache,
+                timeout: ajax.config.timeout,
+                charset: ajax.config.charset
             };
             var util = require('./util');
             options = util.mix(defaults, options);
@@ -159,7 +146,12 @@ define(
             var fakeXHR = requesting.promise;
             var xhrWrapper = {
                 abort: function () {
+                    // 有些浏览器`abort()`就会把`readyState`变成4，
+                    // 这就会导致进入处理函数变成**resolved**状态，
+                    // 因此事先去掉处理函数，然后直接进入**rejected**状态
+                    xhr.onreadystatechange = null;
                     xhr.abort();
+                    fakeXHR.status = 0;
                     fakeXHR.readyState = xhr.readyState;
                     fakeXHR.responseText = '';
                     fakeXHR.responseXML = '';
@@ -196,7 +188,7 @@ define(
 
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
-                    var status = xhr.status;
+                    var status = fakeXHR.status || xhr.status;
                     // `file://`协议下状态码始终为0
                     if (status === 0) {
                         status = 200;
@@ -259,7 +251,13 @@ define(
             if (options.cache === false) {
                 data['_'] = +new Date();
             }
-            var url = resolveURL(options.url, data);
+            var query = ajax.hooks.serializeData(
+                '', data, 'application/x-www-form-urlencoded');
+            var url = options.url;
+            if (query) {
+                var delimiter = url.indexOf('?') >= 0 ? '&' : '?';
+                url += delimiter + query;
+            }
 
             xhr.open(method, url, true);
 
@@ -273,9 +271,12 @@ define(
             else {
                 var contentType = 
                     options.contentType || 'application/x-www-form-urlencoded';
-                xhr.setRequestHeader('Content-type', contentType);
+                if (options.charset) {
+                    contentType += ';charset=' + options.charset;
+                }
+                xhr.setRequestHeader('Content-Type', contentType);
                 var query = ajax.hooks.serializeData(
-                    options.data, contentType, fakeXHR);
+                    '', options.data, contentType, fakeXHR);
                 xhr.send(query);
             }
 
@@ -378,11 +379,17 @@ define(
                 img = null;
             };
 
+            var query = ajax.hooks.serializeData(
+                '', data, 'application/x-www-form-urlencoded');
+            if (query) {
+                var delimiter = url.indexOf('?') >= 0 ? ':' : '?';
+                url += delimiter + query;
+            }
             // 一定要在注册了事件之后再设置src，
             // 不然如果图片是读缓存的话，会错过事件处理，
             // 最后，对于url最好是添加客户端时间来防止缓存，
             // 同时服务器也配合一下传递`Cache-Control: no-cache;`
-            img.src = resolveURL(url, data);
+            img.src = url;
         };
 
         return ajax;

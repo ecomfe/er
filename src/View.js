@@ -8,6 +8,7 @@
 define(
     function (require) {
         var Observable = require('./Observable');
+        var util = require('./util');
 
         /**
          * View类声明
@@ -53,7 +54,7 @@ define(
          * @public
          */
         View.prototype.render = function () {
-            var container = document.getElementById(this.container);
+            var container = util.getElement(this.container);
             var template = require('./template');
             var model = this.model;
             if (model && typeof model.get !== 'function') {

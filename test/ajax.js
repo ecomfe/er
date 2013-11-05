@@ -249,10 +249,11 @@ define(function (require) {
                 var loading = ajax.request(options);
                 loading.ensure(function () {
                     expect(ajax.hooks.serializeData).toHaveBeenCalled();
-                    expect(ajax.hooks.serializeData.mostRecentCall.args.length).toBe(3);
-                    expect(ajax.hooks.serializeData.mostRecentCall.args[0]).toBe(data);
-                    expect(ajax.hooks.serializeData.mostRecentCall.args[1]).toBe('application/json');
-                    expect(ajax.hooks.serializeData.mostRecentCall.args[2]).toBe(loading);
+                    expect(ajax.hooks.serializeData.mostRecentCall.args.length).toBe(4);
+                    expect(ajax.hooks.serializeData.mostRecentCall.args[0]).toBe('');
+                    expect(ajax.hooks.serializeData.mostRecentCall.args[1]).toBe(data);
+                    expect(ajax.hooks.serializeData.mostRecentCall.args[2]).toBe('application/json');
+                    expect(ajax.hooks.serializeData.mostRecentCall.args[3]).toBe(loading);
                     ajax.hooks.serializeData = old;
                     done();
                 });
@@ -268,7 +269,7 @@ define(function (require) {
                 var loading = ajax.request(options);
                 loading.ensure(function () {
                     expect(ajax.hooks.serializeData).toHaveBeenCalled();
-                    expect(ajax.hooks.serializeData.mostRecentCall.args[1]).toBe('application/x-www-form-urlencoded');
+                    expect(ajax.hooks.serializeData.mostRecentCall.args[2]).toBe('application/x-www-form-urlencoded');
                     ajax.hooks.serializeData = old;
                     done();
                 });

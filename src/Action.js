@@ -11,6 +11,25 @@ define(
         var Observable = require('./Observable');
 
         /**
+         * 收集Model加载时产生的错误并通知到Action
+         *
+         * @param {Action} this 当前Action实例
+         * @param {Object...} results 模块加载的结果集
+         * @return {*} 错误处理结果
+         */
+        function reportErrors() {
+            var errors = [];
+            for (var i = 0; i < arguments.length; i++) {
+                var result = arguments[i];
+                if (!result.success) {
+                    errors.push(result);
+                }
+            }
+
+            return this.handleError(errors);
+        }
+
+        /**
          * Action类声明
          * 
          * 在ER框架中，Action并不一定要继承该类，
@@ -22,6 +41,7 @@ define(
          * @extends Observable
          */
         function Action() {
+            this.disposed = false;
         }
 
         /**
@@ -65,7 +85,7 @@ define(
              */
             this.fire('enter');
 
-            this.context = context;
+            this.context = context || {};
 
             var urlQuery = context && context.url && context.url.getQuery();
             var args = util.mix({}, context, urlQuery);
@@ -73,16 +93,29 @@ define(
             this.model = this.createModel(args);
             if (this.model && typeof this.model.load === 'function') {
                 var loadingModel = this.model.load();
-                var events = require('./events');
                 return loadingModel.then(
                     util.bind(this.forwardToView, this),
-                    util.bind(events.notifyError, events)
+                    util.bind(reportErrors, this)
                 );
             }
             else {
                 this.forwardToView();
                 return require('./Deferred').resolved(this);
             }
+        };
+
+        /**
+         * 处理Model加载产生的错误
+         *
+         * 当Model加载失败后，Action会收集所有的错误，组装为一个数组后调用本方法
+         *
+         * - 如果该方法正常返回，则认为错误已经处理完毕，继续进入下一步
+         * - 如果该方法抛出异常，则认为错误未处理，中断执行流程
+         *
+         * @param {Array} 错误集合
+         */
+        Action.prototype.handleError = function (errors) {
+            throw errors;
         };
 
         /**
@@ -112,6 +145,11 @@ define(
          * @private
          */
         Action.prototype.forwardToView = function () {
+            // 如果已经销毁了就别再继续下去
+            if (this.disposed) {
+                return this;
+            }
+
             /**
              * Model加载完成时触发
              *
@@ -123,7 +161,7 @@ define(
             if (this.view) {
                 this.view.model = this.model;
                 // 如果创建View的时候已经设置了`container`，就不要强行干扰了
-                if (this.context && !this.view.container) {
+                if (!this.view.container) {
                     this.view.container = this.context.container;
                 }
 
@@ -184,6 +222,8 @@ define(
          * @protected
          */
         Action.prototype.leave = function () {
+            this.disposed = true;
+
             /**
              * 准备离开Action时触发
              *
