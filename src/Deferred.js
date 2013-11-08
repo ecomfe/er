@@ -129,7 +129,6 @@ define(
              * - `reject`
              *
              * @type {Promise}
-             * @public
              */
             this.promise =  {
                 done: util.bind(this.done, this),
@@ -151,7 +150,6 @@ define(
              * - `reject
              *
              * @type {Resolver}
-             * @public
              */
             this.resolver = {
                 resolve: util.bind(this.resolve, this),
@@ -166,7 +164,7 @@ define(
          * 
          * 该方法采用灵活的判断方式，并非要求`value`为`Deferred`的实例
          *
-         * @param {*} value 需要判断的对象
+         * @param {Mixed} value 需要判断的对象
          * @return {boolean} 如果`value`是`Promise`对象，则返回true
          */
         Deferred.isPromise = function (value) {
@@ -181,15 +179,13 @@ define(
          * 添加的回调函数会**立即**、**同步**地被执行。
          *
          * @type {boolean}
-         * @public
          */
         Deferred.prototype.syncModeEnabled = false;
 
         /**
          * 将当前对象状态设置为**resolved**，并执行所有成功回调函数
          *
-         * @param {...*} args 执行回调时的参数
-         * @public
+         * @param {Mixed...} args 执行回调时的参数
          */
         Deferred.prototype.resolve = function () {
             if (this.state !== 'pending') {
@@ -214,8 +210,7 @@ define(
         /**
          * 将当前对象状态设置为**rejected**，并执行所有失败回调函数
          *
-         * @param {...*} args 执行回调时的参数
-         * @public
+         * @param {Mixed...} args 执行回调时的参数
          */
         Deferred.prototype.reject = function () {
             if (this.state !== 'pending') {
@@ -244,7 +239,6 @@ define(
          *
          * @param {function} callback 需要添加的回调函数
          * @return {Promise} 新的`Promise`对象
-         * @public
          */
         Deferred.prototype.done = function (callback) {
             return this.then(callback);
@@ -257,7 +251,6 @@ define(
          *
          * @param {function} callback 需要添加的回调函数
          * @return {Promise} 新的`Promise`对象
-         * @public
          */
         Deferred.prototype.fail = function (callback) {
             return this.then(null, callback);
@@ -271,7 +264,6 @@ define(
          *
          * @param {function} callback 需要添加的回调函数
          * @return {Promise} 新的`Promise`对象
-         * @public
          */
         Deferred.prototype.ensure = function (callback) {
             return this.then(callback, callback);
@@ -297,10 +289,9 @@ define(
          * - 如果处在**resolved**状态，则成功回调函数会被立即异步执行
          * - 如果处在**rejected**状态，则失败回调函数会被立即异步执行
          *
-         * @param {?function} done 成功时执行的回调函数
-         * @param {function=} fail 失败时执行的回调函数，可选参数
+         * @param {function} [done] 成功时执行的回调函数
+         * @param {function} [fail] 失败时执行的回调函数，可选参数
          * @return {Promise} 新的`Promise`对象
-         * @public
          */
         Deferred.prototype.then = function (done, fail) {
             var deferred = new Deferred();
@@ -336,7 +327,7 @@ define(
          * 本方法对参数的方法与`Array.prototyp.concat`相同，
          * 如果任意一个参数是数组则会展开
          *
-         * @param {...Promise | ...Array.<Promise>} 需要组合的`Promise`对象
+         * @param {Promise | Promise[]...} 需要组合的`Promise`对象
          * @return {Promise} 一个新的`Promise`对象
          */
         Deferred.all = function () {
@@ -392,7 +383,7 @@ define(
         /**
          * 返回一个已经处于**resolved**状态的`Promise`对象
          *
-         * @param {...*} 用于调用`resolve`方法的参数
+         * @param {Mixed...} 用于调用`resolve`方法的参数
          * @return {Promise} 一个已经处于**resolved**状态的`Promise`对象
          */
         Deferred.resolved = function () {
@@ -404,7 +395,7 @@ define(
         /**
          * 返回一个已经处于**rejected**状态的`Promise`对象
          *
-         * @param {...*} 用于调用`reject`方法的参数
+         * @param {Mixed...} 用于调用`reject`方法的参数
          * @return {Promise} 一个已经处于**rejected**状态的`Promise`对象
          */
         Deferred.rejected = function () {
@@ -416,7 +407,7 @@ define(
         /**
          * 返回一个`Promise`对象，当指定的模块被AMD加载器加载后，进入**resolved**状态
          *
-         * @param {...string} 需要加载的模块列表
+         * @param {string[]} 需要加载的模块列表
          * @return {Promise} 一个`Promise`对象
          */
         Deferred.require = function () {

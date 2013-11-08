@@ -27,8 +27,6 @@ define(
         /**
          * 对应的模板
          *
-         * @type {string}
-         * @public
          */
         View.prototype.template = '';
 
@@ -44,7 +42,7 @@ define(
         /**
          * 对应的Model对象
          *
-         * @type {*}
+         * @type {Mixed}
          */
         View.prototype.model = null;
 
@@ -66,8 +64,6 @@ define(
 
         /**
          * 渲染当前视图
-         *
-         * @public
          */
         View.prototype.render = function () {
             var container = this.getContainerElement();
@@ -92,8 +88,6 @@ define(
 
         /**
          * 销毁当前视图
-         *
-         * @public
          */
         View.prototype.dispose = function () {
             var container = this.getContainerElement();

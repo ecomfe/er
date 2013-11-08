@@ -1386,7 +1386,7 @@ define(
          * @inner
          * @param {HTMLElement} output 要输出到的容器元素
          * @param {string} tplName 模板名
-         * @param {Model} model 获取数据的对象，实现`get({string}dataName):{*}`方法即可
+         * @param {Model} model 获取数据的对象，实现`get({string}dataName):{Mixed}`方法即可
          * @return {string}
          */
         function merge(output, tplName, model) {
@@ -1445,7 +1445,7 @@ define(
              * @public
              * @param {HTMLElement} output 要输出到的容器元素
              * @param {string} tplName 视图模板
-             * @param {Model} model 获取数据的对象，实现`get({string}dataName):{*}`方法即可
+             * @param {Model} model 获取数据的对象，实现`get({string}dataName):{Mixed}`方法即可
              * @return {string}
              */
             merge: merge,
@@ -1455,7 +1455,7 @@ define(
              *
              * @public
              * @param {string} tplName 视图模板
-             * @param {Model} model 获取数据的对象，实现`get({string}dataName):{*}`方法即可
+             * @param {Model} model 获取数据的对象，实现`get({string}dataName):{Mixed}`方法即可
              * @return {string}
              */
             render: function (tplName, model) {

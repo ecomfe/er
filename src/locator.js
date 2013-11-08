@@ -155,8 +155,9 @@ define(
          * 执行重定向逻辑
          *
          * @param {string | URL} url 重定向的地址
-         * @param {Object=} options 额外附加的参数对象
-         * @param {boolean=} options.force 确定当跳转地址不变时是否强制刷新
+         * @param {Object} [options] 额外附加的参数对象
+         * @param {boolean} [options.force] 指定当跳转地址不变时是否强制刷新
+         * @param {boolean} [options.silent] 指定是否触发`redirect`事件
          */
         locator.redirect = function (url, options) {
             options = options || {};

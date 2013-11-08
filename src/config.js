@@ -8,9 +8,9 @@
 define(
     {
         /**
-         * 应用主DOM容器的id
+         * 应用主DOM容器或其id
          *
-         * @type {string}
+         * @type {string | HTMLElement}
          */
         mainElement: 'main',
 
