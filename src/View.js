@@ -33,20 +33,36 @@ define(
         View.prototype.template = '';
 
         /**
+         * 获取对应的模板名称
+         *
+         * @return {string}
+         */
+        View.prototype.getTemplateName = function () {
+            return this.template || '';
+        };
+
+        /**
          * 对应的Model对象
          *
          * @type {*}
-         * @public
          */
         View.prototype.model = null;
 
         /**
-         * 渲染容器的元素的id
+         * 渲染容器的元素或其id
          *
-         * @type {string}
-         * @public
+         * @type {string | HTMLElement}
          */
         View.prototype.container = '';
+
+        /**
+         * 获取渲染容器的元素
+         *
+         * @return {HTMLElement}
+         */
+        View.prototype.getContainerElement = function () {
+            return util.getElement(this.container) || null;
+        };
 
         /**
          * 渲染当前视图
@@ -54,14 +70,14 @@ define(
          * @public
          */
         View.prototype.render = function () {
-            var container = util.getElement(this.container);
+            var container = this.getContainerElement();
             var template = require('./template');
             var model = this.model;
             if (model && typeof model.get !== 'function') {
                 var Model = require('./Model');
                 model = new Model(model);
             }
-            template.merge(container, this.template, model);
+            template.merge(container, this.getTemplateName(), model);
 
             this.enterDocument();
         };
@@ -80,7 +96,7 @@ define(
          * @public
          */
         View.prototype.dispose = function () {
-            var container = document.getElementById(this.container);
+            var container = this.getContainerElement();
             container && (container.innerHTML = '');
         };
 

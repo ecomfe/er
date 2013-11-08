@@ -313,10 +313,19 @@ define(
          * - 普通的函数，映射为`{ retrieve: {fn}, dump: true }`
          * - 对象中的一个属性，映射为`{ retrieve: {fn}, name: {name} }`
          *
-         * @type {?Object | ?Array | ?function}
+         * @type {Object | Array | function}
          * @protected
          */
         Model.prototype.datasource = null;
+
+        /**
+         * 获取数据源配置
+         *
+         * @return {Object | Array | function}
+         */
+        Model.prototype.getDatasource = function () {
+            return this.datasource;
+        };
 
         function forwardToPrepare() {
             function processError (ex) {
@@ -351,7 +360,8 @@ define(
          */
         Model.prototype.load = function () {
             try {
-                var loading = load(this, this.datasource);
+                var datasource = this.getDatasource();
+                var loading = load(this, datasource);
                 return loading.then(util.bind(forwardToPrepare, this));
             }
             catch (ex) {
