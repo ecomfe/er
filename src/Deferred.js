@@ -405,6 +405,27 @@ define(
         };
 
         /**
+         * 返回一个以给定值为结果的**resolved**状态的`Promise`对象，
+         * 该方法可用于统一同步和异步编程模型
+         *
+         * @param {Mixed} value 给定的值
+         * @return {Promise} 如果`value`本身是一个`Promise`，则直接返回其本身。
+         * 如果`value`是普通对象，则返回一个同步的处于**resolved**状态的`Promise`，
+         * 该`Promise`以`value`为值
+         */
+        Deferred.when = function (value) {
+            if (Deferred.isPromise(value)) {
+                return value;
+            }
+
+            // `when`返回的`Promise`必须开启同步模式，以便保留堆栈供单步调度
+            var deferred = new Deferred();
+            deferred.syncModeEnabled = true;
+            deferred.resolve(value);
+            return deferred.promise;
+        };
+
+        /**
          * 返回一个`Promise`对象，当指定的模块被AMD加载器加载后，进入**resolved**状态
          *
          * @param {string[]} 需要加载的模块列表
