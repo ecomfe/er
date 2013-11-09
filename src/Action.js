@@ -90,7 +90,7 @@ define(
             var urlQuery = context && context.url && context.url.getQuery();
             var args = util.mix({}, context, urlQuery);
 
-            this.model = this.createModel();
+            this.model = this.createModel(args);
             this.model.fill(args);
             if (this.model && typeof this.model.load === 'function') {
                 var loadingModel = this.model.load();
@@ -132,7 +132,7 @@ define(
          */
         Action.prototype.createModel = function (context) {
             if (this.modelType) {
-                var model = new this.modelType();
+                var model = new this.modelType(context);
                 return model;
             }
             else {
