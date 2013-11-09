@@ -534,6 +534,37 @@ define(
         };
 
         /**
+         * 判断当前`Model`对象是否有指定的属性
+         *
+         * @param {string} name 属性名
+         * @return {boolean}
+         */
+        Model.prototype.has = function (name) {
+            return this.store.hasOwnProperty(name);
+        };
+
+        /**
+         * 判断当前`Model`对象是否有指定的属性且值不为`null`或`undefined`
+         *
+         * @param {string} name 属性名
+         * @return {boolean}
+         */
+        Model.prototype.hasValue = function (name) {
+            // 不要用`this.get`，有可能`Model`重写`get`还依赖这个方法
+            return this.has(name) && this.store[name] != null;
+        };
+
+        /**
+         * 判断当前`Model`对象是否有指定的属性且值不为`null`、`undefined`或空字符串
+         *
+         * @param {string} name 属性名
+         * @return {boolean}
+         */
+        Model.prototype.hasReadableValue = function (name) {
+            return this.hasValue(name) && this.store[name] !== '';
+        };
+
+        /**
          * 将当前`Model`对象展出为一个普通的对象
          *
          * @return {Object} 一个普通的对象，修改该对象不会影响到当前`Model`对象
