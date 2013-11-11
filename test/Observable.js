@@ -54,8 +54,8 @@ define(function() {
             it('should execute the event handler with correct arguments', function () {
                 expect(handler.mostRecentCall.args.length).toBe(1);
                 expect(allHandler.mostRecentCall.args.length).toBe(1);
-                expect(handler.mostRecentCall.args[0]).toBe(arg);
-                expect(allHandler.mostRecentCall.args[0]).toBe(arg);
+                expect(handler.mostRecentCall.args[0].x).toBe(1);
+                expect(allHandler.mostRecentCall.args[0].x).toBe(1);
             });
 
             it('should override the `type` property if it exists', function () {
