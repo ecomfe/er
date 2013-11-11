@@ -8,7 +8,7 @@
 define(
     function (require) {
         var util = require('./util');
-        var Observable = require('./Observable');
+        var EventTarget = require('mini-event/EventTarget');
 
         /**
          * 收集Model加载时产生的错误并通知到Action
@@ -38,7 +38,7 @@ define(
          * 该类制定了一个完整的Action的执行周期
          *
          * @constructor
-         * @extends Observable
+         * @extends EventTarget
          */
         function Action() {
             this.disposed = false;
@@ -281,7 +281,7 @@ define(
             locator.reload();
         };
 
-        util.inherits(Action, Observable);
+        util.inherits(Action, EventTarget);
         return Action;
     }
 );

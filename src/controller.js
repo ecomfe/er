@@ -560,8 +560,8 @@ define(
             };
             childActionMapping[container.id] = info;
 
-            var Observable = require('./Observable');
-            if (action instanceof Observable) {
+            var EventTarget = require('mini-event/EventTarget');
+            if (action instanceof EventTarget) {
                 // 在Action销毁的时候要取消掉
                 action.on(
                     'leave', 

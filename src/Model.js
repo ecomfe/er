@@ -167,7 +167,7 @@ define(
             return loadParallel(model, datasource);
         }
 
-        var Observable = require('./Observable');
+        var EventTarget = require('mini-event/EventTarget');
 
         /**
          * Model类声明
@@ -186,7 +186,7 @@ define(
          * 该Model类为一个通用的可配置的基类，提供了数据加载的相关方法
          *
          * @constructor
-         * @extends Observable
+         * @extends EventTarget
          * @param {Object} [context] 初始化的数据
          */
         function Model(context) {
@@ -616,7 +616,7 @@ define(
             this.pendingWorkers = null;
         };
 
-        util.inherits(Model, Observable);
+        util.inherits(Model, EventTarget);
 
         return Model;
     }

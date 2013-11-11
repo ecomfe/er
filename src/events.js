@@ -31,7 +31,7 @@ define(
             }
         };
 
-        require('./Observable').enable(events);
+        require('mini-event/EventTarget').enable(events);
 
         return events;
     }

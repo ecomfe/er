@@ -196,7 +196,7 @@ define(
             }
         };
 
-        require('./Observable').enable(locator);
+        require('mini-event/EventTarget').enable(locator);
         return locator;
     }
 );

@@ -12,7 +12,7 @@ define(
          * ajax模块
          */
         var ajax = {};
-        require('./Observable').enable(ajax);
+        require('mini-event/EventTarget').enable(ajax);
 
         /**
          * 每次请求流程的勾子，包含以下属性：

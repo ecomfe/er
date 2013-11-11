@@ -157,7 +157,7 @@ define(
             };
         }
 
-        require('./Observable').enable(Deferred);
+        require('mini-event/EventTarget').enable(Deferred);
         
         /**
          * 判断一个对象是否是一个`Promise`对象

@@ -7,7 +7,7 @@
  */
 define(
     function (require) {
-        var Observable = require('./Observable');
+        var EventTarget = require('mini-event/EventTarget');
         var util = require('./util');
 
         /**
@@ -19,7 +19,7 @@ define(
          * 该类结合`template`对象，实现了一个通用的RIA视图方案
          *
          * @constructor
-         * @extends Observable
+         * @extends EventTarget
          */
         function View() {
         }
@@ -94,7 +94,7 @@ define(
             container && (container.innerHTML = '');
         };
 
-        require('./util').inherits(View, Observable);
+        require('./util').inherits(View, EventTarget);
         return View;
     }
 );
