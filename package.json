@@ -2,10 +2,22 @@
     "name": "er",
     "version": "3.1.0",
     "contributors": [
-        { "name": "otakustay", "email": "otakustay@gmail.com" },
-        { "name": "erik", "email": "errorrik@gmail.com" },
-        { "name": "strwind", "email": "gzzyyff@gmail.com" },
-        { "name": "killeryyl", "email": "killeryyl@outlook.com" }
+        {
+            "name": "otakustay",
+            "email": "otakustay@gmail.com"
+        },
+        {
+            "name": "erik",
+            "email": "errorrik@gmail.com"
+        },
+        {
+            "name": "strwind",
+            "email": "gzzyyff@gmail.com"
+        },
+        {
+            "name": "killeryyl",
+            "email": "killeryyl@outlook.com"
+        }
     ],
     "dependencies": {
         "mini-event": "0.x"
