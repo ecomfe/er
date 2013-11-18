@@ -4,7 +4,7 @@ define(
          * main模块，没啥用
          */
         var main = {
-            version: '3.3.0',
+            version: '3.1.0-alpha.1',
 
             /**
              * 启动ER框架
