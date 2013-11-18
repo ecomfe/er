@@ -28,9 +28,9 @@ define(
              * @param {Object} config Action的相关配置
              * @param {string} config.type Action对应模块的id
              * @param {string} config.path 对应的URL的path部分
-             * @param {string=} config.movedTo 设定Action跳转至其它路径
-             * @param {Array.<string>= | string=} config.authority 访问权限
-             * @param {string=} noAuthorityLocation 无权限时的跳转路径
+             * @param {string} [config.movedTo] 设定Action跳转至其它路径
+             * @param {string[] | string} [config.authority] 访问权限
+             * @param {string} [noAuthorityLocation] 无权限时的跳转路径
              */
             registerAction: function (config) {
                 assert.hasProperty(
@@ -43,8 +43,6 @@ define(
 
             /**
              * 开始`controller`对象的工作
-             *
-             * @public
              */
             start: function () {
                 if (!config.systemName) {
@@ -60,10 +58,9 @@ define(
              * 会将查找到的配置，以及进入时的参数一同交给该方法，
              * 该方法可以额外进行一些操作，如在未找到配置时提供默认的映射规则
              *
-             * @param {Object | null} config 按默认逻辑找到的Action配置
+             * @param {Object} [config] 按默认逻辑找到的Action配置
              * @param {Object} args 进入流程时提供的参数
              * @return {Object | null} 一个有效的Action配置对象，或返回null
-             * @public
              */
             resolveActionConfig: function (config, args) {
                 return config;
@@ -76,7 +73,7 @@ define(
          * - 权限可以是一个数组，此时用户拥有数组中任意一项权限即认为有权限
          * - 权限也可以是个字符串，将各权限通过**|**字符分割
          *
-         * @param {Array.<string> | string} authority 权限配置
+         * @param {string[] | string} authority 权限配置
          */
         function checkAuthority(authority) {
             if (!authority) {
@@ -97,6 +94,12 @@ define(
             return false;
         }
 
+        /**
+         * 查找Action配置
+         *
+         * @param {Object} args 进入Action时的参数
+         * @return {Object | null} 对应的Action配置
+         */
         function findActionConfig(args) {
             var path = args.url.getPath();
             var actionConfig = actionPathMapping[path];
@@ -131,7 +134,7 @@ define(
             // 关于actionConfig配置项：
             // 
             // - `{string} type`：指定对应Action的模块id
-            // - `{Array<string>|string} authority`：权限配置，
+            // - `{string[] | string} authority`：权限配置，
             //     参考`checkAuthority`函数中的说明
             // - `{string} noAuthorityLocation`：用户没有权限时的跳转URL
             // - `{string} movedTo`：表示该Action已经被移动到另一个路径，
@@ -557,8 +560,8 @@ define(
             };
             childActionMapping[container.id] = info;
 
-            var Observable = require('./Observable');
-            if (action instanceof Observable) {
+            var EventTarget = require('mini-event/EventTarget');
+            if (action instanceof EventTarget) {
                 // 在Action销毁的时候要取消掉
                 action.on(
                     'leave', 
@@ -671,9 +674,9 @@ define(
         /**
          * 在指定的元素中渲染一个Action
          *
-         * @param {string|URL} Action对应的url
+         * @param {string | URL} Action对应的url
          * @param {string} container 指定容器元素的id
-         * @parma {Object=} options 额外的参数
+         * @parma {Object} [options] 额外的参数
          * @return {Promise} 一个Promise对象，
          * 当渲染完成后进行**resolved**状态，但可在之前调用`abort()`取消
          */

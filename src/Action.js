@@ -8,14 +8,14 @@
 define(
     function (require) {
         var util = require('./util');
-        var Observable = require('./Observable');
+        var EventTarget = require('mini-event/EventTarget');
 
         /**
          * 收集Model加载时产生的错误并通知到Action
          *
          * @param {Action} this 当前Action实例
          * @param {Object...} results 模块加载的结果集
-         * @return {*} 错误处理结果
+         * @return {Mixed} 错误处理结果
          */
         function reportErrors() {
             var errors = [];
@@ -38,7 +38,7 @@ define(
          * 该类制定了一个完整的Action的执行周期
          *
          * @constructor
-         * @extends Observable
+         * @extends EventTarget
          */
         function Action() {
             this.disposed = false;
@@ -55,7 +55,7 @@ define(
         /**
          * 指定对应的Model类型
          *
-         * @type {?function}
+         * @type {function=}
          * @protected
          */
         Action.prototype.modelType = null;
@@ -63,7 +63,7 @@ define(
         /**
          * 指定对应的View类型
          *
-         * @type {?function}
+         * @type {function=}
          * @protected
          */
         Action.prototype.viewType = null;
@@ -73,9 +73,9 @@ define(
          *
          * @param {Object} context 进入Action的上下文
          * @param {URL} context.url 当前的URL
-         * @param {?URL} context.referrer 来源的URL
-         * @param {string} container 用来展现当前Action的DOM容器的id
-         * @public
+         * @param {URL} [context.referrer] 来源的URL
+         * @param {string | HTMLElement} context.container
+         * 用来展现当前Action的DOM容器或其id
          */
         Action.prototype.enter = function (context) {
             /**
@@ -91,6 +91,7 @@ define(
             var args = util.mix({}, context, urlQuery);
 
             this.model = this.createModel(args);
+            this.model.fill(args);
             if (this.model && typeof this.model.load === 'function') {
                 var loadingModel = this.model.load();
                 return loadingModel.then(
@@ -123,15 +124,15 @@ define(
          *
          * @param {Object} context 进入Action的上下文
          * @param {URL} context.url 当前的URL
-         * @param {?URL} context.referrer 来源的URL
-         * @param {string} container 用来展现当前Action的DOM容器的id
-         * @return {Object} 当前Action需要使用的Model对象
+         * @param {URL} [context.referrer] 来源的URL
+         * @param {string | HTMLElement} context.container
+         * 用来展现当前Action的DOM容器或其id
+         * @return {Model | Object} 当前Action需要使用的Model对象
          * @protected
          */
         Action.prototype.createModel = function (context) {
             if (this.modelType) {
-                var model = new this.modelType();
-                model.fill(context);
+                var model = new this.modelType(context);
                 return model;
             }
             else {
@@ -202,7 +203,6 @@ define(
          * 创建对应的View对象
          *
          * @return {Object} 当前Action需要使用的View对象
-         * @public
          */
         Action.prototype.createView = function () {
             return this.viewType ? new this.viewType() : null;
@@ -213,8 +213,7 @@ define(
          *
          * @protected
          */
-        Action.prototype.initBehavior = function () {
-        };
+        Action.prototype.initBehavior = util.noop;
 
         /**
          * 离开当前Action，清理Model和View
@@ -265,9 +264,9 @@ define(
          * 因此由Action直接提供一个`redirect`方法来实现跳转功能，方便替换和扩展
          *
          * @param {string | URL} url 需要重定向的目标URL
-         * @param {Object=} options 额外附加的参数对象
-         * @param {boolean=} options.force 确定当跳转地址不变时是否强制刷新
-         * @public
+         * @param {Object} [options] 额外附加的参数对象
+         * @param {boolean} [options.force] 确定当跳转地址不变时是否强制刷新
+         * @param {boolean} [options.silent] 静默跳转，即不触发全局`redirect`事件
          */
         Action.prototype.redirect = function (url, options) {
             var locator = require('./locator');
@@ -276,15 +275,13 @@ define(
 
         /**
          * 重加载当前Action
-         *
-         * @public
          */
         Action.prototype.reload = function () {
             var locator = require('./locator');
             locator.reload();
         };
 
-        util.inherits(Action, Observable);
+        util.inherits(Action, EventTarget);
         return Action;
     }
 );

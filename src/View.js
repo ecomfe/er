@@ -7,7 +7,7 @@
  */
 define(
     function (require) {
-        var Observable = require('./Observable');
+        var EventTarget = require('mini-event/EventTarget');
         var util = require('./util');
 
         /**
@@ -19,7 +19,7 @@ define(
          * 该类结合`template`对象，实现了一个通用的RIA视图方案
          *
          * @constructor
-         * @extends Observable
+         * @extends EventTarget
          */
         function View() {
         }
@@ -27,41 +27,53 @@ define(
         /**
          * 对应的模板
          *
-         * @type {string}
-         * @public
          */
         View.prototype.template = '';
 
         /**
+         * 获取对应的模板名称
+         *
+         * @return {string}
+         */
+        View.prototype.getTemplateName = function () {
+            return this.template || '';
+        };
+
+        /**
          * 对应的Model对象
          *
-         * @type {*}
-         * @public
+         * @type {Mixed}
          */
         View.prototype.model = null;
 
         /**
-         * 渲染容器的元素的id
+         * 渲染容器的元素或其id
          *
-         * @type {string}
-         * @public
+         * @type {string | HTMLElement}
          */
         View.prototype.container = '';
 
         /**
-         * 渲染当前视图
+         * 获取渲染容器的元素
          *
-         * @public
+         * @return {HTMLElement}
+         */
+        View.prototype.getContainerElement = function () {
+            return util.getElement(this.container) || null;
+        };
+
+        /**
+         * 渲染当前视图
          */
         View.prototype.render = function () {
-            var container = util.getElement(this.container);
+            var container = this.getContainerElement();
             var template = require('./template');
             var model = this.model;
             if (model && typeof model.get !== 'function') {
                 var Model = require('./Model');
                 model = new Model(model);
             }
-            template.merge(container, this.template, model);
+            template.merge(container, this.getTemplateName(), model);
 
             this.enterDocument();
         };
@@ -76,15 +88,13 @@ define(
 
         /**
          * 销毁当前视图
-         *
-         * @public
          */
         View.prototype.dispose = function () {
-            var container = document.getElementById(this.container);
+            var container = this.getContainerElement();
             container && (container.innerHTML = '');
         };
 
-        require('./util').inherits(View, Observable);
+        require('./util').inherits(View, EventTarget);
         return View;
     }
 );

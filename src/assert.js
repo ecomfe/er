@@ -23,7 +23,7 @@ define(
             /**
              * 断言一个对象有值（不为**null**或**undefined**）
              *
-             * @param {*} obj 用于判断的对象
+             * @param {Mixed} obj 用于判断的对象
              * @param {string} message 断言结果为**false**时提示的信息
              */
             assert.has = function (obj, message) {
@@ -34,8 +34,8 @@ define(
             /**
              * 断言两个对象相等
              *
-             * @param {*} x 用于判断相等的左值
-             * @param {*} y 用于判断相等的右值
+             * @param {Mixed} x 用于判断相等的左值
+             * @param {Mixed} y 用于判断相等的右值
              * @param {string} message 断言结果为**false**时提示的信息
              */
             assert.equals = function (x, y, message) {
@@ -45,7 +45,7 @@ define(
             /**
              * 断言一个对象包含指定名称的属性
              *
-             * @param {*} obj 用户断言的对象
+             * @param {Mixed} obj 用户断言的对象
              * @param {string} propertyName 属性的名称
              * @param {string} message 断言结果为**false**时提示的信息
              */
@@ -56,8 +56,8 @@ define(
             /**
              * 断言一个对象小于另一个对象
              *
-             * @param {*} value 用于判断的左值
-             * @param {*} max 用于判断的右值
+             * @param {Mixed} value 用于判断的左值
+             * @param {Mixed} max 用于判断的右值
              * @param {string} message 断言结果为**false**时提示的信息
              */
             assert.lessThan = function (value, max, message) {
@@ -67,8 +67,8 @@ define(
             /**
              * 断言一个对象大于另一个对象
              *
-             * @param {*} value 用于判断的左值
-             * @param {*} min 用于判断的右值
+             * @param {Mixed} value 用于判断的左值
+             * @param {Mixed} min 用于判断的右值
              * @param {string} message 断言结果为**false**时提示的信息
              */
             assert.greaterThan = function (value, min, message) {
@@ -78,8 +78,8 @@ define(
             /**
              * 断言一个对象小于等于另一个对象
              *
-             * @param {*} value 用于判断的左值
-             * @param {*} max 用于判断的右值
+             * @param {Mixed} value 用于判断的左值
+             * @param {Mixed} max 用于判断的右值
              * @param {string} message 断言结果为**false**时提示的信息
              */
             assert.lessThanOrEquals = function (value, max, message) {
@@ -89,8 +89,8 @@ define(
             /**
              * 断言一个对象大于等于另一个对象
              *
-             * @param {*} value 用于判断的左值
-             * @param {*} min 用于判断的右值
+             * @param {Mixed} value 用于判断的左值
+             * @param {Mixed} min 用于判断的右值
              * @param {string} message 断言结果为**false**时提示的信息
              */
             assert.greaterThanOrEquals = function (value, min, message) {

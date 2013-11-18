@@ -171,6 +171,26 @@ define(function() {
             });
         });
 
+        describe('`when` method', function () {
+            it('should be defined on `Deferred` object', function () {
+                expect(Deferred.when).toBeOfType('function');
+            });
+
+            it('should return the original object if given a `Promise`', function () {
+                var promise = Deferred.resolved(1);
+                expect(Deferred.when(promise)).toBe(promise);
+            });
+
+            it('should return a resolved Deferred with `syncModeEnabled` switch on if given a non-promise value', function () {
+                var value = {};
+                var promise = Deferred.when(value);
+                expect(Deferred.isPromise(promise)).toBe(true);
+                var resolvedValue = null;
+                promise.then(function (x) { resolvedValue = x; });
+                expect(resolvedValue).toBe(value);
+            });
+        });
+
         describe('event', function () {
             it('should have event system enabled', function () {
                 expect(Deferred.on).toBeOfType('function');
@@ -225,6 +245,6 @@ define(function() {
                 expect(event.args).toEqual([1, 2, 3]);
                 expect(event.reason).toBe(1);
             });
-        })
+        });
     });
 });

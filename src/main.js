@@ -4,8 +4,11 @@ define(
          * main模块，没啥用
          */
         var main = {
-            version: '3.0.3',
+            version: '3.1.0-alpha.1',
 
+            /**
+             * 启动ER框架
+             */
             start: function () {
                 require('./controller').start();
                 require('./router').start();

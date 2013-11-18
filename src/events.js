@@ -11,7 +11,7 @@ define(
             /**
              * 通知一个错误的产生
              *
-             * @param {*} error 错误对象，如果是字符串则会被封装为一个Error对象
+             * @param {Mixed} error 错误对象，如果是字符串则会被封装为一个Error对象
              */
             notifyError: function (error) {
                 if (typeof error === 'string') {
@@ -23,7 +23,7 @@ define(
                  * 
                  * @event error
                  * @param {Object} e 事件对象
-                 * @param {*} e.error 抛出的错误对象
+                 * @param {Mixed} e.error 抛出的错误对象
                  */
                 this.fire('error', { error: error });
 
@@ -31,7 +31,7 @@ define(
             }
         };
 
-        require('./Observable').enable(events);
+        require('mini-event/EventTarget').enable(events);
 
         return events;
     }

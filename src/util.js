@@ -27,7 +27,7 @@ define(
          * 混合多个对象
          *
          * @param {Object} source 源对象
-         * @param {...Object} destinations 用于混合的对象
+         * @param {Object...} destinations 用于混合的对象
          * @return 返回混合了`destintions`属性的`source`对象
          */
         util.mix = function (source) {
@@ -58,8 +58,8 @@ define(
          * 固定函数的`this`变量和若干参数
          *
          * @param {function} fn 操作的目标函数
-         * @param {*} context 函数的`this`变量
-         * @param {...*} args 固定的参数
+         * @param {Mixed} context 函数的`this`变量
+         * @param {Mixed...} args 固定的参数
          * @return {function} 固定了`this`变量和若干参数后的新函数对象
          */
         util.bind = nativeBind
@@ -120,7 +120,7 @@ define(
          * 将一段文本变为JSON对象
          *
          * @param {string} text 文本内容
-         * @return {*} 对应的JSON对象
+         * @return {Mixed} 对应的JSON对象
          */
         util.parseJSON = function (text) {
             if (!text) {
@@ -166,7 +166,7 @@ define(
         /**
          * 兼容性获取一个元素
          *
-         * @param {HTMLElement|string} element 元素或元素的id
+         * @param {HTMLElement | string} element 元素或元素的id
          * @return {HTMLElement}
          */
         util.getElement = function (element) {

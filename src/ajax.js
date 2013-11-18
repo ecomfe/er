@@ -12,7 +12,7 @@ define(
          * ajax模块
          */
         var ajax = {};
-        require('./Observable').enable(ajax);
+        require('mini-event/EventTarget').enable(ajax);
 
         /**
          * 每次请求流程的勾子，包含以下属性：
@@ -30,13 +30,12 @@ define(
          *     - `{FakeXHR} xhr`：伪造的`XMLHttpRequest`对象
          *     - `{Object} options`：请求时的参数外加默认参数融合后的对象
          * - `afterParse`：在按数据类型处理完响应后
-         *     - `{*} data`：返回的数据
+         *     - `{Mixed} data`：返回的数据
          *     - `{FakeXHR} xhr`：伪造的`XMLHttpRequest`对象
          *     - `{Object} options`：请求时的参数外加默认参数融合后的对象
          *     - 返回值将被作为最终触发回调时的数据
          *
          * @type {Object}
-         * @public
          */
         ajax.hooks = {};
 
@@ -88,9 +87,31 @@ define(
             return parentKey ? parentKey + '.' + propertyName : propertyName;
         };
 
+        /**
+         * AJAX的全局配置
+         *
+         * @type {Object}
+         */
         ajax.config = {
+            /**
+             * 默认是否开启缓存。默认关闭，即所有GET请求会带上时间戳
+             *
+             * @type {boolean}
+             */
             cache: false,
+
+            /**
+             * 默认的超时时间，以毫秒为单位。默认不超时
+             *
+             * @type {number}
+             */
             timeout: 0,
+
+            /**
+             * 默认的编码
+             *
+             * @type {string}
+             */
             charset: ''
         };
 
@@ -99,14 +120,14 @@ define(
          *
          * @param {Object} options 相关配置
          * @param {string} options.url 请求的地址
-         * @param {string=} options.method 请求的类型
-         * @param {Object=} options.data 请求的数据
-         * @param {string=} options.dataType 返回数据的类型，
-         * 可以为**json**或**text**，默认为**responseText**
-         * @param {number=} options.timeout 超时时间
-         * @param {boolean=} options.cache 决定是否允许缓存
+         * @param {string} [options.method] 请求的类型
+         * @param {Object} [options.data] 请求的数据
+         * @param {string} [options.dataType] 返回数据的类型，
+         * 可以为**json**或**text**，默认为**text**
+         * @param {number} [options.timeout] 超时时间
+         * @param {boolean} [options.cache] 决定是否允许缓存
          * @return {FakeXHR} 一个`FakeXHR`对象，
-         * 该对象有Promise的所有方法，以及`XMLHTTPRequest`对象的相应方法
+         * 该对象有`Promise`的所有方法，以及`XMLHTTPRequest`对象的相应方法
          */
         ajax.request = function (options) {
             if (typeof ajax.hooks.beforeExecute === 'function') {
@@ -298,10 +319,10 @@ define(
          * 发起一个GET请求
          *
          * @param {string} url 请求的地址
-         * @param {Object=} data 请求的数据
-         * @param {boolean=} cache 决定是否允许缓存
+         * @param {Object} [data] 请求的数据
+         * @param {boolean} [cache] 决定是否允许缓存
          * @return {Object} 一个`FakeXHR`对象，
-         * 该对象有Promise的所有方法，以及一个`abort`方法
+         * 该对象有`Promise`的所有方法，以及一个`abort`方法
          */
         ajax.get = function (url, data, cache) {
             var options = {
@@ -317,10 +338,10 @@ define(
          * 发起一个GET请求并获取JSON数据
          *
          * @param {string} url 请求的地址
-         * @param {Object=} data 请求的数据
-         * @param {boolean=} cache 决定是否允许缓存
+         * @param {Object} [data] 请求的数据
+         * @param {boolean} [cache] 决定是否允许缓存
          * @return {Object} 一个`FakeXHR`对象，
-         * 该对象有Promise的所有方法，以及一个`abort`方法
+         * 该对象有`Promise`的所有方法，以及一个`abort`方法
          */
         ajax.getJSON = function (url, data, cache) {
             var options = {
@@ -338,10 +359,10 @@ define(
          * 发起一个POST请求
          *
          * @param {string} url 请求的地址
-         * @param {Object=} data 请求的数据
-         * @param {string=} dataType 指定w响应的数据格式，可为**text**或**json**
+         * @param {Object} [data] 请求的数据
+         * @param {string} [dataType="json"] 指定响应的数据格式
          * @return {Object} 一个`FakeXHR`对象，
-         * 该对象有Promise的所有方法，以及一个`abort`方法
+         * 该对象有`Promise`的所有方法，以及一个`abort`方法
          */
         ajax.post = function (url, data, dataType) {
             var options = {
@@ -357,7 +378,7 @@ define(
          * 发送一个日志请求，该请求只负责发出，不负责保证送达，且不支持回调函数
          *
          * @param {string} url 发送的目标URL
-         * @param {Object=} data 额外添加的参数
+         * @param {Object} [data] 额外添加的参数
          */
         ajax.log = function (url, data) {
             var img = new Image();

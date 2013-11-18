@@ -23,9 +23,9 @@ define(
          * - path和search的分隔符默认为**~**字符
          * 
          * @constructor
-         * @param {string=} path URL中的path部分
-         * @param {string=} search URL中的search部分
-         * @param {string=} searchSeparator 分隔path与search的分隔符，默认为`~`
+         * @param {string} [path] URL中的path部分
+         * @param {string} [search] URL中的search部分
+         * @param {string} [searchSeparator] 分隔path与search的分隔符，默认为`~`
          */
         function URL(path, search, searchSeparator) {
             path = path || '/';
@@ -36,7 +36,6 @@ define(
              * 获取完整URL字符串
              *
              * @return {string} 当前URL的完整字符串表示
-             * @public
              * @override
              */
             this.toString = function () {
@@ -47,7 +46,6 @@ define(
              * 获取path部分
              *
              * @return {string} URL中的path部分
-             * @public
              */
             this.getPath = function () {
                 return path;
@@ -57,7 +55,6 @@ define(
              * 获取search部分
              *
              * @return {string} URL中的search部分
-             * @public
              */
             this.getSearch = function () {
                 return search;
@@ -67,7 +64,7 @@ define(
             /**
              * 获取参数对象或指定参数的值
              * 
-             * @param {string=} key 指定参数的名称，不传该参数则返回整个参数对象
+             * @param {string} [key] 指定参数的名称，不传该参数则返回整个参数对象
              * @return {string | Object} 如果有`key`参数则返回对应值，
              * 否则返回参数对象的副本
              */
@@ -85,8 +82,8 @@ define(
          * 该函数仅解析path、search、query
          *
          * @param {string} url 完整的URL
-         * @param {Object=} options 控制解析行为的相关参数
-         * @param {string=} options.querySeparator 用于分隔path和search的字符
+         * @param {Object} [options] 控制解析行为的相关参数
+         * @param {string} [options.querySeparator] 用于分隔path和search的字符
          * @return {URL} 一个URL对象
          */
         URL.parse = function (url, options) {
@@ -110,10 +107,10 @@ define(
         /**
          * 根据path和给定的query对象生成URL对象
          *
-         * @param {string|URL} path 已经存在的URL
+         * @param {string | URL} path 已经存在的URL
          * @param {Object} query URL的参数对象
-         * @param {Object=} options 控制解析行为的相关参数
-         * @param {string=} options.querySeparator 用于分隔path和search的字符
+         * @param {Object} [options] 控制解析行为的相关参数
+         * @param {string} [options.querySeparator] 用于分隔path和search的字符
          * @return {URL} 一个URL对象
          */
         URL.withQuery = function (path, query, options) {
@@ -196,7 +193,6 @@ define(
          * 空的URL实例，用于减少对`new URL()`的调用
          *
          * @type {URL}
-         * @const
          */
         URL.empty = new URL();
 

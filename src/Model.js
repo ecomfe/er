@@ -16,9 +16,9 @@ define(
          *
          * @param {Model} model 用于存放数据的`Model`对象
          * @param {Object} options 数据获取配置项，详见`load`方法说明
-         * @param {function} options.retrieve 获取数据的函数
-         * @param {string=} options.name 获取数据后添加到`Model`对象时的属性名
-         * @param {boolean=} options.dump 决定数据是否完整添加到`Model`对象
+         * @param {function(Model, Object)} options.retrieve 获取数据的函数
+         * @param {string} [options.name] 获取数据后添加到`Model`对象时的属性名
+         * @param {boolean} [options.dump] 决定数据是否完整添加到`Model`对象
          * @return {Promise} 对应的`Promise`对象，数据加载完成后触发
          */
         function loadData(model, options) {
@@ -167,7 +167,7 @@ define(
             return loadParallel(model, datasource);
         }
 
-        var Observable = require('./Observable');
+        var EventTarget = require('mini-event/EventTarget');
 
         /**
          * Model类声明
@@ -186,8 +186,8 @@ define(
          * 该Model类为一个通用的可配置的基类，提供了数据加载的相关方法
          *
          * @constructor
-         * @extends Observable
-         * @param {Object=} context 初始化的数据
+         * @extends EventTarget
+         * @param {Object} [context] 初始化的数据
          */
         function Model(context) {
             this.store = {};
@@ -313,10 +313,19 @@ define(
          * - 普通的函数，映射为`{ retrieve: {fn}, dump: true }`
          * - 对象中的一个属性，映射为`{ retrieve: {fn}, name: {name} }`
          *
-         * @type {?Object | ?Array | ?function}
+         * @type {Object | Array | function}
          * @protected
          */
         Model.prototype.datasource = null;
+
+        /**
+         * 获取数据源配置
+         *
+         * @return {Object | Array | function}
+         */
+        Model.prototype.getDatasource = function () {
+            return this.datasource;
+        };
 
         function forwardToPrepare() {
             function processError (ex) {
@@ -347,11 +356,11 @@ define(
          * 加载当前Model
          * 
          * @return {Promise} `Promise`对象，在数据加载且`prepare`方法执行后触发
-         * @public
          */
         Model.prototype.load = function () {
             try {
-                var loading = load(this, this.datasource);
+                var datasource = this.getDatasource();
+                var loading = load(this, datasource);
                 return loading.then(util.bind(forwardToPrepare, this));
             }
             catch (ex) {
@@ -371,7 +380,7 @@ define(
          * 
          * 如果在`prepare`方法中有异步的操作，可以让方法返回一个`Promise`对象
          *
-         * @return {?Promise} 如果`prepare`的逻辑中有异步操作，
+         * @return {Promise=} 如果`prepare`的逻辑中有异步操作，
          * 则返回一个`Promise`对象，通知调用者等待
          * @protected
          */
@@ -382,8 +391,7 @@ define(
          * 获取对应键的值
          *
          * @param {string} name 属性名
-         * @return {*} `name`对应的值
-         * @public
+         * @return {Mixed} `name`对应的值
          */
         Model.prototype.get = function (name) {
             return this.store[name];
@@ -394,7 +402,7 @@ define(
          *
          * @param {Model} 作为容器的Model对象
          * @param {string} name 属性名
-         * @param {*} value 对应的值
+         * @param {Mixed} value 对应的值
          * @param {Object} 一个变化记录项
          */
         function setProperty(model, name, value) {
@@ -419,10 +427,9 @@ define(
          * 设置值
          *
          * @param {string} name 属性名
-         * @param {*} value 对应的值
-         * @param {Object=} options 相关选项
-         * @param {boolean=} options.silent 如果该值为true则不触发`change`事件
-         * @public
+         * @param {Mixed} value 对应的值
+         * @param {Object} [options] 相关选项
+         * @param {boolean} [options.silent] 如果该值为true则不触发`change`事件
          */
         Model.prototype.set = function (name, value, options) {
             options = options || {};
@@ -440,9 +447,8 @@ define(
          * 批量设置值
          *
          * @param {Object} extension 批量值的存放对象
-         * @param {Object=} options 相关选项
-         * @param {boolean=} options.silent 如果该值为true则不触发`change`事件
-         * @public
+         * @param {Object} [options] 相关选项
+         * @param {boolean} [options.silent] 如果该值为true则不触发`change`事件
          */
         Model.prototype.fill = function (extension, options) {
             options = options || {};
@@ -469,10 +475,9 @@ define(
          * 删除对应键的值
          *
          * @param {string} name 属性名
-         * @return {*} 在删除前`name`对应的值
-         * @param {Object=} options 相关选项
-         * @param {boolean=} options.silent 如果该值为true则不触发`change`事件
-         * @public
+         * @return {Mixed} 在删除前`name`对应的值
+         * @param {Object} [options] 相关选项
+         * @param {boolean} [options.silent] 如果该值为true则不触发`change`事件
          */
         Model.prototype.remove = function (name, options) {
             // 如果原来就没这个值，就不触发`change`事件了
@@ -506,7 +511,6 @@ define(
          *
          * @param {string} name 属性名
          * @return {Model} `name`对应的值组装成的新的`Model`对象
-         * @public
          */
         Model.prototype.getAsModel = function (name) {
             var value = this.get(name);
@@ -522,20 +526,58 @@ define(
          * 将当前`Model`对象展出为一个普通的对象
          *
          * @return {Object} 一个普通的对象，修改该对象不会影响到当前`Model`对象
-         * @public
+         */
+        Model.prototype.dump = function () {
+            // 为保证获取对象后修改不会影响到当前`Model`对象，
+            // 需要做一次克隆的操作
+            return util.mix({}, this.store);
+        };
+
+        /**
+         * 判断当前`Model`对象是否有指定的属性
+         *
+         * @param {string} name 属性名
+         * @return {boolean}
+         */
+        Model.prototype.has = function (name) {
+            return this.store.hasOwnProperty(name);
+        };
+
+        /**
+         * 判断当前`Model`对象是否有指定的属性且值不为`null`或`undefined`
+         *
+         * @param {string} name 属性名
+         * @return {boolean}
+         */
+        Model.prototype.hasValue = function (name) {
+            // 不要用`this.get`，有可能`Model`重写`get`还依赖这个方法
+            return this.has(name) && this.store[name] != null;
+        };
+
+        /**
+         * 判断当前`Model`对象是否有指定的属性且值不为`null`、`undefined`或空字符串
+         *
+         * @param {string} name 属性名
+         * @return {boolean}
+         */
+        Model.prototype.hasReadableValue = function (name) {
+            return this.hasValue(name) && this.store[name] !== '';
+        };
+
+        /**
+         * 将当前`Model`对象展出为一个普通的对象
+         *
+         * @return {Object} 一个普通的对象，修改该对象不会影响到当前`Model`对象
          * @override
          */
         Model.prototype.valueOf = function () {
-            // 为保证`valueOf`获取对象后修改不会影响到当前`Model`对象，
-            // 需要做一次克隆的操作
-            return util.mix({}, this.store);
+            return this.dump();
         };
 
         /**
          * 克隆当前`Model`对象，产生一个新的`Model`对象
          *
          * @return {Model} 克隆后的新`Model`对象
-         * @public
          */
         Model.prototype.clone = function () {
             return new Model(this.store);
@@ -550,8 +592,8 @@ define(
          * - 如果方法抛出异常，则认为错误未经处理，会将该错误继续向上抛出，当前Model加载失败
          *
          * @param {Object} error 错误信息
-         * @param {string=} error.name 对应的数据键名
-         * @param {*} error.error 错误对象
+         * @param {string} [error.name] 对应的数据键名
+         * @param {Mixed} error.error 错误对象
          */
         Model.prototype.handleError = function (error) {
             throw error;
@@ -559,8 +601,6 @@ define(
 
         /**
          * 销毁当前`Model`对象，会尝试停止所有正在加载的数据
-         *
-         * @public
          */
         Model.prototype.dispose = function () {
             for (var i = 0; i < this.pendingWorkers.length; i++) {
@@ -576,7 +616,7 @@ define(
             this.pendingWorkers = null;
         };
 
-        util.inherits(Model, Observable);
+        util.inherits(Model, EventTarget);
 
         return Model;
     }

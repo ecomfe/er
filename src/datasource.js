@@ -17,7 +17,7 @@ define(
         /**
          * 获取一个常量
          *
-         * @param {*} value 常量的值
+         * @param {Mixed} value 常量的值
          * @return {function} 数据获取函数
          */
         datasource.constant = function (value) {
@@ -30,7 +30,7 @@ define(
          * 加载远程数据
          *
          * @param {string} url 加载的URL
-         * @param {Object=} options 调用`ajax.request`时的其它配置项
+         * @param {Object} [options] 调用`ajax.request`时的其它配置项
          * @return {function} 数据获取函数
          */
         datasource.remote = function (url, options) {
@@ -59,6 +59,56 @@ define(
             return function () {
                 var permission = require('./permission');
                 return permission.isAllow(name);
+            };
+        };
+
+        /**
+         * 当属性为`null`或`undefined`时，使用默认值代替
+         *
+         * @param {Mixed} defaultValue 用于代替的默认值
+         * @param {string} [name] 判断的属性名，默认与当前获取的属性名相同
+         * @return {function} 数据获取函数
+         */
+        datasource.defaultValue = function (defaultValue, name) {
+            return function (model, options) {
+                if (!options.name && !name) {
+                    throw new Error('No property name specified '
+                        + 'to determine whether value exists in this model');
+                }
+
+                var propertyName = name || options.name;
+                return model.hasValue(propertyName)
+                    ? model.get(propertyName)
+                    : defaultValue;
+            };
+        };
+
+        /**
+         * 转换属性类型
+         *
+         * @param {string} type 转换的目标类型，支持`number`、`string`或`boolean`
+         * @param {string} [name] 指定属性名，默认与当前获取的属性名相同
+         * @return {function} 数据获取函数
+         */
+        datasource.convertTo = function (type, name) {
+            return function (mode, options) {
+                if (!options.name && !name) {
+                    throw new Error('No property name specified to convert');
+                }
+
+                var property = name || options.name;
+                var value = model.get(property);
+
+                switch (type) {
+                    case 'number':
+                        return parseInt(value, 10);
+                    case 'string':
+                        return value + '';
+                    case 'boolean':
+                        return !!value;
+                    default:
+                        return value;
+                }
             };
         };
 
