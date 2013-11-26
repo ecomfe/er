@@ -66,13 +66,23 @@ define(
          * 渲染当前视图
          */
         View.prototype.render = function () {
-            var container = this.getContainerElement();
-            var template = require('./template');
             var model = this.model;
             if (model && typeof model.get !== 'function') {
                 var Model = require('./Model');
                 model = new Model(model);
             }
+
+            var container = this.getContainerElement();
+            // 容器没有还不一定是没配置好，很可能是主Action销毁了子Action才刚加载完
+            if (!container) {
+                var url = model && model.get('url');
+                throw new Error(
+                    'Container not found when rendering '
+                    + (url ? '"' + url + '"' : 'view')
+                );
+            }
+
+            var template = require('./template');
             template.merge(container, this.getTemplateName(), model);
 
             this.enterDocument();

@@ -221,6 +221,11 @@ define(
          * @protected
          */
         Action.prototype.leave = function () {
+            // 如果已经销毁了就别再继续下去
+            if (this.disposed) {
+                return this;
+            }
+
             this.disposed = true;
 
             /**
