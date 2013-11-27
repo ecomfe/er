@@ -427,7 +427,12 @@ define(
                     else if (window.JSON 
                         && typeof JSON.stringify === 'function'
                     ) {
-                        message = JSON.stringify(reason);
+                        try {
+                            message = JSON.stringify(reason);
+                        }
+                        catch (parseJSONError) {
+                            message = reason;
+                        }
                     }
                     else {
                         message = reason;
