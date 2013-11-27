@@ -1,0 +1,49 @@
+[
+    {
+        "name": "ER",
+        "groups": [
+            {
+                "name": "核心组件",
+                "classes": [
+                    "main",
+                    "locator",
+                    "router",
+                    "controller"
+                ]
+            },
+            {
+                "name": "业务组件",
+                "classes": [
+                    "Action",
+                    "Model",
+                    "View",
+                    "permission",
+                    "events"
+                ]
+            },
+            {
+                "name": "工具组件",
+                "classes": [
+                    "Deferred",
+                    "ajax",
+                    "config",
+                    "datasource",
+                    "URL",
+                    "util"
+                ]
+            },
+            {
+                "name": "内部数据结构",
+                "classes": [
+                    "meta.*"
+                ]
+            },
+            {
+                "name": "已废弃",
+                "classes": [
+                    "Observable"
+                ]
+            }
+        ]
+    }
+]

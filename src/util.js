@@ -1,7 +1,8 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
+ *
+ * @ignore
  * @file 杂而乱的工具对象
  * @author otakustay, errorrik
  */
@@ -10,14 +11,18 @@ define(
         var now = +new Date();
 
         /**
+         * @class util
+         *
          * 工具模块，放一些杂七杂八的东西
+         *
+         * @singleton
          */
         var util = {};
 
         /**
          * 获取一个唯一的ID
          *
-         * @return {number} 一个唯一的ID
+         * @return {string} 一个唯一的ID
          */
         util.guid = function () {
             return 'er' + now++;
@@ -57,10 +62,10 @@ define(
         /**
          * 固定函数的`this`变量和若干参数
          *
-         * @param {function} fn 操作的目标函数
+         * @param {Function} fn 操作的目标函数
          * @param {Mixed} context 函数的`this`变量
          * @param {Mixed...} args 固定的参数
-         * @return {function} 固定了`this`变量和若干参数后的新函数对象
+         * @return {Function} 固定了`this`变量和若干参数后的新函数对象
          */
         util.bind = nativeBind
             ? function (fn) {
@@ -77,8 +82,8 @@ define(
         /**
          * 空函数
          *
-         * @type {function}
-         * @const
+         * @property
+         * @type {Function}
          */
         util.noop = function () {};
 
@@ -87,9 +92,9 @@ define(
         /**
          * 设置继承关系
          *
-         * @param {function} type 子类
-         * @param {function} superType 父类
-         * @return {function} 子类
+         * @param {Function} type 子类
+         * @param {Function} superType 父类
+         * @return {Function} 子类
          */
         util.inherits = function (type, superType) {
             var Empty = function () {};
@@ -150,7 +155,7 @@ define(
         /**
          * 对字符中进行HTML编码
          *
-         * @param {string} 源字符串
+         * @param {string} source 源字符串
          * @param {string} HTML编码后的字符串
          */
         util.encodeHTML = function (source) {

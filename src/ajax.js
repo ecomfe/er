@@ -1,41 +1,29 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
- * @file ajax相关方法
+ *
+ * @ignore
+ * @file AJAX相关方法
  * @author otakustay
  */
 define(
     function (require) {
 
         /**
-         * ajax模块
+         * @class ajax
+         *
+         * AJAX模块
+         *
+         * @mixins mini-event.EventTarget
+         * @singleton
          */
         var ajax = {};
         require('mini-event/EventTarget').enable(ajax);
 
         /**
-         * 每次请求流程的勾子，包含以下属性：
-         * 
-         * - `beforeExecute`：在执行逻辑以前
-         *     - `{Object} options`：请求时的参数
-         * - `beforeCreate`：在创建`XMLHttpRequest`前
-         *     - `{Object} options`：请求时的参数外加默认参数融合后的对象
-         *     - `{Deferred} request`：控制请求的`Deferred`对象
-         *     - 返回**true**表示请求已经处理，ajax模块将不再进行后续的逻辑
-         * - `beforeSend`：链接打开但没发送数据
-         *     - `{FakeXHR} xhr`：伪造的`XMLHttpRequest`对象
-         *     - `{Object} options`：请求时的参数外加默认参数融合后的对象
-         * - `afterReceive`：在收到返回后
-         *     - `{FakeXHR} xhr`：伪造的`XMLHttpRequest`对象
-         *     - `{Object} options`：请求时的参数外加默认参数融合后的对象
-         * - `afterParse`：在按数据类型处理完响应后
-         *     - `{Mixed} data`：返回的数据
-         *     - `{FakeXHR} xhr`：伪造的`XMLHttpRequest`对象
-         *     - `{Object} options`：请求时的参数外加默认参数融合后的对象
-         *     - 返回值将被作为最终触发回调时的数据
+         * 每次请求流程的勾子，可通过重写其中的函数来影响AJAX的行为
          *
-         * @type {Object}
+         * @type {meta.AjaxHook}
          */
         ajax.hooks = {};
 
@@ -90,44 +78,19 @@ define(
         /**
          * AJAX的全局配置
          *
-         * @type {Object}
+         * @type {meta.AjaxOption}
          */
         ajax.config = {
-            /**
-             * 默认是否开启缓存。默认关闭，即所有GET请求会带上时间戳
-             *
-             * @type {boolean}
-             */
             cache: false,
-
-            /**
-             * 默认的超时时间，以毫秒为单位。默认不超时
-             *
-             * @type {number}
-             */
             timeout: 0,
-
-            /**
-             * 默认的编码
-             *
-             * @type {string}
-             */
             charset: ''
         };
 
         /**
-         * 发起XMLHttpRequest请求
+         * 发起`XMLHttpRequest`请求
          *
-         * @param {Object} options 相关配置
-         * @param {string} options.url 请求的地址
-         * @param {string} [options.method] 请求的类型
-         * @param {Object} [options.data] 请求的数据
-         * @param {string} [options.dataType] 返回数据的类型，
-         * 可以为**json**或**text**，默认为**text**
-         * @param {number} [options.timeout] 超时时间
-         * @param {boolean} [options.cache] 决定是否允许缓存
-         * @return {FakeXHR} 一个`FakeXHR`对象，
-         * 该对象有`Promise`的所有方法，以及`XMLHTTPRequest`对象的相应方法
+         * @param {meta.AjaxOption} options 相关配置
+         * @return {meta.FakeXHR}
          */
         ajax.request = function (options) {
             if (typeof ajax.hooks.beforeExecute === 'function') {
@@ -187,21 +150,21 @@ define(
             fakeXHR.then(
                 function () {
                     /**
-                     * 任意一个XMLHttpRequest请求失败时触发
-                     *
                      * @event done
-                     * @param {Object} e 事件对象
-                     * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
+                     *
+                     * 任意一个请求成功时触发
+                     *
+                     * @param {meta.FakeXHR} xhr 请求对象
                      */
                     ajax.fire('done', { xhr: fakeXHR });
                 },
                 function () {
                     /**
-                     * 任意一个XMLHttpRequest请求失败时触发
-                     *
                      * @event fail
-                     * @param {Object} e 事件对象
-                     * @param {FakeXHR} e.xhr 请求使用的`FakeXHR`对象
+                     *
+                     * 任意一个请求失败时触发
+                     *
+                     * @param {meta.FakeXHR} xhr 请求对象
                      */
                     ajax.fire('fail', { xhr: fakeXHR });
                 }
@@ -316,13 +279,12 @@ define(
         };
 
         /**
-         * 发起一个GET请求
+         * 发起一个`GET`请求
          *
          * @param {string} url 请求的地址
          * @param {Object} [data] 请求的数据
          * @param {boolean} [cache] 决定是否允许缓存
-         * @return {Object} 一个`FakeXHR`对象，
-         * 该对象有`Promise`的所有方法，以及一个`abort`方法
+         * @return {meta.FakeXHR}
          */
         ajax.get = function (url, data, cache) {
             var options = {
@@ -335,13 +297,12 @@ define(
         };
 
         /**
-         * 发起一个GET请求并获取JSON数据
+         * 发起一个`GET`请求并获取JSON数据
          *
          * @param {string} url 请求的地址
          * @param {Object} [data] 请求的数据
          * @param {boolean} [cache] 决定是否允许缓存
-         * @return {Object} 一个`FakeXHR`对象，
-         * 该对象有`Promise`的所有方法，以及一个`abort`方法
+         * @return {meta.FakeXHR}
          */
         ajax.getJSON = function (url, data, cache) {
             var options = {
@@ -356,13 +317,12 @@ define(
 
 
         /**
-         * 发起一个POST请求
+         * 发起一个`POST`请求
          *
          * @param {string} url 请求的地址
          * @param {Object} [data] 请求的数据
          * @param {string} [dataType="json"] 指定响应的数据格式
-         * @return {Object} 一个`FakeXHR`对象，
-         * 该对象有`Promise`的所有方法，以及一个`abort`方法
+         * @return {meta.FakeXHR}
          */
         ajax.post = function (url, data, dataType) {
             var options = {

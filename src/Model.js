@@ -1,8 +1,9 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
- * @file Model类声明
+ *
+ * @ignore
+ * @file Model类
  * @author otakustay
  */
 define(
@@ -15,11 +16,9 @@ define(
          * 加载一个数据
          *
          * @param {Model} model 用于存放数据的`Model`对象
-         * @param {Object} options 数据获取配置项，详见`load`方法说明
-         * @param {function(Model, Object)} options.retrieve 获取数据的函数
-         * @param {string} [options.name] 获取数据后添加到`Model`对象时的属性名
-         * @param {boolean} [options.dump] 决定数据是否完整添加到`Model`对象
-         * @return {Promise} 对应的`Promise`对象，数据加载完成后触发
+         * @param {meta.DatasourceOption} options 数据获取配置项
+         * @return {meta.Promise} 对应的`Promise`对象，数据加载完成后触发
+         * @ignore
          */
         function loadData(model, options) {
             function addDataToModel(value) {
@@ -87,8 +86,9 @@ define(
          * 按顺序加载一个数组中的各项数据
          *
          * @param {Model} model 用于存放数据的`Model`对象
-         * @param {Array} datasource 数据原配置
-         * @return {Promise} 对应的`Promise`对象，数据加载完成后触发
+         * @param {meta.DatasourceOption[]} datasource 数据原配置
+         * @return {meta.Promise} 对应的`Promise`对象，数据加载完成后触发
+         * @ignore
          */ 
         function loadSequence(model, datasource) {
             // 第一个Promise是直接成功的，以便开始第一块的加载
@@ -105,8 +105,10 @@ define(
          * 并行加载一批数据
          *
          * @param {Model} model 用于存放数据的`Model`对象
-         * @param {Object} datasource 数据源配置
+         * @param {Object} datasource 数据源配置，
+         * 此对象中的每个值是一个{@link meta.DatasourceOption}对象
          * @return {Promise} 对应的`Promise`对象，数据加载完成后触发
+         * @ignore
          */
         function loadParallel(model, datasource) {
             var workers = [];
@@ -139,6 +141,7 @@ define(
          * @param {Model} model 用于存放数据的`Model`对象
          * @param {Object} datasource 数据源配置
          * @return {Promise} 对应的`Promise`对象，数据加载完成后触发
+         * @ignore
          */
         function load(model, datasource) {
             // 允许datasource是null或undefined，
@@ -185,9 +188,9 @@ define(
          * 
          * 该Model类为一个通用的可配置的基类，提供了数据加载的相关方法
          *
-         * @constructor
-         * @extends EventTarget
+         * @extends mini-event.EventTarget
          * @param {Object} [context] 初始化的数据
+         * @constructor
          */
         function Model(context) {
             this.store = {};
@@ -201,7 +204,8 @@ define(
         /**
          * 移除一个已完成的工作对象
          *
-         * @param {Promise} worker 工作对象
+         * @param {meta.Promise} worker 工作对象
+         * @ignore
          */
         function removePendingWorker(model, worker) {
             for (var i = 0; i < model.pendingWorkers.length; i++) {
@@ -215,7 +219,14 @@ define(
         /**
          * 添加一个未完成的工作对象
          *
-         * @param {Promise} worker 工作对象
+         * 将一个{@link meta.Promise}对象添加到当前的{@link Model}对象上，
+         * 则当此{@link meta.Promise}对象进入`resolved或`rejected`状态后，会自动移除
+         *
+         * 而未移除的这些{@link meta.Promise}对象，会在当前{@link Model}对象销毁果，
+         * 一并进行销毁。一个{@link meta.Promise}对象如果额外提供`abort()`方法，
+         * 则调用此方法进行销毁，其它情况下直接丢弃
+         *
+         * @param {meta.Promise} worker 工作对象
          */
         Model.prototype.addPendingWorker = function (worker) {
             this.pendingWorkers.push(worker);
@@ -227,71 +238,67 @@ define(
          * 
          * 数据源是对数据一系列配置，其中保存了多个数据的获取函数，有以下方式
          * 
-         * ### 单一数据源配置
+         * - 单一数据源配置
          * 
-         * 如果`datasource`是一个函数，则认为该函数是一个数据获取函数，
-         * 执行该函数，并把返回值按照一个对象放到当前Model中
+         *     如果`datasource`是一个函数，则认为该函数是一个数据获取函数，
+         *     执行该函数，并把返回值按照一个对象放到当前{@link Model}中
+         *     
+         *         // 配置从指定的URL获取数据
+         *         datasource = require('./datasource').remote('/model/list')
          * 
-         *     // 配置从指定的URL获取数据
-         *     datasource = require('./datasource').remote('/model/list')
+         * - 并发请求数据
          * 
-         * ### 并发请求数据
+         *     通过一个对象配置并发的数据获取。对象中每一个属性对应一个获取函数，
+         *     当数据获取后，会调用`this.set(name, result)`，以属性名为键值添加
+         *     
+         *         // 并发请求多个URL
+         *         datasource = {
+         *             'list': require('./datasource').remote('/model/list'),
+         *             'config': require('./datasource').constant('listConfig')
+         *         };
          * 
-         * 通过一个对象配置并发的数据获取。对象中每一个属性对应一个获取函数，
-         * 当数据获取后，会调用`this.set(name, result)`，以属性名为键值添加
+         * - 串行请求数据
          * 
-         *     // 并发请求多个URL
-         *     datasource = {
-         *         'list': require('./datasource').remote('/model/list'),
-         *         'config': require('./datasource').constant('listConfig')
-         *     };
+         *     通过一个数组配置并发的数据获取，数组中包含对象。将按照数组的顺序，
+         *     依次加载每一个对象（对象中的各属性是并发）
+         *     
+         *         // 串行请求几个URL
+         *         datasource = [
+         *             { 'config': require('./datasource').constant('config') },
+         *             { 'list': require('./datasource').remote('/model/list') }
+         *         ];
+         *     
+         *     注意使用该方案时，各对象中的键 **不要相同** ，否则会造成数据的覆盖
          * 
-         * ### 串行请求数据
+         * - 嵌套配置
          * 
-         * 通过一个数组配置并发的数据获取，数组中包含对象。将按照数组的顺序，
-         * 依次加载每一个对象（对象中的各属性是并发）
+         *     数组和对象可以相互嵌套，但有一个限制：
+         *     
+         *     > 当一个对象中某个属性的值为普通对象（非数据加载配置项）或数组时，
+         *     > 该属性名将不起作用，即不会在{@link Model}对象中存在以该属性名为键的值
+         *     
+         *     以下为一个串行和并行混杂的数据源配置：
+         *     
+         *         datasource = {
+         *             'one': [getX, getY, getZ],
+         *             'two': getA,
+         *             'three': [
+         *                 { 'four': getB },
+         *                 { 'five': getC }
+         *             ]
+         *         };
          * 
-         *     // 串行请求几个URL
-         *     datasource = [
-         *         { 'config': require('./datasource').constant('config') },
-         *         { 'list': require('./datasource').remote('/model/list') }
-         *     ];
+         *     以上对象将在最终的{@link Model}对象中生成`two`、`four`和`five`属性，
+         *     而`one`、`two`和`three`因为属性值为普通对象或数组，将被忽略，
+         *     其中`one`对应3个函数，将会把函数的返回值展开后添加到当前{@link Model}
          * 
-         * 注意使用该方案时，各对象中的键**不要相同**，否则会造成数据的覆盖
+         *     同样，注意在嵌套的同时，各属性名 **不要相同** ，除非该属性名称没用，
+         *     以避免出现数据相互覆盖的情况
          * 
-         * ### 嵌套配置
+         * 通过数据获取配置项
          * 
-         * 数组和对象可以相互嵌套，但有一个限制：
-         * 
-         * > 当一个对象中某个属性的值为普通对象（非数据加载配置项）或数组时，
-         * > 该属性名将不起作用，即不会在`Model`对象中存在以该属性名为键的值
-         * 
-         * 以下为一个串行和并行混杂的数据源配置：
-         * 
-         *     datasource = {
-         *         'one': [getX, getY, getZ],
-         *         'two': getA,
-         *         'three': [
-         *             { 'four': getB },
-         *             { 'five': getC }
-         *         ]
-         *     };
-         * 
-         * 以上对象将在最终的`Model`对象中生成**two**、**four**和**five**属性，
-         * 而**one**、**two**和**three**因为属性值为普通对象或数组，将被忽略，
-         * 其中**one**对应3个函数，将会把函数的返回值完全展开后添加到当前`Model`
-         * 
-         * 同样，注意在嵌套的同时，各属性名**不要相同**，除非该属性名称没用，
-         * 以避免出现数据相互覆盖的情况
-         * 
-         * ### 通过数据获取配置项
-         * 
-         * 上文所述的各种方案，均是数据获取配置项的一种简写，
-         * 一个数据获取配置项包含以下内容：
-         * 
-         * - `name`：数据加载后添加到`Model`对象时用的键值
-         * - `retrieve`：获取数据的函数
-         * - `dump`：如果该值为**true**，则`name`配置无效，完整添加获取的对象
+         * 上文所述的各种方案，均是数据获取配置项的简写，
+         * 一个数据获取配置项的结构请参考{@link meta.DatasourceOption}的说明
          * 
          * 因此，可以使用数据获取配置项来处理一些例外情况，比如并行加载2个对象，
          * 且2个对象均无对应的键值，需要完整添加到`Model`对象：
@@ -313,15 +320,15 @@ define(
          * - 普通的函数，映射为`{ retrieve: {fn}, dump: true }`
          * - 对象中的一个属性，映射为`{ retrieve: {fn}, name: {name} }`
          *
-         * @type {Object | Array | function}
+         * @type {Object | Array | Function}
          * @protected
          */
         Model.prototype.datasource = null;
 
         /**
-         * 获取数据源配置
+         * 获取数据源配置，默认直接返回{@link Model#datasource}属性
          *
-         * @return {Object | Array | function}
+         * @return {Object | Array | Function}
          */
         Model.prototype.getDatasource = function () {
             return this.datasource;
@@ -353,9 +360,11 @@ define(
         }
 
         /**
-         * 加载当前Model
+         * 加载当前{@link Model}对象的数据
          * 
-         * @return {Promise} `Promise`对象，在数据加载且`prepare`方法执行后触发
+         * @return {meta.Promise} 返回一个{@link meta.Promise}对象，
+         * 在数据加载且{@link Model#prepare}方法执行后进入`resolved`状态，
+         * 如果加载过程中出现错误，则进入`rejected`状态
          */
         Model.prototype.load = function () {
             try {
@@ -371,21 +380,24 @@ define(
         /**
          * 处理加载后的数据
          * 
-         * 这个方法用于在`load`完毕后，调整一些数据结构
+         * 这个方法用于在{@link Model#load}完毕后，调整一些数据结构
          * 
-         * 在该方法执行时，`this`中已经有`load`方法填充的数据，
-         * 可使用`get`、`set`和`remove`进行调整
+         * 在该方法执行时，当前的{@link Model}对象中
+         * 已经有{@link Model#load}方法填充的数据，
+         * 可使用{@link Model#get}、{@link Model#set}和{@link Model#remove}
+         * 方法对数据进行调整
          * 
          * 该方法默认不执行任何逻辑
          * 
-         * 如果在`prepare`方法中有异步的操作，可以让方法返回一个`Promise`对象
+         * 如果在`prepare`方法中有异步的操作，
+         * 可以让方法返回一个{@link meta.Promise}对象，
+         * {@link Model#load}方法会等待其进入`resolved状态
          *
-         * @return {Promise=} 如果`prepare`的逻辑中有异步操作，
-         * 则返回一个`Promise`对象，通知调用者等待
+         * @return {meta.Promise | undefined} 如果`prepare`的逻辑中有异步操作，
+         * 则返回一个{@link meta.Promise}对象，通知调用者等待
          * @protected
          */
-        Model.prototype.prepare = function () {
-        };
+        Model.prototype.prepare = util.noop;
 
         /**
          * 获取对应键的值
@@ -403,7 +415,8 @@ define(
          * @param {Model} 作为容器的Model对象
          * @param {string} name 属性名
          * @param {Mixed} value 对应的值
-         * @param {Object} 一个变化记录项
+         * @return {meta.ChangeRecord} 一个变化记录项
+         * @ignore
          */
         function setProperty(model, name, value) {
             var type = model.store.hasOwnProperty(name) ? 'change' : 'add';
@@ -429,7 +442,9 @@ define(
          * @param {string} name 属性名
          * @param {Mixed} value 对应的值
          * @param {Object} [options] 相关选项
-         * @param {boolean} [options.silent] 如果该值为true则不触发`change`事件
+         * @param {boolean} [options.silent=false] 如果该值为`true`则
+         * 不触发{@link Model#change}事件
+         * @fires change
          */
         Model.prototype.set = function (name, value, options) {
             options = options || {};
@@ -439,6 +454,13 @@ define(
                 var event = {
                     changes: [record]
                 };
+                /**
+                 * @event change
+                 *
+                 * 属性值发生变化时触发
+                 *
+                 * @param {meta.ChangeRecord[]} changes 发生变化的记录项
+                 */
                 this.fire('change', event);
             }
         };
@@ -448,7 +470,9 @@ define(
          *
          * @param {Object} extension 批量值的存放对象
          * @param {Object} [options] 相关选项
-         * @param {boolean} [options.silent] 如果该值为true则不触发`change`事件
+         * @param {boolean} [options.silent=false] 如果该值为`true`则
+         * 不触发{@link Model#change}事件
+         * @fires change
          */
         Model.prototype.fill = function (extension, options) {
             options = options || {};
@@ -477,7 +501,9 @@ define(
          * @param {string} name 属性名
          * @return {Mixed} 在删除前`name`对应的值
          * @param {Object} [options] 相关选项
-         * @param {boolean} [options.silent] 如果该值为true则不触发`change`事件
+         * @param {boolean} [options.silent=false] 如果该值为`true`则
+         * 不触发{@link Model#change}事件
+         * @fires change
          */
         Model.prototype.remove = function (name, options) {
             // 如果原来就没这个值，就不触发`change`事件了
@@ -507,10 +533,10 @@ define(
         };
 
         /**
-         * 获取对应键的值并组装为一个新的`Model`对象后返回
+         * 获取对应键的值并组装为一个新的{@link Model}对象后返回
          *
          * @param {string} name 属性名
-         * @return {Model} `name`对应的值组装成的新的`Model`对象
+         * @return {Model} `name`对应的值组装成的新的{@link Model}对象
          */
         Model.prototype.getAsModel = function (name) {
             var value = this.get(name);
@@ -523,9 +549,9 @@ define(
         };
 
         /**
-         * 将当前`Model`对象展出为一个普通的对象
+         * 将当前{@link Model}对象导出为一个普通的对象
          *
-         * @return {Object} 一个普通的对象，修改该对象不会影响到当前`Model`对象
+         * @return {Object} 一个普通的对象，修改该对象不会影响到当前{@link Model}对象
          */
         Model.prototype.dump = function () {
             // 为保证获取对象后修改不会影响到当前`Model`对象，
@@ -534,7 +560,7 @@ define(
         };
 
         /**
-         * 判断当前`Model`对象是否有指定的属性
+         * 判断当前{@link Model}对象是否有指定的属性
          *
          * @param {string} name 属性名
          * @return {boolean}
@@ -544,7 +570,7 @@ define(
         };
 
         /**
-         * 判断当前`Model`对象是否有指定的属性且值不为`null`或`undefined`
+         * 判断当前{@link Model}对象是否有指定的属性且值不为`null`或`undefined`
          *
          * @param {string} name 属性名
          * @return {boolean}
@@ -555,7 +581,8 @@ define(
         };
 
         /**
-         * 判断当前`Model`对象是否有指定的属性且值不为`null`、`undefined`或空字符串
+         * 判断当前{@link Model}对象是否有指定的属性
+         * 且值不为`null`、`undefined`或空字符串
          *
          * @param {string} name 属性名
          * @return {boolean}
@@ -565,19 +592,20 @@ define(
         };
 
         /**
-         * 将当前`Model`对象展出为一个普通的对象
+         * 将当前{@link Model}对象导出为一个普通的对象
          *
-         * @return {Object} 一个普通的对象，修改该对象不会影响到当前`Model`对象
+         * @return {Object} 一个普通的对象，修改该对象不会影响到当前{@link Model}对象
          * @override
+         * @deprecated 建议使用{@link Model#dump}方法
          */
         Model.prototype.valueOf = function () {
             return this.dump();
         };
 
         /**
-         * 克隆当前`Model`对象，产生一个新的`Model`对象
+         * 克隆当前{@link Model}对象，产生一个新的{@link Model}对象
          *
-         * @return {Model} 克隆后的新`Model`对象
+         * @return {Model} 克隆后的新{@link Model}对象
          */
         Model.prototype.clone = function () {
             return new Model(this.store);
@@ -589,7 +617,7 @@ define(
          * 加载过程中的每一个错误都会调用该方法，该方法可以决定错误的处理逻辑：
          * 
          * - 如果方法正常返回，则认为错误已经处理完毕，返回值作为数据值加入到当前Model中
-         * - 如果方法抛出异常，则认为错误未经处理，会将该错误继续向上抛出，当前Model加载失败
+         * - 如果方法抛出异常，则认为错误未经处理，将错误继续向上抛出，当前Model加载失败
          *
          * @param {Object} error 错误信息
          * @param {string} [error.name] 对应的数据键名
@@ -600,7 +628,7 @@ define(
         };
 
         /**
-         * 销毁当前`Model`对象，会尝试停止所有正在加载的数据
+         * 销毁当前{@link Model}对象，会尝试停止所有正在加载的数据
          */
         Model.prototype.dispose = function () {
             for (var i = 0; i < this.pendingWorkers.length; i++) {

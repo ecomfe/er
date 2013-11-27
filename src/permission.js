@@ -1,7 +1,8 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
+ *
+ * @ignore
  * @file 权限管理对象
  * @author otakustay
  */
@@ -10,11 +11,15 @@ define(
         var authorities = {};
 
         /**
+         * @class permission
+         *
          * 权限管理器，提供权限的注册和判断功能
+         *
+         * @singleton
          */
         var permssion = {
             /**
-             * 添加权限说明
+             * 添加权限
              * 
              * 权限以字符串作为名称，添加权限说明时，传递一个对象，
              * 其中的健为权限名称，值为是否拥有该权限

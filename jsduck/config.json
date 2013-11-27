@@ -1,0 +1,35 @@
+{
+    "--title": "ER",
+    "--output": "../doc/api",
+    "--categories": "categories.json",
+    "--external": "mini-event.EventTarget",
+    "--": [
+        "../src/Action.js",
+        "../src/ajax.js",
+        "../src/config.js",
+        "../src/controller.js",
+        "../src/datasource.js",
+        "../src/Deferred.js",
+        "../src/events.js",
+        "../src/locator.js",
+        "../src/main.js",
+        "../src/Model.js",
+        "../src/Observable.js",
+        "../src/permission.js",
+        "../src/router.js",
+        "../src/URL.js",
+        "../src/util.js",
+        "../src/View.js",
+
+        "meta/ActionConfig.js",
+        "meta/ActionContext.js",
+        "meta/AjaxHook.js",
+        "meta/AjaxOption.js",
+        "meta/ChangeRecord.js",
+        "meta/DatasourceOption.js",
+        "meta/FakeXHR.js",
+        "meta/Promise.js",
+        "meta/RedirectOption.js",
+        "meta/Resolver.js"
+    ]
+}
