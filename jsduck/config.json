@@ -6,6 +6,7 @@
     "--": [
         "../src/Action.js",
         "../src/ajax.js",
+        "../src/assert.js",
         "../src/config.js",
         "../src/controller.js",
         "../src/datasource.js",
