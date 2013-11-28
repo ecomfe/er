@@ -66,30 +66,46 @@ define(
         };
 
         /**
+         * 获取用于模板渲染的数据对象
+         *
+         * @return {Object}
+         */
+        View.prototype.getTemplateData = function () {
+            // TODO: 使用etpl后改为一个包装器
+            var model = this.model;
+            if (model && typeof model.get !== 'function') {
+                var Model = require('./Model');
+                model = new Model(model);
+            }
+            return model;
+        };
+
+        /**
          * 渲染当前视图
          *
          * ER的默认实现是使用[etpl](https://github.com/ecomfe/etpl)渲染容器，
          * 如果需要使用其它的模板，或自己有视图的管理，建议重写此方法
          */
         View.prototype.render = function () {
-            var model = this.model;
-            if (model && typeof model.get !== 'function') {
-                var Model = require('./Model');
-                model = new Model(model);
-            }
-
             var container = this.getContainerElement();
             // 容器没有还不一定是没配置好，很可能是主Action销毁了子Action才刚加载完
             if (!container) {
-                var url = model && model.get('url');
+                var url = this.model
+                    && typeof this.model.get === 'function'
+                    && this.model.get('url');
                 throw new Error(
                     'Container not found when rendering '
                     + (url ? '"' + url + '"' : 'view')
                 );
             }
 
+            // TODO: 改用etpl
             var template = require('./template');
-            template.merge(container, this.getTemplateName(), model);
+            template.merge(
+                container,
+                this.getTemplateName(),
+                this.getTemplateData()
+            );
 
             this.enterDocument();
         };
