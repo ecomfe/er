@@ -1,16 +1,21 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
+ *
+ * @ignore
  * @file 获取数据相关的函数生产工厂
  * @author otakustay
  */
 define(
     function (require) {
         /**
+         * @class datasource
+         *
          * 获取数据相关的函数生产工厂
          * 
-         * 该对象下的每个方法均返回一个函数，可用于`Model`的`datasource`配置
+         * 该对象下的每个方法均返回一个函数，可用于生成{@link Model#datasource}配置
+         *
+         * @singleton
          */
         var datasource = {};
 
@@ -18,7 +23,7 @@ define(
          * 获取一个常量
          *
          * @param {Mixed} value 常量的值
-         * @return {function} 数据获取函数
+         * @return {Function} 数据获取函数
          */
         datasource.constant = function (value) {
             return function () {
@@ -30,8 +35,8 @@ define(
          * 加载远程数据
          *
          * @param {string} url 加载的URL
-         * @param {Object} [options] 调用`ajax.request`时的其它配置项
-         * @return {function} 数据获取函数
+         * @param {Object} [options] 调用{@link ajax#request}时的其它配置项
+         * @return {Function} 数据获取函数
          */
         datasource.remote = function (url, options) {
             return function (model) {
@@ -53,7 +58,7 @@ define(
          * 获取权限数据
          *
          * @param {string} name 权限的名称
-         * @return {function} 数据获取函数
+         * @return {Function} 数据获取函数
          */
         datasource.permission = function (name) {
             return function () {
@@ -67,7 +72,7 @@ define(
          *
          * @param {Mixed} defaultValue 用于代替的默认值
          * @param {string} [name] 判断的属性名，默认与当前获取的属性名相同
-         * @return {function} 数据获取函数
+         * @return {Function} 数据获取函数
          */
         datasource.defaultValue = function (defaultValue, name) {
             return function (model, options) {
@@ -86,9 +91,10 @@ define(
         /**
          * 转换属性类型
          *
-         * @param {string} type 转换的目标类型，支持`number`、`string`或`boolean`
+         * @param {string} type 转换的目标类型，支
+         * 持`"number"`、`"string"`或`"boolean"`
          * @param {string} [name] 指定属性名，默认与当前获取的属性名相同
-         * @return {function} 数据获取函数
+         * @return {Function} 数据获取函数
          */
         datasource.convertTo = function (type, name) {
             return function (mode, options) {

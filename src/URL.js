@@ -1,8 +1,9 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
- * @file URL封闭类
+ *
+ * @ignore
+ * @file URL封装类
  * @author otakustay
  */
 define(
@@ -14,18 +15,18 @@ define(
          *
          * 该类是一个不可变类型，构建后可以读取其中的内容，但不能修改
          * 
-         * **不建议**使用该类的构造函数，
+         * **不建议** 使用该类的构造函数，
          * 如果需要获得URL实例，通过`parse`和`withQuery`工厂方法生成
          * 
          * 该类的默认规则不同于普通的URL协议，具体体现如下：
          * 
          * - 不分解protocol、host、port、hash部分，仅包含path和search
-         * - path和search的分隔符默认为**~**字符
+         * - path和search的分隔符默认为`~`字符
          * 
-         * @constructor
          * @param {string} [path] URL中的path部分
          * @param {string} [search] URL中的search部分
-         * @param {string} [searchSeparator] 分隔path与search的分隔符，默认为`~`
+         * @param {string} [searchSeparator="~"] 分隔path与search的分隔符
+         * @constructor
          */
         function URL(path, search, searchSeparator) {
             path = path || '/';
@@ -33,6 +34,8 @@ define(
             searchSeparator = searchSeparator || '~';
 
             /**
+             * @method toString
+             *
              * 获取完整URL字符串
              *
              * @return {string} 当前URL的完整字符串表示
@@ -43,6 +46,8 @@ define(
             };
 
             /**
+             * @method getPath
+             *
              * 获取path部分
              *
              * @return {string} URL中的path部分
@@ -52,6 +57,8 @@ define(
             };
 
             /**
+             * @method getSearch
+             *
              * 获取search部分
              *
              * @return {string} URL中的search部分
@@ -61,7 +68,10 @@ define(
             };
 
             var query = null;
+
             /**
+             * @method getQuery
+             *
              * 获取参数对象或指定参数的值
              * 
              * @param {string} [key] 指定参数的名称，不传该参数则返回整个参数对象
@@ -79,12 +89,13 @@ define(
         /**
          * 解析完整的URL
          * 
-         * 该函数仅解析path、search、query
+         * 该函数仅解析`path`、`search`和`query`
          *
          * @param {string} url 完整的URL
          * @param {Object} [options] 控制解析行为的相关参数
-         * @param {string} [options.querySeparator] 用于分隔path和search的字符
+         * @param {string} [options.querySeparator="~"] 用于分隔path和search的字符
          * @return {URL} 一个URL对象
+         * @static
          */
         URL.parse = function (url, options) {
             var defaults = { querySeparator: '~' };
@@ -105,13 +116,14 @@ define(
         };
 
         /**
-         * 根据path和给定的query对象生成URL对象
+         * 根据`path`和给定的`query`对象生成URL对象
          *
          * @param {string | URL} path 已经存在的URL
          * @param {Object} query URL的参数对象
          * @param {Object} [options] 控制解析行为的相关参数
-         * @param {string} [options.querySeparator] 用于分隔path和search的字符
+         * @param {string} [options.querySeparator="~"] 用于分隔path和search的字符
          * @return {URL} 一个URL对象
+         * @static
          */
         URL.withQuery = function (path, query, options) {
             path = path + '';
@@ -128,10 +140,11 @@ define(
         };
 
         /**
-         * 根据query规则解析字符串并返回参数对象
+         * 根据`query`规则解析字符串并返回参数对象
          *
-         * @param {string} str query字符串，不能有起始的**?**或**#**字符
+         * @param {string} str query字符串， *不能* 有起始的`?`或`#`字符
          * @return {Object} 从`str`解析得到的参数对象
+         * @static
          */
         URL.parseQuery = function (str) {
             var pairs = str.split('&');
@@ -169,7 +182,8 @@ define(
          * 将参数对象转换为URL字符串
          *
          * @param {Object} query 参数对象
-         * @return {string} 转换后的URL字符串，相当于search部分
+         * @return {string} 转换后的URL字符串，相当于`search`部分
+         * @static
          */
         URL.serialize = function (query) {
             if (!query) {
@@ -193,6 +207,7 @@ define(
          * 空的URL实例，用于减少对`new URL()`的调用
          *
          * @type {URL}
+         * @static
          */
         URL.empty = new URL();
 

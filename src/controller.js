@@ -1,7 +1,8 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
+ *
+ * @ignore
  * @file 控制器实现
  * @author otakustay, erik
  */
@@ -19,18 +20,19 @@ define(
         var assert = require('./assert');
 
         /**
+         * @class controller
+         *
          * URL与Action的调度器
+         *
+         * `controller`负责将URL映射到具体的一个{@link Action}的执行上
+         *
+         * @singleton
          */
         var controller = {
             /**
              * 注册一个Action
              *
-             * @param {Object} config Action的相关配置
-             * @param {string} config.type Action对应模块的id
-             * @param {string} config.path 对应的URL的path部分
-             * @param {string} [config.movedTo] 设定Action跳转至其它路径
-             * @param {string[] | string} [config.authority] 访问权限
-             * @param {string} [noAuthorityLocation] 无权限时的跳转路径
+             * @param {meta.ActionConfig} config Action的相关配置
              */
             registerAction: function (config) {
                 assert.hasProperty(
@@ -54,13 +56,15 @@ define(
             },
 
             /**
-             * 处理Action配置，在`controller`按默认逻辑查找Action配置后，
-             * 会将查找到的配置，以及进入时的参数一同交给该方法，
+             * 处理{@link meta.ActionConfig}配置，
+             * 在`controller`按默认逻辑查找Action配置后，
+             * 会将查找到的配置，以及进入时的{@link meta.ActionContext}参数交给该方法，
              * 该方法可以额外进行一些操作，如在未找到配置时提供默认的映射规则
              *
-             * @param {Object} [config] 按默认逻辑找到的Action配置
-             * @param {Object} args 进入流程时提供的参数
-             * @return {Object | null} 一个有效的Action配置对象，或返回null
+             * @param {meta.ActionConfig | null} config 按默认逻辑找到的Action配置
+             * @param {meta.ActionContext} args 进入流程时提供的参数
+             * @return {meta.ActionConfig | null} 一个有效的Action配置对象，
+             * 如果确定不存在需要的配置，则返回null
              */
             resolveActionConfig: function (config, args) {
                 return config;
@@ -71,9 +75,12 @@ define(
          * 检查是否拥有权限
          * 
          * - 权限可以是一个数组，此时用户拥有数组中任意一项权限即认为有权限
-         * - 权限也可以是个字符串，将各权限通过**|**字符分割
+         * - 权限也可以是个字符串，将各权限通过`|`字符分割
+         *
+         * 具体参考{@link meta.ActionConfig#authority}的说明
          *
          * @param {string[] | string} authority 权限配置
+         * @ignore
          */
         function checkAuthority(authority) {
             if (!authority) {
@@ -97,8 +104,9 @@ define(
         /**
          * 查找Action配置
          *
-         * @param {Object} args 进入Action时的参数
-         * @return {Object | null} 对应的Action配置
+         * @param {meta.ActionContext} args 进入Action时的参数
+         * @return {meta.ActionConfig | null} 对应的Action配置
+         * @ignore
          */
         function findActionConfig(args) {
             var path = args.url.getPath();
@@ -131,15 +139,7 @@ define(
                 actionConfig = null;
             }
 
-            // 关于actionConfig配置项：
-            // 
-            // - `{string} type`：指定对应Action的模块id
-            // - `{string[] | string} authority`：权限配置，
-            //     参考`checkAuthority`函数中的说明
-            // - `{string} noAuthorityLocation`：用户没有权限时的跳转URL
-            // - `{string} movedTo`：表示该Action已经被移动到另一个路径，
-            //     controller将根据该配置指定的路径加载对应的Action
-            // - `{boolean} childActionOnly`：指定只能在子Action时加载
+            // 关于actionConfig配置项，参考{@link meta.ActionConfig}
 
             // 以下所有和跳转相关的逻辑均不能用`redirect`，
             // 因为一但有重定向，会在历史记录里多一帧，
@@ -205,10 +205,13 @@ define(
         /**
          * 根据URL加载对应的Action对象
          *
-         * @param {Object} args 调用Action的初始化参数
-         * @return {Promise} 如果有相应的Action配置，返回一个Promise对象，
-         * 如果正确创建了Action对象，则该Promise对象进入**resolved**状态，
-         * 如果没找到Action的配置或者加载Action失败，则进入**rejected**状态
+         * @param {meta.ActionContext} args 调用Action的初始化参数
+         * @return {meta.Promise} 如果有相应的Action配置，
+         * 返回一个{@link meta.Promise}对象，如果正确创建了{@link Action}对象，
+         * 则该{@link meta.Promise}对象进入`resolved`状态。
+         * 如果没找到{@link Action}的配置或者加载{@link Action}失败，
+         * 则该{@link meta.Promise}进入`rejected`状态
+         * @ignore
          */
         function loadAction(args) {
             var actionConfig = findActionConfig(args);
@@ -357,8 +360,9 @@ define(
         /**
          * 进入Action的执行周期
          *
-         * @param {Object} action `Action`对象
-         * @param {Object} context `Action`对象执行的上下文
+         * @param {Action} action {@link Action}对象
+         * @param {meta.ActionContext} context {@link Action}对象执行的上下文
+         * @ignore
          */
         function enterAction(action, context) {
             if (!context.isChildAction) {
@@ -423,7 +427,12 @@ define(
                     else if (window.JSON 
                         && typeof JSON.stringify === 'function'
                     ) {
-                        message = JSON.stringify(reason);
+                        try {
+                            message = JSON.stringify(reason);
+                        }
+                        catch (parseJSONError) {
+                            message = reason;
+                        }
                     }
                     else {
                         message = reason;
@@ -449,11 +458,11 @@ define(
         /**
          * 将URL变更转换到Action的加载
          *
-         * @parma {URL} url 当前的URL对象
+         * @param {URL} url 当前的URL对象
          * @param {string} container 指定容器元素的id
-         * @parma {Object} options 额外的参数
+         * @param {Object | null | undefined} options 额外的参数
          * @param {boolean} isChildAction 标识是否为子Action
-         * @return {Promise} 一个特殊的Promise对象，
+         * @return {meta.Promise} 一个特殊的{@link meta.Promise}对象，
          * 该对象可以通过`abort()`取消Action加载完成后的执行
          */
         function forward(url, container, options, isChildAction) {
@@ -672,13 +681,13 @@ define(
         }
 
         /**
-         * 在指定的元素中渲染一个Action
+         * 在指定的元素中渲染一个子Action
          *
          * @param {string | URL} Action对应的url
          * @param {string} container 指定容器元素的id
-         * @parma {Object} [options] 额外的参数
-         * @return {Promise} 一个Promise对象，
-         * 当渲染完成后进行**resolved**状态，但可在之前调用`abort()`取消
+         * @param {Object} [options] 交给{@link Action}的额外参数
+         * @return {meta.Promise} 一个带取消功能的{@link meta.Promise}对象，
+         * 当渲染完成后进行`resolved`状态，但可在之前调用`abort()`取消
          */
         controller.renderChildAction = function (url, container, options) {
             var assert = require('./assert');

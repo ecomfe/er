@@ -245,6 +245,18 @@ define(function() {
                 expect(event.args).toEqual([1, 2, 3]);
                 expect(event.reason).toBe(1);
             });
+
+            it('should fire `exception` event whenver a call throws error', function (done) {
+                var deferred = new Deferred();
+                var error = new Error;
+                var handler = jasmine.createSpy('handler');
+                Deferred.on('exception', handler);
+                deferred.then(function () { throw error; })
+                    .fail(function () {
+                        expect(handler).toHaveBeenCalled();
+                    }).ensure(done);
+                deferred.resolve();
+            });
         });
     });
 });

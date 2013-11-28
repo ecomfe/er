@@ -1,23 +1,29 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
+ *
+ * @ignore
  * @file 地址监听器对象
  * @author otakustay, erik
  */
 define(
     function (require) {
         /**
+         * @class locator
+         *
          * 地址监听对象
          * 
-         * 该对象用于监听地址中的hash部分的变化，以及根据要求更新hash值
+         * 该对象用于监听地址中的`hash`部分的变化，以及根据要求更新`hash`值
          * 
-         * locator的基本工作流程：
+         * `locator`的基本工作流程：
          * 
-         * 1. 监听hash的变化
-         * 2. 当hash变化时，如果确实发生变化（与上一次的值不同），则执行逻辑
+         * 1. 监听`hash`的变化
+         * 2. 当`hash`变化时，如果确实发生变化（与上一次的值不同），则执行逻辑
          * 3. 保存当前的地址信息（高版本浏览器此时自动记录历史项）
-         * 4. 触发`redirect`事件
+         * 4. 触发{@link locator#event-redirect}事件
+         *
+         * @mixins mini-event.EventTarget
+         * @singleton
          */
         var locator = {};
         var currentLocation = '';
@@ -26,6 +32,7 @@ define(
          * 获取URL中的hash值
          *
          * @return {string} 当前URL中的hash值
+         * @ignore
          */
         function getLocation() {
             // Firefox下`location.hash`存在自动解码的情况，
@@ -42,6 +49,7 @@ define(
 
         /**
          * 执行hash变更的相关逻辑
+         * @ignore
          */
         function forwardHash() {
             var url = getLocation();
@@ -88,7 +96,7 @@ define(
         }
 
         /**
-         * 更新当前的hash值，同时在历史记录中添加该项
+         * 更新当前的`hash`值，同时在历史记录中添加该项
          * 
          * 如果hash值与当前的地址相同则不会进行更新
          * 
@@ -98,6 +106,7 @@ define(
          * @param {string} url 需要进行更新的hash值
          * @param {Object} options 配置项
          * @return {boolean} 如果地址有过变更则返回true
+         * @ignore
          */
         function updateURL(url, options) {
             var changed = currentLocation !== url;
@@ -122,7 +131,7 @@ define(
         }
 
         /**
-         * 开始`locator`对象的工作
+         * 使对象开始工作对象的工作
          */
         locator.start = function () {
             start(true);
@@ -155,9 +164,7 @@ define(
          * 执行重定向逻辑
          *
          * @param {string | URL} url 重定向的地址
-         * @param {Object} [options] 额外附加的参数对象
-         * @param {boolean} [options.force] 指定当跳转地址不变时是否强制刷新
-         * @param {boolean} [options.silent] 指定是否触发`redirect`事件
+         * @param {meta.RedirectOption} options 额外附加的参数对象
          */
         locator.redirect = function (url, options) {
             options = options || {};

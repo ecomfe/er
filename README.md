@@ -13,3 +13,10 @@ ER具有如下特性：
 ![ER总体结构](doc/asset/er-overview.png)
 
 ER的目的在于让业务开发工程师可以关注于 **数据（Model）** 、 **业务（Action）** 和 **视图（View）** 这三部分，而不需要关心如 **数据怎么获取** 、 **权限如何管理** 、 **URL如何控制** 等技术性问题。
+
+## 文档
+
+    cd {esui}
+    sudo gem install jsduck
+    jsduck —-config=jsduck/config.json
+    open doc/api/index.html

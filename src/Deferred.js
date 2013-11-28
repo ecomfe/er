@@ -1,7 +1,8 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
+ *
+ * @ignore
  * @file Deferred类实现
  * @author otakustay
  */
@@ -17,10 +18,11 @@ define(
         /**
          * 尝试执行相关的回调函数
          * 
-         * 当`deferred`处于非**pending**状态时，根据其状态，
+         * 当`deferred`处于非`pending`状态时，根据其状态，
          * 立即异步地运行对应的回调函数
          *
          * @param {Deferred} deferred 需要处理的`Deferred`实例
+         * @ignore
          */
         function tryFlush(deferred) {
             if (deferred.state === 'pending') {
@@ -62,8 +64,9 @@ define(
          * @param {Deferred} original 原`Deferred`对象
          * @param {Deferred} deferred 新`Deferred`对象
          * @param {callback} 当`original`运行完毕后，需要执行的函数
-         * @param {string} actionType 关联的动作类型，`'resolve'`或`'reject'`
-         * @return {function} 关联函数，可注册在`original`的相关回调函数上
+         * @param {string} actionType 关联的动作类型，`"resolve"`或`"reject"`
+         * @return {Function} 关联函数，可注册在`original`的相关回调函数上
+         * @ignore
          */
         function pipe(original, deferred, callback, actionType) {
             return function () {
@@ -71,8 +74,8 @@ define(
                 // 
                 // 根据`callback`的行为，进行以下处理：
                 // 
-                // - 如果`callback`返回值，则用该值改`deferred`为**resolved**
-                // - 如果`callback`抛出异常，则用异常改`deferred`为**rejected**
+                // - 如果`callback`返回值，则用该值改`deferred`为`resolved`
+                // - 如果`callback`抛出异常，则用异常改`deferred`为`rejected`
                 if (typeof callback === 'function') {
                     var resolver = deferred.resolver;
                     try {
@@ -87,6 +90,27 @@ define(
                         }
                     }
                     catch (error) {
+                        /**
+                         * @event exception
+                         *
+                         * 当回调函数执行出现错误时触发，
+                         * 在此事件后会再触发{@link Deferred#event-reject}事件
+                         *
+                         *
+                         * @param {Deferred} deferred 当前的{@link Deferred}对象
+                         * @param {Array} args 抛出的错误对象形成的数组，肯定只有1项
+                         * @param {Mixed} reason 抛出的错误对象
+                         * @member Deferred
+                         * @static
+                         */
+                        Deferred.fire(
+                            'exception',
+                            {
+                                deferred: original,
+                                args: [error],
+                                reason: error
+                            }
+                        );
                         resolver.reject(error);
                     }
                 }
@@ -102,33 +126,38 @@ define(
         /**
          * Deferred类
          * 
-         * 类似于jQuery的Deferred对象，是对异步操作的一种封装
+         * 类似于jQuery的`Deferred`对象，是对异步操作的一种封装
          *
+         * 一个`Deferred`对象是一个{@link meta.Resolver}对象
+         * 和一个{@link meta.Promise}的组合，同时提供两者的功能
+         *
+         * 当创建一个`Deferred`对象后，通过其中的{@link meta.Resolver}对象定义的方法
+         * 来控制状态的流转，并将{@link Deferred#promise}返回给调用者来追加回调
+         *
+         * @mixins mini-event.EventTarget
          * @constructor
          */
         function Deferred() {
+            /**
+             * @property {string} state
+             *
+             * 当前对象的状态
+             *
+             * 一个`Deferred`对象一共有3个状态：
+             *
+             * - `pending`：还处在等待状态，并没有明确最终结果
+             * - `resolved`：任务已经完成，处在成功状态
+             * - `rejected`：任务已经完成，处在失败状态
+             */
             this.state = 'pending';
             this._args = null;
             this._doneCallbacks = [];
             this._failCallbacks = [];
 
             /**
-             * 与当前对象关联的`Promise`对象
-             * 
-             * 一个`Promise`对象是对`Deferred`对象的**只读**状态的表达，
-             * `Promise`对象拥有所有添加回调函数的方法，包括：
-             * 
-             * - `done`
-             * - `fail`
-             * - `ensure`
-             * - `then`
-             * 
-             * 但`Promise`对象并不包改变`Deferred`对象的方法，包括：
-             * 
-             * - `resolve`
-             * - `reject`
+             * @property {meta.Promise} promise
              *
-             * @type {Promise}
+             * 与当前对象关联的{@link meta.Promise}对象
              */
             this.promise =  {
                 done: util.bind(this.done, this),
@@ -141,15 +170,9 @@ define(
 
 
             /**
-             * 与当前对象关联的`Resolver`对象
-             * 
-             * 一个`Resolver`对象是对`Deferred`对象的**只写**状态的表达，
-             * `Resolver`对象拥有所有改变状态的方法，包括：
-             * 
-             * - `resolve`
-             * - `reject
+             * @property {meta.Resolver} resolver
              *
-             * @type {Resolver}
+             * 与当前对象关联的{@link meta.Resolver}对象
              */
             this.resolver = {
                 resolve: util.bind(this.resolve, this),
@@ -160,12 +183,12 @@ define(
         require('mini-event/EventTarget').enable(Deferred);
         
         /**
-         * 判断一个对象是否是一个`Promise`对象
+         * 判断一个对象是否是一个{@link meta.Promise}对象
          * 
          * 该方法采用灵活的判断方式，并非要求`value`为`Deferred`的实例
          *
          * @param {Mixed} value 需要判断的对象
-         * @return {boolean} 如果`value`是`Promise`对象，则返回true
+         * @return {boolean} 如果`value`是{@link meta.Promise}对象，则返回`true`
          */
         Deferred.isPromise = function (value) {
             return value && typeof value.then === 'function';
@@ -175,17 +198,15 @@ define(
          * 是否启用同步模式。
          * 
          * 在同步模式下，`Deferred`对象并不符合Promise/A规范，
-         * 当对象进入或处于**resolved**或**rejected**状态时，
-         * 添加的回调函数会**立即**、**同步**地被执行。
+         * 当对象进入或处于`resolved`或`rejected`状态时，
+         * 添加的回调函数会 **立即** 、 **同步** 地被执行。
          *
          * @type {boolean}
          */
         Deferred.prototype.syncModeEnabled = false;
 
         /**
-         * 将当前对象状态设置为**resolved**，并执行所有成功回调函数
-         *
-         * @param {Mixed...} args 执行回调时的参数
+         * @inheritdoc meta.Resolver#resolve
          */
         Deferred.prototype.resolve = function () {
             if (this.state !== 'pending') {
@@ -195,6 +216,17 @@ define(
             this.state = 'resolved';
             this._args = [].slice.call(arguments);
 
+            /**
+             * @event resolve
+             *
+             * 当任意一个`Deferred`对象进入`resolved`状态时触发
+             *
+             * @param {Deferred} deferred 当前的{@link Deferred}对象
+             * @param {Array} args 改变状态时提供的参数
+             * @param {Mixed} reason 相当于`args[0]`，供多数场景下快速访问
+             * @member Deferred
+             * @static
+             */
             Deferred.fire(
                 'resolve',
                 {
@@ -208,9 +240,7 @@ define(
         };
 
         /**
-         * 将当前对象状态设置为**rejected**，并执行所有失败回调函数
-         *
-         * @param {Mixed...} args 执行回调时的参数
+         * @inheritdoc meta.Resolver#reject
          */
         Deferred.prototype.reject = function () {
             if (this.state !== 'pending') {
@@ -220,6 +250,17 @@ define(
             this.state = 'rejected';
             this._args = [].slice.call(arguments);
 
+            /**
+             * @event reject
+             *
+             * 当任意一个`Deferred`对象进入`rejected`状态时触发
+             *
+             * @param {Deferred} deferred 当前的{@link Deferred}对象
+             * @param {Array} args 改变状态时提供的参数
+             * @param {Mixed} reason 相当于`args[0]`，供多数场景下快速访问
+             * @member Deferred
+             * @static
+             */
             Deferred.fire(
                 'reject',
                 {
@@ -233,65 +274,28 @@ define(
         };
 
         /**
-         * 添加一个成功回调函数
-         * 
-         * 本方法相当于`.then(callback, null)，具体参考`then`方法的说明al
-         *
-         * @param {function} callback 需要添加的回调函数
-         * @return {Promise} 新的`Promise`对象
+         * @inheritdoc meta.Promise#done
          */
         Deferred.prototype.done = function (callback) {
             return this.then(callback);
         };
 
         /**
-         * 添加一个失败回调函数
-         * 
-         * 本方法相当于`.then(null, callback)，具体参考`then`方法的说明
-         *
-         * @param {function} callback 需要添加的回调函数
-         * @return {Promise} 新的`Promise`对象
+         * @inheritdoc meta.Promise#fail
          */
         Deferred.prototype.fail = function (callback) {
             return this.then(null, callback);
         };
 
-
         /**
-         * 添加一个无论成功还是失败均执行的回调函数
-         * 
-         * 本方法相当于`.then(callback, callback)，具体参考`then`方法的说明
-         *
-         * @param {function} callback 需要添加的回调函数
-         * @return {Promise} 新的`Promise`对象
+         * @inheritdoc meta.Promise#ensure
          */
         Deferred.prototype.ensure = function (callback) {
             return this.then(callback, callback);
         };
 
         /**
-         * 添加成功回调函数及可选的失败回调函数
-         * 
-         * 该函数会返回一个新的`Promise`对象，新`Promise`对象将有以下行为：
-         * 
-         * - 当原有`Deferred`对象进入**resolved**状态时，执行`done`回调函数，
-         *   并根据函数的返回值进行逻辑
-         * - 当原有`Deferred`对象进入**rejected**状态时，执行`fail`回调函数，
-         *   并根据函数的返回值进行逻辑
-         * 
-         * 其中**根据函数的返回值进行逻辑**具体如下：
-         * 
-         * - 当函数返回非`null`或`undefined`时，使用返回值进入**resolved**状态
-         * - 当函数抛出异常时，使用异常对象进入**rejected**状态
-         * 
-         * 另如果当前`Deferred`对象不处在**pending**状态，则：
-         * 
-         * - 如果处在**resolved**状态，则成功回调函数会被立即异步执行
-         * - 如果处在**rejected**状态，则失败回调函数会被立即异步执行
-         *
-         * @param {function} [done] 成功时执行的回调函数
-         * @param {function} [fail] 失败时执行的回调函数，可选参数
-         * @return {Promise} 新的`Promise`对象
+         * @inheritdoc meta.Promise#then
          */
         Deferred.prototype.then = function (done, fail) {
             var deferred = new Deferred();
@@ -309,26 +313,27 @@ define(
         // 社区对`progress`处理函数的返回值和异常的传递还在讨论中
 
         /**
-         * 生成一个新的`Promise`对象，当所有给定的`Promise`对象完成后触发
+         * 生成一个新的{@link meta.Promise}对象，
+         * 当所有给定的{@link meta.Promise}对象完成后触发
          * 
          * 其触发逻辑如下：
          * 
-         * - 如果所有给定的`Promise`对象均进入**resolved**状态，则该`Promise`
-         *   对象进入**resolved**状态
-         * - 如果有至少一个`Promise`对象进入**rejected**状态，则该`Promise`
-         *   对象进入**rejected**状态
+         * - 如果所有给定的{@link meta.Promise}对象均进入`resolved`状态，
+         * 则该{@link meta.Promise}对象进入`resolved`状态
+         * - 如果有至少一个{@link meta.Promise}对象进入`rejected`状态，
+         * 则该{@link meta.Promise}对象进入`rejected`状态
          * 
-         * 当新的`Promise`对象触发时，将按照传入的`Promise`对象的顺序，
-         * 依次提供参数，且根据原`Promise`对象的回调参数，有以下情况：
+         * 当新的{@link meta.Promise}对象触发时，
+         * 将按照传入的{@link meta.Promise}对象的顺序，
+         * 依次提供参数，且根据原{@link meta.Promise}对象的回调参数，有以下情况：
          * 
          * - 如果给定参数只有一个，使用这一个参数
          * - 如果给定多个参数，则提供一个数组包含这些参数
          * 
-         * 本方法对参数的方法与`Array.prototyp.concat`相同，
-         * 如果任意一个参数是数组则会展开
+         * 本方法对参数的方法与`Array.prototyp.concat`相同，任意一个参数是数组则会展开
          *
-         * @param {Promise | Promise[]...} 需要组合的`Promise`对象
-         * @return {Promise} 一个新的`Promise`对象
+         * @param {meta.Promise... | meta.Promise[]...} args 需要组合的对象
+         * @return {meta.Promise}
          */
         Deferred.all = function () {
             // 典型的异步并发归并问题，使用计数器来解决
@@ -381,10 +386,10 @@ define(
         };
 
         /**
-         * 返回一个已经处于**resolved**状态的`Promise`对象
+         * 返回一个已经处于`resolved`状态的{@link meta.Promise}对象
          *
-         * @param {Mixed...} 用于调用`resolve`方法的参数
-         * @return {Promise} 一个已经处于**resolved**状态的`Promise`对象
+         * @param {Mixed...} args 用于调用{@link meta.Resolver#resolve}方法的参数
+         * @return {meta.Promise}
          */
         Deferred.resolved = function () {
             var deferred = new Deferred();
@@ -393,10 +398,10 @@ define(
         };
 
         /**
-         * 返回一个已经处于**rejected**状态的`Promise`对象
+         * 返回一个已经处于`rejected`状态的{@link meta.Promise}对象
          *
-         * @param {Mixed...} 用于调用`reject`方法的参数
-         * @return {Promise} 一个已经处于**rejected**状态的`Promise`对象
+         * @param {Mixed...} args 用于调用{@link meta.Resolver#reject}方法的参数
+         * @return {meta.Promise}
          */
         Deferred.rejected = function () {
             var deferred = new Deferred();
@@ -405,13 +410,14 @@ define(
         };
 
         /**
-         * 返回一个以给定值为结果的**resolved**状态的`Promise`对象，
+         * 返回一个以给定值为结果的`resolved`状态的{@link meta.Promise}对象，
          * 该方法可用于统一同步和异步编程模型
          *
          * @param {Mixed} value 给定的值
-         * @return {Promise} 如果`value`本身是一个`Promise`，则直接返回其本身。
-         * 如果`value`是普通对象，则返回一个同步的处于**resolved**状态的`Promise`，
-         * 该`Promise`以`value`为值
+         * @return {meta.Promise} 如果`value`本身是一个{@link meta.Promise}，
+         * 则直接返回其本身。如果`value`是普通对象，
+         * 则返回一个 **同步** 的处于`resolved`状态的{@link meta.Promise}，
+         * 该{@link meta.Promise}以`value`为值进入`resolved`状态
          */
         Deferred.when = function (value) {
             if (Deferred.isPromise(value)) {
@@ -426,10 +432,11 @@ define(
         };
 
         /**
-         * 返回一个`Promise`对象，当指定的模块被AMD加载器加载后，进入**resolved**状态
+         * 返回一个{@link meta.Promise}对象，
+         * 当指定的模块被AMD加载器加载后，进入`resolved`状态
          *
-         * @param {string[]} 需要加载的模块列表
-         * @return {Promise} 一个`Promise`对象
+         * @param {string[]} modules 需要加载的模块列表
+         * @return {meta.Promise}
          */
         Deferred.require = function () {
             var modules = [].slice.call(arguments);

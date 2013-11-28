@@ -1,8 +1,9 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
- * @file Action类声明
+ *
+ * @ignore
+ * @file Action类
  * @author otakustay
  */
 define(
@@ -16,6 +17,7 @@ define(
          * @param {Action} this 当前Action实例
          * @param {Object...} results 模块加载的结果集
          * @return {Mixed} 错误处理结果
+         * @ignore
          */
         function reportErrors() {
             var errors = [];
@@ -30,15 +32,15 @@ define(
         }
 
         /**
-         * Action类声明
+         * Action类
          * 
          * 在ER框架中，Action并不一定要继承该类，
          * 任何有一个名为`enter`的方法的对象均可作为Action
          * 
          * 该类制定了一个完整的Action的执行周期
          *
+         * @extends mini-event.EventTarget
          * @constructor
-         * @extends EventTarget
          */
         function Action() {
             this.disposed = false;
@@ -47,23 +49,23 @@ define(
         /**
          * 当前Action运行上下文
          *
-         * @type {Object}
+         * @type {meta.ActionContext}
          * @protected
          */
         Action.prototype.context = null;
 
         /**
-         * 指定对应的Model类型
+         * 指定对应的Model类型，{@link Action#createModel}默认使用此属性
          *
-         * @type {function=}
+         * @type {Function}
          * @protected
          */
         Action.prototype.modelType = null;
 
         /**
-         * 指定对应的View类型
+         * 指定对应的View类型，{@link Action#createView}默认使用此属性
          *
-         * @type {function=}
+         * @type {Function}
          * @protected
          */
         Action.prototype.viewType = null;
@@ -71,17 +73,14 @@ define(
         /**
          * 进入Action执行周期
          *
-         * @param {Object} context 进入Action的上下文
-         * @param {URL} context.url 当前的URL
-         * @param {URL} [context.referrer] 来源的URL
-         * @param {string | HTMLElement} context.container
-         * 用来展现当前Action的DOM容器或其id
+         * @param {meta.ActionContext} context 进入Action的上下文
+         * @return {meta.Promise}
          */
         Action.prototype.enter = function (context) {
             /**
-             * 进入Action生命周期
-             *
              * @event enter
+             *
+             * Action生命周期开始执行时触发
              */
             this.fire('enter');
 
@@ -113,7 +112,8 @@ define(
          * - 如果该方法正常返回，则认为错误已经处理完毕，继续进入下一步
          * - 如果该方法抛出异常，则认为错误未处理，中断执行流程
          *
-         * @param {Array} 错误集合
+         * @param {Object[]} 错误集合
+         * @ignore
          */
         Action.prototype.handleError = function (errors) {
             throw errors;
@@ -122,11 +122,7 @@ define(
         /**
          * 创建对应的Model对象
          *
-         * @param {Object} context 进入Action的上下文
-         * @param {URL} context.url 当前的URL
-         * @param {URL} [context.referrer] 来源的URL
-         * @param {string | HTMLElement} context.container
-         * 用来展现当前Action的DOM容器或其id
+         * @param {meta.ActionContext} context 进入Action的上下文
          * @return {Model | Object} 当前Action需要使用的Model对象
          * @protected
          */
@@ -143,7 +139,11 @@ define(
         /**
          * 加载完Model后，进入View相关的逻辑
          *
-         * @private
+         * @protected
+         * @fires modelloaded
+         * @fires beforerender
+         * @fires rendered
+         * @fires entercomplete
          */
         Action.prototype.forwardToView = function () {
             // 如果已经销毁了就别再继续下去
@@ -152,9 +152,9 @@ define(
             }
 
             /**
-             * Model加载完成时触发
-             *
              * @event modelloaded
+             *
+             * Model加载完成时触发
              */
             this.fire('modelloaded');
 
@@ -167,27 +167,27 @@ define(
                 }
 
                 /**
-                 * 视图开始渲染时触发
-                 *
                  * @event beforerender
+                 *
+                 * 视图开始渲染时触发
                  */
                 this.fire('beforerender');
 
                 this.view.render();
 
                 /**
-                 * 视图渲染完毕后触发
-                 *
                  * @event rendered
+                 *
+                 * 视图渲染完毕后触发
                  */
                 this.fire('rendered');
 
                 this.initBehavior();
 
                 /**
-                 * Action进入完毕后触发
-                 *
                  * @event entercomplete
+                 *
+                 * Action进入完毕后触发
                  */
                 this.fire('entercomplete');
             }
@@ -219,14 +219,21 @@ define(
          * 离开当前Action，清理Model和View
          *
          * @protected
+         * @fires beforeleave
+         * @fires leave
          */
         Action.prototype.leave = function () {
+            // 如果已经销毁了就别再继续下去
+            if (this.disposed) {
+                return this;
+            }
+
             this.disposed = true;
 
             /**
-             * 准备离开Action时触发
-             *
              * @event beforeleave
+             *
+             * 准备离开Action时触发
              */
             this.fire('beforeleave');
 
@@ -245,18 +252,20 @@ define(
             }
 
             /**
-             * 离开Action后触发
-             *
              * @event leave
+             *
+             * 离开Action后触发
              */
             this.fire('leave');
+
+            this.destroyEvents();
         };
 
         /**
          * 重定向到另一个URL
          * 
-         * 通常会使用`require('./locator').redirect`来重定向，
-         * 但locator对象存在一些问题：
+         * 通常会使用{@link locator#method-redirect}来重定向，
+         * 但{@link locator}对象存在一些问题：
          * 
          * - 严重依赖浏览器实现，因此无法在脱离浏览器的环境下做单元测试
          * - 无法应对子Action的跳转场景
@@ -264,9 +273,7 @@ define(
          * 因此由Action直接提供一个`redirect`方法来实现跳转功能，方便替换和扩展
          *
          * @param {string | URL} url 需要重定向的目标URL
-         * @param {Object} [options] 额外附加的参数对象
-         * @param {boolean} [options.force] 确定当跳转地址不变时是否强制刷新
-         * @param {boolean} [options.silent] 静默跳转，即不触发全局`redirect`事件
+         * @param {meta.RedirectOption} [options] 额外附加的参数对象
          */
         Action.prototype.redirect = function (url, options) {
             var locator = require('./locator');
