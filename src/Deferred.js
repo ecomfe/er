@@ -90,6 +90,27 @@ define(
                         }
                     }
                     catch (error) {
+                        /**
+                         * @event exception
+                         *
+                         * 当回调函数执行出现错误时触发，
+                         * 在此事件后会再触发{@link Deferred#event-reject}事件
+                         *
+                         *
+                         * @param {Deferred} deferred 当前的{@link Deferred}对象
+                         * @param {Array} args 抛出的错误对象形成的数组，肯定只有1项
+                         * @param {Mixed} reason 抛出的错误对象
+                         * @member Deferred
+                         * @static
+                         */
+                        Deferred.fire(
+                            'exception',
+                            {
+                                deferred: original,
+                                args: [error],
+                                reason: error
+                            }
+                        );
                         resolver.reject(error);
                     }
                 }
@@ -200,6 +221,9 @@ define(
              *
              * 当任意一个`Deferred`对象进入`resolved`状态时触发
              *
+             * @param {Deferred} deferred 当前的{@link Deferred}对象
+             * @param {Array} args 改变状态时提供的参数
+             * @param {Mixed} reason 相当于`args[0]`，供多数场景下快速访问
              * @member Deferred
              * @static
              */
@@ -231,6 +255,9 @@ define(
              *
              * 当任意一个`Deferred`对象进入`rejected`状态时触发
              *
+             * @param {Deferred} deferred 当前的{@link Deferred}对象
+             * @param {Array} args 改变状态时提供的参数
+             * @param {Mixed} reason 相当于`args[0]`，供多数场景下快速访问
              * @member Deferred
              * @static
              */
