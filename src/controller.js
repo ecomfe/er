@@ -99,7 +99,7 @@ define(
 
                 var permission = require('./permission');
                 for (var i = 0; i < authority.length; i++) {
-                    if (permission.isAllow(authority[i])) {
+                    if (permission.isAllow(util.trim(authority[i]))) {
                         return true;
                     }
                 }
