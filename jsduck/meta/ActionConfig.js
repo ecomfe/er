@@ -21,12 +21,18 @@ function ActionConfig() {
     this.type;
 
     /**
-     * @property {string | string[]} [authority]
+     * @property {string | string[] | Function} [authority]
      *
-     * 配置进入Action的权限，可以为2种类型：
+     * 配置进入Action的权限，可以为3种类型：
      *
      * - 使用字符串数组，数组中每一项表示一个权限
      * - 使用单一字符串，多个权限可以使用`|`分隔，注意`|`的前后不能有空格
+     * - 使用函数，则函数接受以下参数：
+     *
+     *     - `{meta.ActionContext} context`：当前的{@link meta.ActionContext}对象
+     *     - `{meta.ActionConfig} config`：当前的{@link meta.ActionConfig}对象
+     *
+     *     函数返回`true`则认为权限检验通过，否则认为没有权限
      *
      * 权限采用 **或** 的关系，即用户有其中任何一个权限均能够进入该Action
      *

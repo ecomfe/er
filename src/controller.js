@@ -79,12 +79,18 @@ define(
          *
          * 具体参考{@link meta.ActionConfig#authority}的说明
          *
-         * @param {string[] | string} authority 权限配置
+         * @param {string[] | string | Function} authority 权限配置
+         * @param {meta.ActionContext} 进入当前`Action`的上下文
+         * @parma {meta.ActionConfig} 查找到的`Action`配置信息
          * @ignore
          */
-        function checkAuthority(authority) {
+        function checkAuthority(authority, context, config) {
             if (!authority) {
                 return true;
+            }
+
+            if (typeof authority === 'function') {
+                return authority(context, config);
             }
 
             if (typeof authority === 'string') {
@@ -178,7 +184,8 @@ define(
             }
 
             // 检查权限，如果没有权限的话，根据Action或全局配置跳转
-            var hasAuthority = checkAuthority(actionConfig.authority);
+            var hasAuthority = checkAuthority(
+                actionConfig.authority, args, actionConfig);
             if (!hasAuthority) {
                 events.fire(
                     'permissiondenied', 
