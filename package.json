@@ -20,7 +20,8 @@
         }
     ],
     "dependencies": {
-        "mini-event": "1.x"
+        "mini-event": "1.x",
+        "etpl": "^2.0.2"
     },
     "main": "main",
     "description": "ER是一个富浏览器端web应用的框架，适用于并能很方便地构建一个整站式的AJAX web应用。",
