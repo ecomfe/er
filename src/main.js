@@ -21,7 +21,7 @@ define(
              *
              * @type {string}
              */
-            version: '3.1.0-alpha.2',
+            version: '3.1.0-alpha.3',
 
             /**
              * 启动ER框架，此方法按顺序启动{@link controller}、
