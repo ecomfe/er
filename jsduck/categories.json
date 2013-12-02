@@ -42,7 +42,9 @@
             {
                 "name": "已废弃",
                 "classes": [
-                    "Observable"
+                    "Observable",
+                    "template",
+                    "tpl"
                 ]
             }
         ]

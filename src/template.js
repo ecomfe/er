@@ -1,12 +1,22 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
+ *
+ * @ignore
  * @file 简易的、基于html注释的模板支持
  * @author erik, mytharcher, otakustay
  */
 define(
     function (require) {
+        /**
+         * @class template
+         *
+         * 模板模块
+         *
+         * 已废弃，请使用[etpl](https://github.com/ecomfe/etpl)代替
+         *
+         * @singleton
+         */
         var template = require('etpl/main');
 
         /**
@@ -16,6 +26,7 @@ define(
          * @param {string} tplName 模板名
          * @param {Model} [model] 获取数据的对象
          * @return {string}
+         * @member template
          */
         template.merge = function (output, tplName, model) {
             var html = '';

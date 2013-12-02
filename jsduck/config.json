@@ -18,6 +18,8 @@
         "../src/Observable.js",
         "../src/permission.js",
         "../src/router.js",
+        "../src/template.js",
+        "../src/tpl.js",
         "../src/URL.js",
         "../src/util.js",
         "../src/View.js",
