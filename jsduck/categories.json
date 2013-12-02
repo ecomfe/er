@@ -29,7 +29,8 @@
                     "config",
                     "datasource",
                     "URL",
-                    "util"
+                    "util",
+                    "assert"
                 ]
             },
             {
