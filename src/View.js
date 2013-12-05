@@ -82,7 +82,7 @@ define(
                 var propertyName = path.shift();
                 var value = model.get(propertyName);
 
-                while (value && (propertyName = path.unshift())) {
+                while (value && (propertyName = path.shift())) {
                     value = value[propertyName];
                 }
 

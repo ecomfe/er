@@ -255,12 +255,12 @@ define(
             else {
                 var contentType = 
                     options.contentType || 'application/x-www-form-urlencoded';
+                var query = ajax.hooks.serializeData(
+                    '', options.data, contentType, fakeXHR);
                 if (options.charset) {
                     contentType += ';charset=' + options.charset;
                 }
                 xhr.setRequestHeader('Content-Type', contentType);
-                var query = ajax.hooks.serializeData(
-                    '', options.data, contentType, fakeXHR);
                 xhr.send(query);
             }
 
