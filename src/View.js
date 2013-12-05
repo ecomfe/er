@@ -71,13 +71,25 @@ define(
          * @return {Object}
          */
         View.prototype.getTemplateData = function () {
-            // TODO: 使用etpl后改为一个包装器
             var model = this.model;
             if (model && typeof model.get !== 'function') {
                 var Model = require('./Model');
                 model = new Model(model);
             }
-            return model;
+
+            var visit = function (propertyPath) {
+                var path = propertyPath.split('.');
+                var propertyName = path.shift();
+                var value = model.get(propertyName);
+
+                while (value && (propertyName = path.unshift())) {
+                    value = value[propertyName];
+                }
+
+                return value;
+            };
+
+            return { get: visit, relatedModel: model };
         };
 
         /**
@@ -99,13 +111,12 @@ define(
                 );
             }
 
-            // TODO: 改用etpl
-            var template = require('./template');
-            template.merge(
-                container,
+            var template = require('etpl');
+            var html = template.render(
                 this.getTemplateName(),
                 this.getTemplateData()
             );
+            container.innerHTML = html;
 
             this.enterDocument();
         };
