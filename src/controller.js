@@ -78,8 +78,8 @@ define(
              *
              * 对于有复杂权限场景的系统，可通过重写此方法来判断权限
              *
-             * @parma {meta.ActionConfig} 查找到的`Action`配置信息
-             * @param {meta.ActionContext} 进入当前`Action`的上下文
+             * @param {meta.ActionConfig} config 查找到的`Action`配置信息
+             * @param {meta.ActionContext} context 进入当前`Action`的上下文
              * @return {boolean} 有权限返回`true`，无权限则返回`false`
              */
             checkAuthority: function (config, context) {

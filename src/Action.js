@@ -90,7 +90,13 @@ define(
             var args = util.mix({}, context, urlQuery);
 
             this.model = this.createModel(args);
-            this.model.fill(args);
+
+            // TODO: 确认影响后删除这一块，由于允许任何对象当数据模型，不能依赖`fill`
+            var Model = require('./Model');
+            if (this.model instanceof Model) {
+                this.model.fill(args);
+            }
+
             if (this.model && typeof this.model.load === 'function') {
                 var loadingModel = this.model.load();
                 return loadingModel.then(
