@@ -4,11 +4,11 @@ var express = require('express');
 
 var root = __dirname;
 fs.mkdirs(
-    path.join(root, 'lib', 'er'),
+    path.join(root, 'dep'),
     function() {
-        fs.copy(
+        fs.link(
             path.join(root, '..', '..', 'src'),
-            path.join(root, 'lib', 'er'),
+            path.join(root, 'dep', 'er'),
             function(err) {
                 var app = express();
                 app.use(express.static(root));
