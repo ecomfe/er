@@ -145,6 +145,12 @@ define(
                 },
                 setRequestHeader: function (name, value) {
                     xhr.setRequestHeader(name, value);
+                },
+                getAllResponseHeaders: function () {
+                    return xhr.getAllResponseHeaders();
+                },
+                getResponseHeader: function (name) {
+                    return xhr.getResponseHeader(name);
                 }
             };
             util.mix(fakeXHR, xhrWrapper);
