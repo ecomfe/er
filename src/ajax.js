@@ -273,6 +273,15 @@ define(
             if (options.timeout > 0) {
                 var tick = setTimeout(
                     function () {
+                        /**
+                         * @event timeout
+                         *
+                         * 任意一个请求成功时触发，
+                         * 在此事件后会再触发一次{@link ajax#fail}事件
+                         *
+                         * @param {meta.FakeXHR} xhr 请求对象
+                         */
+                        ajax.fire('timeout', { xhr: fakeXHR });
                         fakeXHR.status = 408; // HTTP 408: Request Timeout
                         fakeXHR.abort();
                     },
