@@ -179,12 +179,8 @@ define(
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     var status = fakeXHR.status || xhr.status;
-                    // `file://`协议下状态码始终为0
-                    if (status === 0) {
-                        status = 200;
-                    }
                     // IE9会把204状态码变成1223
-                    else if (status === 1223) {
+                    if (status === 1223) {
                         status = 204;
                     }
 
