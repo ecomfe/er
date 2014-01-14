@@ -135,7 +135,9 @@ define(
                     // 因此事先去掉处理函数，然后直接进入**rejected**状态
                     xhr.onreadystatechange = null;
                     xhr.abort();
-                    fakeXHR.status = 0;
+                    if (!fakeXHR.status) {
+                        fakeXHR.status = 0;
+                    }
                     fakeXHR.readyState = xhr.readyState;
                     fakeXHR.responseText = '';
                     fakeXHR.responseXML = '';
