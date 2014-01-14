@@ -77,7 +77,7 @@ define(
                 }
             }
             catch (ex) {
-                var error = buildError(error);
+                var error = buildError(ex);
                 return Deferred.rejected(error);
             }
         }

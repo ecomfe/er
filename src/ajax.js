@@ -135,7 +135,9 @@ define(
                     // 因此事先去掉处理函数，然后直接进入**rejected**状态
                     xhr.onreadystatechange = null;
                     xhr.abort();
-                    fakeXHR.status = 0;
+                    if (!fakeXHR.status) {
+                        fakeXHR.status = 0;
+                    }
                     fakeXHR.readyState = xhr.readyState;
                     fakeXHR.responseText = '';
                     fakeXHR.responseXML = '';
@@ -143,6 +145,12 @@ define(
                 },
                 setRequestHeader: function (name, value) {
                     xhr.setRequestHeader(name, value);
+                },
+                getAllResponseHeaders: function () {
+                    return xhr.getAllResponseHeaders();
+                },
+                getResponseHeader: function (name) {
+                    return xhr.getResponseHeader(name);
                 }
             };
             util.mix(fakeXHR, xhrWrapper);
@@ -173,12 +181,8 @@ define(
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     var status = fakeXHR.status || xhr.status;
-                    // `file://`协议下状态码始终为0
-                    if (status === 0) {
-                        status = 200;
-                    }
                     // IE9会把204状态码变成1223
-                    else if (status === 1223) {
+                    if (status === 1223) {
                         status = 204;
                     }
 
@@ -267,6 +271,15 @@ define(
             if (options.timeout > 0) {
                 var tick = setTimeout(
                     function () {
+                        /**
+                         * @event timeout
+                         *
+                         * 任意一个请求成功时触发，
+                         * 在此事件后会再触发一次{@link ajax#fail}事件
+                         *
+                         * @param {meta.FakeXHR} xhr 请求对象
+                         */
+                        ajax.fire('timeout', { xhr: fakeXHR });
                         fakeXHR.status = 408; // HTTP 408: Request Timeout
                         fakeXHR.abort();
                     },

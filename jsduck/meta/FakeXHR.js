@@ -38,6 +38,25 @@ function FakeXHR() {
     this.setRequestHeader;
 
     /**
+     * @method getAllResponseHeaders
+     *
+     * 获取所有响应头，如果请求未到响应阶段则返回`null`
+     *
+     * @return {Object} 事实上返回的是一个`DOMString`对象
+     */
+    this.getAllResponseHeaders;
+
+    /**
+     * @method getResponseHeader
+     *
+     * 获取指定名称的响应头
+     *
+     * @param {string} name 需要获取的头名称
+     * @return {string | null} 对应响应头的值，如果不存在则返回`null`
+     */
+    this.getResponseHeader;
+
+    /**
      * @property {number} status
      *
      * 服务器返回状态码
