@@ -41,6 +41,7 @@ define(
                         callback.apply(deferred.promise, deferred._args);
                     }
                     catch (ex) {
+                        throw ex;
                     }
                 }
             }
@@ -90,6 +91,7 @@ define(
                         }
                     }
                     catch (error) {
+                        throw error;
                         /**
                          * @event exception
                          *
