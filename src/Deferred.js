@@ -334,6 +334,7 @@ define(
          *
          * @param {meta.Promise... | meta.Promise[]...} args 需要组合的对象
          * @return {meta.Promise}
+         * @static
          */
         Deferred.all = function () {
             // 典型的异步并发归并问题，使用计数器来解决
@@ -390,6 +391,7 @@ define(
          *
          * @param {Mixed...} args 用于调用{@link meta.Resolver#resolve}方法的参数
          * @return {meta.Promise}
+         * @static
          */
         Deferred.resolved = function () {
             var deferred = new Deferred();
@@ -402,6 +404,7 @@ define(
          *
          * @param {Mixed...} args 用于调用{@link meta.Resolver#reject}方法的参数
          * @return {meta.Promise}
+         * @static
          */
         Deferred.rejected = function () {
             var deferred = new Deferred();
@@ -418,6 +421,7 @@ define(
          * 则直接返回其本身。如果`value`是普通对象，
          * 则返回一个 **同步** 的处于`resolved`状态的{@link meta.Promise}，
          * 该{@link meta.Promise}以`value`为值进入`resolved`状态
+         * @static
          */
         Deferred.when = function (value) {
             if (Deferred.isPromise(value)) {
@@ -437,9 +441,9 @@ define(
          *
          * @param {string[]} modules 需要加载的模块列表
          * @return {meta.Promise}
+         * @static
          */
-        Deferred.require = function () {
-            var modules = [].slice.call(arguments);
+        Deferred.require = function (modules) {
             var deferred = new Deferred();
 
             window.require(modules, deferred.resolver.resolve);
