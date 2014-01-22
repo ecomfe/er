@@ -162,9 +162,13 @@ define(
                      *
                      * 任意一个请求成功时触发
                      *
+                     * @param {meta.AjaxOption} options 请求的配置信息
                      * @param {meta.FakeXHR} xhr 请求对象
                      */
-                    ajax.fire('done', { xhr: fakeXHR });
+                    ajax.fire(
+                        'done',
+                        { xhr: fakeXHR, options: options }
+                    );
                 },
                 function () {
                     /**
@@ -173,8 +177,12 @@ define(
                      * 任意一个请求失败时触发
                      *
                      * @param {meta.FakeXHR} xhr 请求对象
+                     * @param {meta.AjaxOption} options 请求的配置信息
                      */
-                    ajax.fire('fail', { xhr: fakeXHR });
+                    ajax.fire(
+                        'fail',
+                        { xhr: fakeXHR, options: options }
+                    );
                 }
             );
 
@@ -278,8 +286,12 @@ define(
                          * 在此事件后会再触发一次{@link ajax#fail}事件
                          *
                          * @param {meta.FakeXHR} xhr 请求对象
+                         * @param {meta.AjaxOption} options 请求的配置信息
                          */
-                        ajax.fire('timeout', { xhr: fakeXHR });
+                        ajax.fire(
+                            'timeout',
+                            { xhr: fakeXHR, options: options }
+                        );
                         fakeXHR.status = 408; // HTTP 408: Request Timeout
                         fakeXHR.abort();
                     },
