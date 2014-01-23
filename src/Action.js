@@ -294,6 +294,20 @@ define(
             locator.reload();
         };
 
+        /**
+         * 返回来源URL，无来源URL时可指定一个默认地址
+         *
+         * @param {string | URL} [defaultURL] 无来源URL时的跳转地址，
+         * 如果无此参数，则无来源URL时不进行跳转
+         */
+        Action.prototype.back = function (defaultURL) {
+            var referrer = this.context && this.context.referrer;
+            var url = referrer || defaultURL;
+            if (url) {
+                this.redirect(url);
+            }
+        };
+
         util.inherits(Action, EventTarget);
         return Action;
     }

@@ -1,6 +1,6 @@
 {
     "name": "er",
-    "version": "3.1.0-alpha.4",
+    "version": "3.1.0-alpha.5",
     "contributors": [
         {
             "name": "otakustay",
@@ -21,7 +21,7 @@
     ],
     "dependencies": {
         "mini-event": "1.x",
-        "etpl": ">=2.0.6"
+        "etpl": ">=2.0.8"
     },
     "main": "main",
     "description": "ER是一个富浏览器端web应用的框架，适用于并能很方便地构建一个整站式的AJAX web应用。",

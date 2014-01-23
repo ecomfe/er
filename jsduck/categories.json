@@ -29,6 +29,7 @@
                     "config",
                     "datasource",
                     "URL",
+                    "Enum",
                     "util",
                     "assert"
                 ]
