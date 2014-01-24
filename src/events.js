@@ -47,6 +47,18 @@ define(
          */
 
         /**
+         * @event forwardaction
+         * @member events
+         *
+         * 在重定向前往一个Action时，但执行任何Action查找、进入等逻辑前触发
+         *
+         * @param {URL} url 当前访问的URL
+         * @param {string} container 指定渲染Action的容器元素的id
+         * @param {boolean} isChildAction 是否为子Action
+         * @param {URL} [referrer] 来源URL
+         */
+
+        /**
          * @event actionmoved
          * @member events
          *

@@ -489,6 +489,9 @@ define(
             }
 
             util.mix(context, options);
+
+            events.fire('forwardaction', util.mix({}, context));
+
             var loader = loadAction(context);
 
             assert.has(loader, 'loadAction should always return a Promise');
