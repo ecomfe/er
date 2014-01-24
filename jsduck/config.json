@@ -31,10 +31,12 @@
         "meta/AjaxOption.js",
         "meta/ChangeRecord.js",
         "meta/DatasourceOption.js",
+        "meta/Difference.js",
         "meta/EnumItem.js",
         "meta/FakeXHR.js",
         "meta/Promise.js",
         "meta/RedirectOption.js",
-        "meta/Resolver.js"
+        "meta/Resolver.js",
+        "meta/URLDifference.js"
     ]
 }
