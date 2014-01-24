@@ -689,6 +689,12 @@ define(
             action.reload = function (extra) {
                 this.redirect(context.url, { force: true }, extra);
             };
+            // 同样增加`back`方法
+            action.back = function (defaultURL, extra) {
+                var referrer = this.context && this.context.referrer;
+                var url = referrer || defaultURL;
+                this.redirect(url, null, extra);
+            };
 
             // TODO: 添加`back`方法，传递`extra`参数
 
