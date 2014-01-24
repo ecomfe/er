@@ -138,6 +138,7 @@ define(
                 if (anotherQuery.hasOwnProperty(key)
                     && !thisQuery.hasOwnProperty(key)
                 ) {
+                    hasQueryDifference = true;
                     var diff = {
                         key: key,
                         self: undefined,

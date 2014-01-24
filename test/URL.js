@@ -25,6 +25,7 @@ define(function() {
             var y = URL.parse('/foo/bar~x=2');
             var z = URL.parse('/bar~x=1&y=1');
             var o = URL.parse('/foo~x=1&y=2');
+            var p = URL.parse('/foo/bar~x=1&y=2&z=3');
 
             it('should exists', function () {
                 expect(x.compare).toBeOfType('function');
@@ -69,6 +70,16 @@ define(function() {
                 var diff = x.compare(o);
                 expect(diff.query).toBe(false);
                 expect(diff.queryDifference.length).toBe(0);
+            });
+
+            it('should include query which another have but self does not', function () {
+                var diff = x.compare(p);
+                expect(diff.query.z).toEqual({
+                    key: 'z',
+                    self: undefined,
+                    other: '3'
+                });
+                expect(diff.queryDifference.length).toBe(1);
             });
         });
 
