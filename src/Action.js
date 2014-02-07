@@ -222,6 +222,14 @@ define(
         Action.prototype.initBehavior = util.noop;
 
         /**
+         * 过滤重定向操作，本方法返回`false`则会取消重定向，由当前Action处理新的URL
+         *
+         * @param {URL} targetURL 重定向的目标URL
+         * @return {boolean}
+         */
+        Action.prototype.filterRedirect = util.noop;
+
+        /**
          * 离开当前Action，清理Model和View
          *
          * @protected

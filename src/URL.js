@@ -87,6 +87,74 @@ define(
         }
 
         /**
+         * 对比2个URL的差异
+         *
+         * @param {string | URL} another 另一个URL
+         * @return {meta.URLDifference}
+         */
+        URL.prototype.compare = function (another) {
+            if (typeof another === 'string') {
+                another = URL.parse(another);
+            }
+
+            var result = {};
+
+            var thisPath = this.getPath();
+            var anotherPath = another.getPath();
+            if (thisPath === anotherPath) {
+                result.path = false;
+            }
+            else {
+                result.path = {
+                    key: 'path',
+                    self: thisPath,
+                    other: anotherPath
+                };
+            }
+
+            var thisQuery = this.getQuery();
+            var anotherQuery = another.getQuery();
+            var queryDifferenceIndex = {};
+            var queryDifference = [];
+            var hasQueryDifference = false;
+            for (var key in thisQuery) {
+                if (thisQuery.hasOwnProperty(key)) {
+                    var thisValue = thisQuery[key];
+                    var anotherValue = anotherQuery[key];
+                    if (thisValue !== anotherValue) {
+                        hasQueryDifference = true;
+                        var diff = {
+                            key: key,
+                            self: thisValue,
+                            other: anotherValue
+                        };
+                        queryDifference.push(diff);
+                        queryDifferenceIndex[key] = diff;
+                    }
+                }
+            }
+            // 再把`another`有的自身没有的加进去
+            for (var key in anotherQuery) {
+                if (anotherQuery.hasOwnProperty(key)
+                    && !thisQuery.hasOwnProperty(key)
+                ) {
+                    hasQueryDifference = true;
+                    var diff = {
+                        key: key,
+                        self: undefined,
+                        other: anotherQuery[key]
+                    };
+                    queryDifference.push(diff);
+                    queryDifferenceIndex[key] = diff;
+                }
+            }
+            result.queryDifference = queryDifference;
+            result.query = hasQueryDifference ? queryDifferenceIndex : false;
+
+            return result;
+        };
+
+        /**
          * 解析完整的URL
          * 
          * 该函数仅解析`path`、`search`和`query`

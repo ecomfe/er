@@ -404,7 +404,7 @@ define(
                     || context.documentTitle 
                     || config.systemName;
             }
-            
+
             events.fire(
                 'enteraction',
                 util.mix({ action: action }, context)
@@ -489,6 +489,9 @@ define(
             }
 
             util.mix(context, options);
+
+            events.fire('forwardaction', util.mix({}, context));
+
             var loader = loadAction(context);
 
             assert.has(loader, 'loadAction should always return a Promise');
@@ -506,8 +509,16 @@ define(
             ) {
                 globalActionLoader.abort();
             }
+
+            if (currentAction
+                && typeof currentAction.filterRedirect === 'function'
+                && currentAction.filterRedirect(url) === false
+            ) {
+                return Deferred.rejected('Redirect aborted by previous action');
+            }
+
             globalActionLoader = forward(url, config.mainElement, null, false);
-            globalActionLoader
+            return globalActionLoader
                 .then(enterAction)
                 .fail(util.bind(events.notifyError, events));
         }
@@ -681,6 +692,14 @@ define(
             action.reload = function (extra) {
                 this.redirect(context.url, { force: true }, extra);
             };
+            // 同样增加`back`方法
+            action.back = function (defaultURL, extra) {
+                var referrer = this.context && this.context.referrer;
+                var url = referrer || defaultURL;
+                this.redirect(url, null, extra);
+            };
+
+            // TODO: 添加`back`方法，传递`extra`参数
 
             addChildAction(container, action, hijack, context);
 
@@ -708,11 +727,20 @@ define(
             if (previousLoader && typeof previousLoader.abort === 'function') {
                 previousLoader.abort();
             }
+
+            var actionInfo = childActionMapping[container];
+            var previousAction = actionInfo && actionInfo.action;
+            if (previousAction
+                && typeof previousAction.filterRedirect === 'function'
+                && previousAction.filterRedirect(url) === false
+            ) {
+                return Deferred.rejected('Redirect aborted by previous action');
+            }
+
             var loader = forward(url, container, options, true);
-            var loadingChildAction = loader.then(
-                enterChildAction,
-                util.bind(events.notifyError, events)
-            );
+            var loadingChildAction = loader
+                .then(enterChildAction)
+                .fail(util.bind(events.notifyError, events));
             // `then`方法会返回一个新的`Promise`，
             // 但原来的`loader`上有个`abort`方法，
             // 要把这个方法留下来
