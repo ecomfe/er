@@ -122,7 +122,7 @@ define(
             // 判断优先级：
             // movedTo > childActionOnly > 404 > authority
 
-            // 检查Action的跳转，类似302跳转，用于系统升级迁移
+            // 检查Action的跳转，类似302跳转，但地址栏URL不会变，主要用于系统升级迁移
             if (actionConfig && actionConfig.movedTo) {
                 events.fire(
                     'actionmoved', 
@@ -133,9 +133,11 @@ define(
                     }
                 );
 
-                var forwardURL = URL.parse(actionConfig.movedTo);
                 args.originalURL = args.url;
-                args.url = forwardURL;
+                args.url = URL.withQuery(
+                    action.movedTo,
+                    args.originalURL.getPath()
+                );
                 return findActionConfig(args);
             }
 
