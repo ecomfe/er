@@ -56,6 +56,18 @@ define(
             },
 
             /**
+             * 根据上下文查找适合的{@link meta.ActionConfig}对象
+             *
+             * @param {meta.ActionContext} actionContext 当前的执行上下文对象
+             * @return {meta.ActionConfig | null} 找到的配置对象，找不到返回`null`
+             */
+            findActionConfig: function (actionContext) {
+                var path = actionContext.url.getPath();
+                var actionConfig = actionPathMapping[path];
+                return actionConfig;
+            },
+
+            /**
              * 处理{@link meta.ActionConfig}配置，
              * 在`controller`按默认逻辑查找Action配置后，
              * 会将查找到的配置，以及进入时的{@link meta.ActionContext}参数交给该方法，
@@ -115,9 +127,8 @@ define(
          * @return {meta.ActionConfig | null} 对应的Action配置
          * @ignore
          */
-        function findActionConfig(actionContext) {
-            var path = actionContext.url.getPath();
-            var actionConfig = actionPathMapping[path];
+        function findEligibleActionConfig(actionContext) {
+            var actionConfig = controller.findActionConfig(actionContext);
 
             // 判断优先级：
             // movedTo > childActionOnly > 404 > authority
@@ -138,7 +149,7 @@ define(
                     action.movedTo,
                     actionContext.originalURL.getPath()
                 );
-                return findActionConfig(actionContext);
+                return findEligibleActionConfig(actionContext);
             }
 
             // 如果只允许子Action访问但当前是主Action，就当没找到
@@ -183,7 +194,7 @@ define(
                     return null;
                 }
 
-                return findActionConfig(actionContext);
+                return findEligibleActionConfig(actionContext);
             }
 
             // 检查权限，如果没有权限的话，根据Action或全局配置跳转
@@ -206,7 +217,7 @@ define(
                     || config.noAuthorityLocation;
                 actionContext.originalURL = actionContext.url;
                 actionContext.url = URL.parse(location);
-                return findActionConfig(actionContext);
+                return findEligibleActionConfig(actionContext);
             }
 
             return actionConfig;
@@ -224,7 +235,7 @@ define(
          * @ignore
          */
         function loadAction(actionContext) {
-            var actionConfig = findActionConfig(actionContext);
+            var actionConfig = findEligibleActionConfig(actionContext);
             // 通过`resolveActionConfig`可以配置默认映射关系等，提供扩展点
             if (typeof controller.resolveActionConfig === 'function') {
                 actionConfig = 
