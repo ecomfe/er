@@ -497,7 +497,12 @@ define(
                 actionContext.referrer = currentURL;
             }
 
-            util.mix(actionContext.args, options);
+            // 把URL中的参数和作为子Action传过来的参数都放进`args`属性里
+            util.mix(
+                actionContext.args,
+                url.getQuery(),
+                options
+            );
 
             events.fire('forwardaction', util.mix({}, actionContext));
 
