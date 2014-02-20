@@ -38,4 +38,15 @@ function ActionContext () {
      * 使用的容器元素的id
      */
     this.container;
+
+    /**
+     * @property {Object} args
+     *
+     * 相关参数，包含了：
+     *
+     * - 从URL中获取的参数
+     * - 在{@link meta.ActionConfig#args}中配置的参数
+     * - 通过{@link controller#renderChildAction}加载时传递的`options`参数
+     */
+    this.args;
 }
