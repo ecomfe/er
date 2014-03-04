@@ -33,10 +33,10 @@ define(
 
         /**
          * Action类
-         * 
+         *
          * 在ER框架中，Action并不一定要继承该类，
          * 任何有一个名为`enter`的方法的对象均可作为Action
-         * 
+         *
          * 该类制定了一个完整的Action的执行周期
          *
          * @extends mini-event.EventTarget
@@ -73,10 +73,10 @@ define(
         /**
          * 进入Action执行周期
          *
-         * @param {meta.ActionContext} context 进入Action的上下文
+         * @param {meta.ActionContext} actionContext 进入Action的上下文
          * @return {meta.Promise}
          */
-        Action.prototype.enter = function (context) {
+        Action.prototype.enter = function (actionContext) {
             /**
              * @event enter
              *
@@ -84,10 +84,10 @@ define(
              */
             this.fire('enter');
 
-            this.context = context || {};
+            this.context = actionContext || {};
 
-            var urlQuery = context && context.url && context.url.getQuery();
-            var args = util.mix({}, context, urlQuery);
+            // `actionContext.args`里有URL里的参数和子Action时传入的`options`，全部放到`Model`上去
+            var args = util.mix({}, actionContext && actionContext.args);
 
             this.model = this.createModel(args);
 
@@ -271,13 +271,13 @@ define(
 
         /**
          * 重定向到另一个URL
-         * 
+         *
          * 通常会使用{@link locator#method-redirect}来重定向，
          * 但{@link locator}对象存在一些问题：
-         * 
+         *
          * - 严重依赖浏览器实现，因此无法在脱离浏览器的环境下做单元测试
          * - 无法应对子Action的跳转场景
-         * 
+         *
          * 因此由Action直接提供一个`redirect`方法来实现跳转功能，方便替换和扩展
          *
          * @param {string | URL} url 需要重定向的目标URL
