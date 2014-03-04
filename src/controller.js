@@ -36,7 +36,7 @@ define(
              */
             registerAction: function (actionConfig) {
                 assert.hasProperty(
-                    actionConfig, 'path', 
+                    actionConfig, 'path',
                     'action config should contains a "path" property'
                 );
 
@@ -136,24 +136,21 @@ define(
             // 检查Action的跳转，类似302跳转，但地址栏URL不会变，主要用于系统升级迁移
             if (actionConfig && actionConfig.movedTo) {
                 events.fire(
-                    'actionmoved', 
+                    'actionmoved',
                     {
-                        url: actionContext.url, 
-                        config: actionConfig, 
+                        url: actionContext.url,
+                        config: actionConfig,
                         movedTo: actionConfig.movedTo
                     }
                 );
 
                 actionContext.originalURL = actionContext.url;
-                actionContext.url = URL.withQuery(
-                    action.movedTo,
-                    actionContext.originalURL.getPath()
-                );
+                actionContext.url = URL.parse(actionConfig.movedTo);
                 return findEligibleActionConfig(actionContext);
             }
 
             // 如果只允许子Action访问但当前是主Action，就当没找到
-            if (actionConfig && 
+            if (actionConfig &&
                 (actionConfig.childActionOnly && !actionContext.isChildAction)
             ) {
                 actionConfig = null;
@@ -173,12 +170,12 @@ define(
             // 如果没有Action的配置，则跳转到404页面
             if (!actionConfig) {
                 events.fire(
-                    'actionnotfound', 
+                    'actionnotfound',
                     util.mix(
                         {
                             failType: 'NotFound',
                             reason: 'Not found'
-                        }, 
+                        },
                         actionContext
                     )
                 );
@@ -202,18 +199,18 @@ define(
                 controller.checkAuthority(actionConfig, actionContext);
             if (!hasAuthority) {
                 events.fire(
-                    'permissiondenied', 
+                    'permissiondenied',
                     util.mix(
                         {
                             failType: 'PermissionDenied',
                             reason: 'Permission denied',
                             config: actionConfig
-                        }, 
+                        },
                         actionContext
                     )
                 );
 
-                var location = actionConfig.noAuthorityLocation 
+                var location = actionConfig.noAuthorityLocation
                     || config.noAuthorityLocation;
                 actionContext.originalURL = actionContext.url;
                 actionContext.url = URL.parse(location);
@@ -238,7 +235,7 @@ define(
             var actionConfig = findEligibleActionConfig(actionContext);
             // 通过`resolveActionConfig`可以配置默认映射关系等，提供扩展点
             if (typeof controller.resolveActionConfig === 'function') {
-                actionConfig = 
+                actionConfig =
                     controller.resolveActionConfig(actionConfig, actionContext);
             }
             if (!actionConfig) {
@@ -275,12 +272,12 @@ define(
             // 否则已经加载的Action会变成同步加载，造成不一致性，
             // 导致有些地方等Action加载完触发个事件的，很可能在事件绑上以前就触发了，
             // 比如这种：
-            // 
+            //
             //     function ActionLoader() {
             //          var loading = controller.renderChildAction(...);
             //          loading.done(this.fire.bind(this, 'actionloaded'));
             //     }
-            //     
+            //
             //     var loader = new ActionLoader();
             //     loader.on('actionloaded', ...); // 这里会错过触发
             loading.syncModeEnabled = false;
@@ -311,7 +308,7 @@ define(
 
                     // 没有Action配置的`type`属性对应的模块实现
                     if (!SpecificAction) {
-                        var reason = 
+                        var reason =
                             'No action implement for ' + acrtionConfig.type;
 
                         var error = util.mix(
@@ -319,7 +316,7 @@ define(
                                 failType: 'NoModule',
                                 config: actionConfig,
                                 reason: reason
-                            }, 
+                            },
                             actionContext
                         );
                         events.fire('actionfail', error);
@@ -350,10 +347,10 @@ define(
                             var error = util.mix(
                                 {
                                     failType: 'InvalidFactory',
-                                    config: actionConfig, 
-                                    reason: reason, 
+                                    config: actionConfig,
+                                    reason: reason,
                                     action: action
-                                }, 
+                                },
                                 actionContext
                             );
                             events.fire('actionfail', error);
@@ -392,11 +389,11 @@ define(
                 // 未防止在加载Action模块的时候，用户的操作导致进入其它模块，
                 // 这里需要判断当前的URL是否依旧是加载时指定的URL。
                 // 如果URL发生了变化，则应当不对Action模块作实例化处理。
-                // 
+                //
                 // 对于ActionA -> ActionB -> ActionA这样的情况，
                 // 由于这里的URL是个对象，引用变化判等失败，
                 // 因此不用担心ActionA被初始化2次的情况出现
-                // 
+                //
                 // 该判断仅在主Action时有效，子Action需要外部逻辑自己控制
                 if (actionContext.url !== currentURL) {
                     return;
@@ -405,13 +402,13 @@ define(
                 // 是主Action的话，要销毁前面用的那个，并设定当前Action实例
                 if (currentAction) {
                     events.fire(
-                        'leaveaction', 
+                        'leaveaction',
                         {
                             action: currentAction,
                             to: util.mix({}, actionContext)
                         }
                     );
-                    
+
                     if (typeof currentAction.leave === 'function') {
                         currentAction.leave();
                     }
@@ -419,8 +416,8 @@ define(
                 currentAction = action;
 
                 // 只有主Action才有资格改`document.title`
-                document.title = actionContext.title 
-                    || actionContext.documentTitle 
+                document.title = actionContext.title
+                    || actionContext.documentTitle
                     || config.systemName;
             }
 
@@ -450,7 +447,7 @@ define(
                         }
                     }
                     // 能够序列化
-                    else if (window.JSON 
+                    else if (window.JSON
                         && typeof JSON.stringify === 'function'
                     ) {
                         try {
@@ -529,7 +526,7 @@ define(
             if (typeof url === 'string') {
                 url = URL.parse(url);
             }
-            if (globalActionLoader 
+            if (globalActionLoader
                 && typeof globalActionLoader.abort === 'function'
             ) {
                 globalActionLoader.abort();
@@ -578,7 +575,7 @@ define(
                     };
                 }
                 events.fire(
-                    'leaveaction', 
+                    'leaveaction',
                     { action: info.action, to: targetContext }
                 );
 
@@ -616,7 +613,7 @@ define(
             if (action instanceof EventTarget) {
                 // 在Action销毁的时候要取消掉
                 action.on(
-                    'leave', 
+                    'leave',
                     function () {
                         removeChildAction(container);
                     }
