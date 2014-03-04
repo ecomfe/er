@@ -79,7 +79,7 @@ define(
             if (this.hasOwnProperty(element.alias)) {
                 throw new Error(
                     'Already defined an element with alias'
-                    + '"' + element.value + '" in this enum type'
+                    + '"' + element.alias + '" in this enum type'
                 );
             }
 
@@ -184,15 +184,32 @@ define(
         /**
          * 将当前枚举转换为数组，常用于下拉选择控件之类的数据源
          *
+         * @param {Mixed...} [hints] 用于生成数组的提示信息，数组中的每一项可以为字符串
+         * 或者对象，为字符串时使用`alias`与字符串相同的{@link meta.EnumItem}对象，
+         * 为对象时则直接将对象插入到当前位置。
+         * 不提供此参数则直接将枚举按`value`属性进行排序生成数组返回
          * @return {meta.EnumItem[]} 每次返回一个全新的数组副本
          */
         Enum.prototype.toArray = function () {
-            // 必须做一次复制操作，不能让外部的修改影响枚举结构
             var array = [];
-            for (var i = 0; i < this.valueIndex.length; i++) {
-                // 由于`value`不一定是连续的，所以一定要去除空项
-                if (this.valueIndex[i]) {
-                    array.push(this.valueIndex[i]);
+            if (arguments.length > 0) {
+                for (var i = 0; i < arguments.length; i++) {
+                    var hint = arguments[i];
+                    if (typeof hint === 'string') {
+                        array.push(this.fromAlias(hint));
+                    }
+                    else {
+                        array.push(hint);
+                    }
+                }
+            }
+            else {
+                // 必须做一次复制操作，不能让外部的修改影响枚举结构
+                for (var i = 0; i < this.valueIndex.length; i++) {
+                    // 由于`value`不一定是连续的，所以一定要去除空项
+                    if (this.valueIndex[i]) {
+                        array.push(this.valueIndex[i]);
+                    }
                 }
             }
             return array;

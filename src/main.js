@@ -21,7 +21,7 @@ define(
              *
              * @type {string}
              */
-            version: '3.1.0-alpha.6',
+            version: '3.1.0-alpha.7',
 
             /**
              * 启动ER框架，此方法按顺序启动{@link controller}、
@@ -33,7 +33,7 @@ define(
                 require('./locator').start();
             }
         };
-        
+
         return main;
     }
 );
