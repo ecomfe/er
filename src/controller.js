@@ -494,9 +494,9 @@ define(
             var actionContext = {
                 url: url,
                 container: container,
-                isChildAction: !!isChildAction,
-                args: {}
+                isChildAction: !!isChildAction
             };
+            actionContext.args = util.mix({}, actionContext);
             if (isChildAction) {
                 var referrerInfo = childActionMapping[container];
                 actionContext.referrer = referrerInfo ? referrerInfo.url : null;
