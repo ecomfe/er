@@ -44,7 +44,11 @@ define(
          */
         function Action() {
             this.disposed = false;
+
+            this.initialize();
         }
+
+        Action.prototype.initialize = util.noop;
 
         /**
          * 当前Action运行上下文
