@@ -309,7 +309,7 @@ define(
                     // 没有Action配置的`type`属性对应的模块实现
                     if (!SpecificAction) {
                         var reason =
-                            'No action implement for ' + acrtionConfig.type;
+                            'No action implement for ' + actionConfig.type;
 
                         var error = util.mix(
                             {
@@ -604,6 +604,7 @@ define(
 
             var info = {
                 url: context.url,
+                container: container.id,
                 action: action,
                 hijack: hijack
             };
@@ -654,8 +655,7 @@ define(
                 // 强制全局跳转，直接使用`locator`即可，
                 // 但在这之前要把原来的`Action`灭掉
                 if (options.global) {
-                    var container =
-                        document.getElementById(actionContext.container);
+                    var container = document.getElementById(actionContext.container);
                     if (container) {
                         removeChildAction(container);
                     }
@@ -664,17 +664,16 @@ define(
                     return;
                 }
 
-                var actionContext = childActionMapping[actionContext.container];
-                var changed = url.toString() !== actionContext.url.toString();
+                var childActionInfo = childActionMapping[actionContext.container];
+                var changed = url.toString() !== childActionInfo.url.toString();
                 if (changed || options.force) {
                     // 静默跳转只要改掉原来映射的URL就行，为了下一次跳转的`referrer`
                     if (options.silent) {
-                        actionContext.url = url;
+                        childActionInfo.url = url;
                     }
                     else {
                         // `renderChildAction`中会把原来的Action销毁
-                        controller.renderChildAction(
-                            url, actionContext.container, extra);
+                        controller.renderChildAction(url, childActionInfo.container, extra);
                     }
                 }
             }
