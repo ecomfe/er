@@ -131,12 +131,12 @@ define(
             if (!text) {
                 return undefined;
             }
-            
+
             if (window.JSON && typeof JSON.parse === 'function') {
                 return JSON.parse(text);
             }
             else {
-                return eval('(' + text + ')');
+                return new Function('return (' + text + ');');
             }
         };
 
