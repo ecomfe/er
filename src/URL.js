@@ -14,15 +14,15 @@ define(
          * URL信息类
          *
          * 该类是一个不可变类型，构建后可以读取其中的内容，但不能修改
-         * 
+         *
          * **不建议** 使用该类的构造函数，
          * 如果需要获得URL实例，通过`parse`和`withQuery`工厂方法生成
-         * 
+         *
          * 该类的默认规则不同于普通的URL协议，具体体现如下：
-         * 
+         *
          * - 不分解protocol、host、port、hash部分，仅包含path和search
          * - path和search的分隔符默认为`~`字符
-         * 
+         *
          * @param {string} [path] URL中的path部分
          * @param {string} [search] URL中的search部分
          * @param {string} [searchSeparator="~"] 分隔path与search的分隔符
@@ -73,7 +73,7 @@ define(
              * @method getQuery
              *
              * 获取参数对象或指定参数的值
-             * 
+             *
              * @param {string} [key] 指定参数的名称，不传该参数则返回整个参数对象
              * @return {string | Object} 如果有`key`参数则返回对应值，
              * 否则返回参数对象的副本
@@ -135,9 +135,7 @@ define(
             }
             // 再把`another`有的自身没有的加进去
             for (var key in anotherQuery) {
-                if (anotherQuery.hasOwnProperty(key)
-                    && !thisQuery.hasOwnProperty(key)
-                ) {
+                if (anotherQuery.hasOwnProperty(key) && !thisQuery.hasOwnProperty(key)) {
                     hasQueryDifference = true;
                     var diff = {
                         key: key,
@@ -156,7 +154,7 @@ define(
 
         /**
          * 解析完整的URL
-         * 
+         *
          * 该函数仅解析`path`、`search`和`query`
          *
          * @param {string} url 完整的URL
@@ -198,8 +196,8 @@ define(
             var defaults = { querySeparator: '~' };
             options = util.mix(defaults, options);
 
-            var separator = path.indexOf(options.querySeparator) < 0 
-                ? options.querySeparator 
+            var separator = path.indexOf(options.querySeparator) < 0
+                ? options.querySeparator
                 : '&';
             var search = URL.serialize(query);
             var url = path + separator + search;
@@ -263,8 +261,7 @@ define(
                 if (query.hasOwnProperty(key)) {
                     var value = query[key];
                     // 如果`value`是数组，其`toString`会自动转为逗号分隔的字符串
-                    search += '&' + encodeURIComponent(key) 
-                        + '=' + encodeURIComponent(value);
+                    search += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value);
                 }
             }
 

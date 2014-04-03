@@ -108,17 +108,11 @@ define(
                 var url = this.model
                     && typeof this.model.get === 'function'
                     && this.model.get('url');
-                throw new Error(
-                    'Container not found when rendering '
-                    + (url ? '"' + url + '"' : 'view')
-                );
+                throw new Error('Container not found when rendering ' + (url ? '"' + url + '"' : 'view'));
             }
 
             var template = require('etpl');
-            var html = template.render(
-                this.getTemplateName(),
-                this.getTemplateData()
-            );
+            var html = template.render(this.getTemplateName(), this.getTemplateData());
             container.innerHTML = html;
 
             this.enterDocument();

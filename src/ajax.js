@@ -8,6 +8,7 @@
  */
 define(
     function (require) {
+        var TIMESTAMP_PARAM_KEY = '_';
 
         /**
          * @class ajax
@@ -59,13 +60,12 @@ define(
                     var result = [];
                     for (var name in data) {
                         var propertyKey = getKey(name, prefix);
-                        var propertyValue = 
-                            ajax.hooks.serializeData(propertyKey, data[name]);
+                        var propertyValue = ajax.hooks.serializeData(propertyKey, data[name]);
                         result.push(propertyValue);
                     }
                     return result.join('&');
                 default:
-                    return encodedKey 
+                    return encodedKey
                         ? encodedKey + '=' + encodeURIComponent(data)
                         : encodeURIComponent(data);
             }
@@ -125,7 +125,7 @@ define(
 
             var xhr = window.XMLHttpRequest
                 ? new XMLHttpRequest()
-                : new ActiveXObject('Microsoft.XMLHTTP');
+                : new window.ActiveXObject('Microsoft.XMLHTTP');
 
             var fakeXHR = requesting.promise;
             var xhrWrapper = {
@@ -224,8 +224,7 @@ define(
 
                     if (typeof ajax.hooks.afterParse === 'function') {
                         try {
-                            data = 
-                                ajax.hooks.afterParse(data, fakeXHR, options);
+                            data = ajax.hooks.afterParse(data, fakeXHR, options);
                         }
                         catch (ex) {
                             fakeXHR.error = ex;
@@ -245,10 +244,9 @@ define(
                 util.mix(data, options.data);
             }
             if (options.cache === false) {
-                data['_'] = +new Date();
+                data[TIMESTAMP_PARAM_KEY] = +new Date();
             }
-            var query = ajax.hooks.serializeData(
-                '', data, 'application/x-www-form-urlencoded');
+            var query = ajax.hooks.serializeData('', data, 'application/x-www-form-urlencoded');
             var url = options.url;
             if (query) {
                 var delimiter = url.indexOf('?') >= 0 ? '&' : '?';
@@ -265,10 +263,8 @@ define(
                 xhr.send();
             }
             else {
-                var contentType = 
-                    options.contentType || 'application/x-www-form-urlencoded';
-                var query = ajax.hooks.serializeData(
-                    '', options.data, contentType, fakeXHR);
+                var contentType = options.contentType || 'application/x-www-form-urlencoded';
+                var query = ajax.hooks.serializeData('', options.data, contentType, fakeXHR);
                 if (options.charset) {
                     contentType += ';charset=' + options.charset;
                 }
@@ -352,7 +348,7 @@ define(
         ajax.post = function (url, data, dataType) {
             var options = {
                 method: 'POST',
-                url: url, 
+                url: url,
                 data: data,
                 dataType: dataType || 'json'
             };
@@ -385,8 +381,7 @@ define(
                 img = null;
             };
 
-            var query = ajax.hooks.serializeData(
-                '', data, 'application/x-www-form-urlencoded');
+            var query = ajax.hooks.serializeData('', data, 'application/x-www-form-urlencoded');
             if (query) {
                 var delimiter = url.indexOf('?') >= 0 ? ':' : '?';
                 url += delimiter + query;

@@ -8,6 +8,7 @@
  */
 define(
     function (require) {
+        /* jshint nomen: false */
         var util = require('./util');
         var assert = require('./assert');
 
@@ -17,7 +18,7 @@ define(
 
         /**
          * 尝试执行相关的回调函数
-         * 
+         *
          * 当`deferred`处于非`pending`状态时，根据其状态，
          * 立即异步地运行对应的回调函数
          *
@@ -58,7 +59,7 @@ define(
 
         /**
          * 将一个原有的`Deferred`与一个新的`Deferred`对象连接起来
-         * 
+         *
          * 该方法作为`then`方法的核心
          *
          * @param {Deferred} original 原`Deferred`对象
@@ -71,16 +72,15 @@ define(
         function pipe(original, deferred, callback, actionType) {
             return function () {
                 // `.then(done)`及`.then(null, fail)`时使用
-                // 
+                //
                 // 根据`callback`的行为，进行以下处理：
-                // 
+                //
                 // - 如果`callback`返回值，则用该值改`deferred`为`resolved`
                 // - 如果`callback`抛出异常，则用异常改`deferred`为`rejected`
                 if (typeof callback === 'function') {
                     var resolver = deferred.resolver;
                     try {
-                        var returnValue = 
-                            callback.apply(original.promise, arguments);
+                        var returnValue = callback.apply(original.promise, arguments);
 
                         if (Deferred.isPromise(returnValue)) {
                             returnValue.then(resolver.resolve, resolver.reject);
@@ -93,8 +93,7 @@ define(
                         /**
                          * @event exception
                          *
-                         * 当回调函数执行出现错误时触发，
-                         * 在此事件后会再触发{@link Deferred#event-reject}事件
+                         * 当回调函数执行出现错误时触发，在此事件后会再触发{@link Deferred#event-reject}事件
                          *
                          *
                          * @param {Deferred} deferred 当前的{@link Deferred}对象
@@ -115,7 +114,7 @@ define(
                     }
                 }
                 // `.then()`及`.then(done, null)`时使用
-                // 
+                //
                 // 直接使用原`Deferred`保存的参数将`deferred`改为对应状态
                 else {
                     deferred[actionType].apply(deferred, original._args);
@@ -125,7 +124,7 @@ define(
 
         /**
          * Deferred类
-         * 
+         *
          * 类似于jQuery的`Deferred`对象，是对异步操作的一种封装
          *
          * 一个`Deferred`对象是一个{@link meta.Resolver}对象
@@ -181,10 +180,10 @@ define(
         }
 
         require('mini-event/EventTarget').enable(Deferred);
-        
+
         /**
          * 判断一个对象是否是一个{@link meta.Promise}对象
-         * 
+         *
          * 该方法采用灵活的判断方式，并非要求`value`为`Deferred`的实例
          *
          * @param {Mixed} value 需要判断的对象
@@ -196,7 +195,7 @@ define(
 
         /**
          * 是否启用同步模式。
-         * 
+         *
          * 在同步模式下，`Deferred`对象并不符合Promise/A规范，
          * 当对象进入或处于`resolved`或`rejected`状态时，
          * 添加的回调函数会 **立即** 、 **同步** 地被执行。
@@ -313,23 +312,19 @@ define(
         // 社区对`progress`处理函数的返回值和异常的传递还在讨论中
 
         /**
-         * 生成一个新的{@link meta.Promise}对象，
-         * 当所有给定的{@link meta.Promise}对象完成后触发
-         * 
+         * 生成一个新的{@link meta.Promise}对象，当所有给定的{@link meta.Promise}对象完成后触发
+         *
          * 其触发逻辑如下：
-         * 
-         * - 如果所有给定的{@link meta.Promise}对象均进入`resolved`状态，
-         * 则该{@link meta.Promise}对象进入`resolved`状态
-         * - 如果有至少一个{@link meta.Promise}对象进入`rejected`状态，
-         * 则该{@link meta.Promise}对象进入`rejected`状态
-         * 
-         * 当新的{@link meta.Promise}对象触发时，
-         * 将按照传入的{@link meta.Promise}对象的顺序，
+         *
+         * - 如果所有给定的{@link meta.Promise}对象均进入`resolved`状态，则该{@link meta.Promise}对象进入`resolved`状态
+         * - 如果有至少一个{@link meta.Promise}对象进入`rejected`状态，则该{@link meta.Promise}对象进入`rejected`状态
+         *
+         * 当新的{@link meta.Promise}对象触发时，将按照传入的{@link meta.Promise}对象的顺序，
          * 依次提供参数，且根据原{@link meta.Promise}对象的回调参数，有以下情况：
-         * 
+         *
          * - 如果给定参数只有一个，使用这一个参数
          * - 如果给定多个参数，则提供一个数组包含这些参数
-         * 
+         *
          * 本方法对参数的方法与`Array.prototyp.concat`相同，任意一个参数是数组则会展开
          *
          * @param {meta.Promise... | meta.Promise[]...} args 需要组合的对象
@@ -354,9 +349,7 @@ define(
             function resolveOne(whichToFill) {
                 workingCount--;
 
-                assert.greaterThanOrEquals(
-                    workingCount, 0, 'workingCount should be positive'
-                );
+                assert.greaterThanOrEquals(workingCount, 0, 'workingCount should be positive');
 
                 var unitResult = [].slice.call(arguments, 1);
                 // 如果给定的结果只有一个，不要再组装成数组
@@ -417,9 +410,8 @@ define(
          * 该方法可用于统一同步和异步编程模型
          *
          * @param {Mixed} value 给定的值
-         * @return {meta.Promise} 如果`value`本身是一个{@link meta.Promise}，
-         * 则直接返回其本身。如果`value`是普通对象，
-         * 则返回一个 **同步** 的处于`resolved`状态的{@link meta.Promise}，
+         * @return {meta.Promise} 如果`value`本身是一个{@link meta.Promise}，则直接返回其本身。
+         * 如果`value`是普通对象，则返回一个 **同步** 的处于`resolved`状态的{@link meta.Promise}，
          * 该{@link meta.Promise}以`value`为值进入`resolved`状态
          * @static
          */

@@ -21,7 +21,7 @@ define(
 
         /**
          * 合并模板与数据
-         * 
+         *
          * @param {HTMLElement} output 要输出到的容器元素
          * @param {string} tplName 模板名
          * @param {Model} [model] 获取数据的对象

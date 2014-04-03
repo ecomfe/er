@@ -11,7 +11,7 @@
     "undef": true,
     "unused": "vars",
     "strict": false,
-    "trailing": false,
+    "trailing": true,
     "maxparams": 20,
     "maxdepth": 4,
     "maxlen": 120,
@@ -57,6 +57,6 @@
     "onevar": false,
     "passfail": false,
     "white": false,
-    
+
     "predef": ["define", "URL"]
 }

@@ -40,7 +40,7 @@ define(
         /**
          * @event error
          * @member events
-         * 
+         *
          * 接收到错误时触发
          *
          * @param {Mixed} error 抛出的错误对象
@@ -117,8 +117,7 @@ define(
          *
          * @param {string} reason 失败原因
          * @param {meta.ActionConfig} config 当前Action的配置项
-         * @param {Object} action 当`failType`为`"InvalidFactory"`时存在，
-         * 值为当前加载的被认为是Action工厂的对象
+         * @param {Object} action 当`failType`为`"InvalidFactory"`时存在，值为当前加载的被认为是Action工厂的对象
          */
 
         /**

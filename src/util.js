@@ -136,6 +136,7 @@ define(
                 return JSON.parse(text);
             }
             else {
+                /* jshint evil: true */
                 return new Function('return (' + text + ');');
             }
         };
