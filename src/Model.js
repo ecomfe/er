@@ -447,8 +447,8 @@ define(
          * @param {string} name 属性名
          * @param {Mixed} value 对应的值
          * @param {Object} [options] 相关选项
-         * @param {boolean} [options.silent=false] 如果该值为`true`则
-         * 不触发{@link Model#change}事件
+         * @param {boolean} [options.silent=false] 如果该值为`true`则不触发{@link Model#change}事件
+         * @return {Mixed} 返回`value`对象
          * @fires change
          */
         Model.prototype.set = function (name, value, options) {
@@ -468,6 +468,8 @@ define(
                  */
                 this.fire('change', event);
             }
+
+            return value;
         };
 
         /**
@@ -475,8 +477,8 @@ define(
          *
          * @param {Object} extension 批量值的存放对象
          * @param {Object} [options] 相关选项
-         * @param {boolean} [options.silent=false] 如果该值为`true`则
-         * 不触发{@link Model#change}事件
+         * @param {boolean} [options.silent=false] 如果该值为`true`则不触发{@link Model#change}事件
+         * @return {Object} 返回`extension`对象
          * @fires change
          */
         Model.prototype.fill = function (extension, options) {
@@ -498,6 +500,8 @@ define(
                 };
                 this.fire('change', event);
             }
+
+            return extension;
         };
 
         /**
@@ -506,8 +510,7 @@ define(
          * @param {string} name 属性名
          * @return {Mixed} 在删除前`name`对应的值
          * @param {Object} [options] 相关选项
-         * @param {boolean} [options.silent=false] 如果该值为`true`则
-         * 不触发{@link Model#change}事件
+         * @param {boolean} [options.silent=false] 如果该值为`true`则不触发{@link Model#change}事件
          * @fires change
          */
         Model.prototype.remove = function (name, options) {
