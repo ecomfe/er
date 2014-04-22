@@ -8,22 +8,25 @@
  */
 define(
     function (require) {
-        var EventTarget = require('mini-event/EventTarget');
         var util = require('./util');
+        var EventTarget = require('mini-event/EventTarget');
 
         /**
          * 视图类
-         * 
+         *
          * 在ER框架中，View不一定要继承该类，
          * 任何有一个名为`render`的方法的对象均可作为View
-         * 
+         *
          * 该类结合`template`对象，实现了一个通用的RIA视图方案
          *
          * @extends mini-event.EventTarget
          * @constructor
          */
         function View() {
+            this.initialize();
         }
+
+        View.prototype.initialize = util.noop;
 
         /**
          * 对应的模板名，指定一个etpl的`target`来作为渲染的内容，
@@ -105,17 +108,11 @@ define(
                 var url = this.model
                     && typeof this.model.get === 'function'
                     && this.model.get('url');
-                throw new Error(
-                    'Container not found when rendering '
-                    + (url ? '"' + url + '"' : 'view')
-                );
+                throw new Error('Container not found when rendering ' + (url ? '"' + url + '"' : 'view'));
             }
 
             var template = require('etpl');
-            var html = template.render(
-                this.getTemplateName(),
-                this.getTemplateData()
-            );
+            var html = template.render(this.getTemplateName(), this.getTemplateData());
             container.innerHTML = html;
 
             this.enterDocument();

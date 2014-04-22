@@ -12,7 +12,7 @@ define(
          * @class datasource
          *
          * 获取数据相关的函数生产工厂
-         * 
+         *
          * 该对象下的每个方法均返回一个函数，可用于生成{@link Model#datasource}配置
          *
          * @singleton
@@ -41,7 +41,7 @@ define(
         datasource.remote = function (url, options) {
             return function (model) {
                 options = require('./util').mix(
-                    { url: url, dataType: 'json' }, 
+                    { url: url, dataType: 'json' },
                     options
                 );
 
@@ -77,8 +77,7 @@ define(
         datasource.defaultValue = function (defaultValue, name) {
             return function (model, options) {
                 if (!options.name && !name) {
-                    throw new Error('No property name specified '
-                        + 'to determine whether value exists in this model');
+                    throw new Error('No property name specified to determine whether value exists in this model');
                 }
 
                 var propertyName = name || options.name;
@@ -97,7 +96,7 @@ define(
          * @return {Function} 数据获取函数
          */
         datasource.convertTo = function (type, name) {
-            return function (mode, options) {
+            return function (model, options) {
                 if (!options.name && !name) {
                     throw new Error('No property name specified to convert');
                 }

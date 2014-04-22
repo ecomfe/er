@@ -1,7 +1,7 @@
 /**
  * ER (Enterprise RIA)
  * Copyright 2013 Baidu Inc. All rights reserved.
- * 
+ *
  * @ignore
  * @file 通用枚举类
  * @author otakustay, wangyaqiong(catkin2009@gmail.com)
@@ -12,8 +12,7 @@ define(
         /**
          * 通用枚举类，用于生成一个枚举对象
          *
-         * 枚举对象是业务系统中非常普遍使用的一个类型，
-         * 其基本功能是将一个数字和具体的含义对应起来
+         * 枚举对象是业务系统中非常普遍使用的一个类型，其基本功能是将一个数字和具体的含义对应起来
          *
          * 枚举是一类数值的集合，枚举中的每一项包括3个属性：
          *
@@ -29,8 +28,7 @@ define(
          *         { alias: 'DELETED', text: '已删除' }
          *     );
          *
-         * 传入的参数的`value`由0开始今次递增。对于`value`非递增的枚举，
-         * 在构造时对指定的项传入`value`属性即可，如：
+         * 传入的参数的`value`由0开始今次递增。对于`value`非递增的枚举，在构造时对指定的项传入`value`属性即可，如：
          *
          *     var MouseButton = new Enum(
          *         { alias: 'LEFT', text: '正常', value: 1 },
@@ -38,8 +36,7 @@ define(
          *         { alias: 'MIDDLE', text: '已删除', value: 4 }
          *     );
          *
-         * 枚举会维护2个映射，分别为`value`至`alias`及`alias`至`value`，
-         * 因此可以简单地通过属性访问的方式获取`alias`或`value`：
+         * 枚举会维护2个映射，分别为`value`至`alias`及`alias`至`value`，因此可以简单地通过属性访问的方式获取`alias`或`value`：
          *
          *     if (user.status = Status.DELETED) {
          *         warn('该用户已经删除');
@@ -70,17 +67,11 @@ define(
          */
         Enum.prototype.addElement = function (element) {
             if (this.hasOwnProperty(element.value)) {
-                throw new Error(
-                    'Already defined an element with value'
-                    + element.value + ' in this enum type'
-                );
+                throw new Error('Already defined an element with value' + element.value + ' in this enum type');
             }
 
             if (this.hasOwnProperty(element.alias)) {
-                throw new Error(
-                    'Already defined an element with alias'
-                    + '"' + element.alias + '" in this enum type'
-                );
+                throw new Error('Already defined an element with alias "' + element.alias + '" in this enum type');
             }
 
             this[element.value] = element.alias;
@@ -184,9 +175,8 @@ define(
         /**
          * 将当前枚举转换为数组，常用于下拉选择控件之类的数据源
          *
-         * @param {Mixed...} [hints] 用于生成数组的提示信息，数组中的每一项可以为字符串
-         * 或者对象，为字符串时使用`alias`与字符串相同的{@link meta.EnumItem}对象，
-         * 为对象时则直接将对象插入到当前位置。
+         * @param {Mixed...} [hints] 用于生成数组的提示信息，数组中的每一项可以为字符串或者对象，
+         * 为字符串时使用`alias`与字符串相同的{@link meta.EnumItem}对象，为对象时则直接将对象插入到当前位置。
          * 不提供此参数则直接将枚举按`value`属性进行排序生成数组返回
          * @return {meta.EnumItem[]} 每次返回一个全新的数组副本
          */

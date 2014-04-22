@@ -20,12 +20,12 @@ define(
         var permssion = {
             /**
              * 添加权限
-             * 
+             *
              * 权限以字符串作为名称，添加权限说明时，传递一个对象，
              * 其中的健为权限名称，值为是否拥有该权限
-             * 
+             *
              * 权限说明可以嵌套，如：
-             * 
+             *
              *     {
              *         books: { VIEW_BOOK: true, EDIT_BOOK: false },
              *         authors: { VIEW_AUTHOR: true, EDIT_AUTHOR: true }

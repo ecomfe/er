@@ -10,7 +10,8 @@ define(
     function (require) {
         var util = require('./util');
         var Deferred = require('./Deferred');
-        var silent = { silent: true };
+
+        var SILENT = { silent: true };
 
         /**
          * 加载一个数据
@@ -23,15 +24,15 @@ define(
         function loadData(model, options) {
             function addDataToModel(value) {
                 if (options.dump) {
-                    model.fill(value, silent);
+                    model.fill(value, SILENT);
                 }
                 else {
-                    model.set(options.name, value, silent);
+                    model.set(options.name, value, SILENT);
                 }
                 return {
                     success: true,
                     name: options.name,
-                    options: options, 
+                    options: options,
                     value: value
                 };
             }
@@ -47,7 +48,7 @@ define(
 
             try {
                 var value = options.retrieve(model, options);
-                
+
                 if (Deferred.isPromise(value)) {
                     if (typeof value.abort === 'function') {
                         model.addPendingWorker(value);
@@ -89,7 +90,7 @@ define(
          * @param {meta.DatasourceOption[]} datasource 数据原配置
          * @return {meta.Promise} 对应的`Promise`对象，数据加载完成后触发
          * @ignore
-         */ 
+         */
         function loadSequence(model, datasource) {
             // 第一个Promise是直接成功的，以便开始第一块的加载
             var loading = Deferred.resolved();
@@ -135,7 +136,7 @@ define(
 
         /**
          * 根据数据源配置加载数据
-         * 
+         *
          * 该函数处理所有数据项配置的情况
          *
          * @param {Model} model 用于存放数据的`Model`对象
@@ -155,7 +156,7 @@ define(
                 var options = { retrieve: datasource, dump: true };
                 return loadData(model, options);
             }
-            
+
             // 是数组的话，数组中的各项串行加载
             if (datasource instanceof Array) {
                 return loadSequence(model, datasource);
@@ -174,18 +175,18 @@ define(
 
         /**
          * Model类声明
-         * 
+         *
          * 在ER框架中，Model并不一定要继承该类，任何对象都可以作为Model使用
-         * 
+         *
          * ER对于Model的处理如下：
-         * 
+         *
          * 1. 通过Action的`createModel`创建一个对象
          * 2. 如果该对象有`load`函数，则执行该函数，并分为以下情况：
          *     - 如果`load`函数返回一个Promise，则认为是异步加载
          *     - 反之则认为是同步加载，对象已经直接可以使用
          * 3. 如果对象没有`load`函数，则默认对象本身就是Model
          * 4. 当离开Action时，如果Model有`dispose`方法，则会调用以销毁对象
-         * 
+         *
          * 该Model类为一个通用的可配置的基类，提供了数据加载的相关方法
          *
          * @extends mini-event.EventTarget
@@ -197,9 +198,13 @@ define(
             this.pendingWorkers = [];
 
             if (context) {
-                this.fill(context, silent);
+                this.fill(context, SILENT);
             }
+
+            this.initialize();
         }
+
+        Model.prototype.initialize = util.noop;
 
         /**
          * 移除一个已完成的工作对象
@@ -235,50 +240,50 @@ define(
 
         /**
          * 当前Model的数据源
-         * 
+         *
          * 数据源是对数据一系列配置，其中保存了多个数据的获取函数，有以下方式
-         * 
+         *
          * - 单一数据源配置
-         * 
+         *
          *     如果`datasource`是一个函数，则认为该函数是一个数据获取函数，
          *     执行该函数，并把返回值按照一个对象放到当前{@link Model}中
-         *     
+         *
          *         // 配置从指定的URL获取数据
          *         datasource = require('./datasource').remote('/model/list')
-         * 
+         *
          * - 并发请求数据
-         * 
+         *
          *     通过一个对象配置并发的数据获取。对象中每一个属性对应一个获取函数，
          *     当数据获取后，会调用`this.set(name, result)`，以属性名为键值添加
-         *     
+         *
          *         // 并发请求多个URL
          *         datasource = {
          *             'list': require('./datasource').remote('/model/list'),
          *             'config': require('./datasource').constant('listConfig')
          *         };
-         * 
+         *
          * - 串行请求数据
-         * 
+         *
          *     通过一个数组配置并发的数据获取，数组中包含对象。将按照数组的顺序，
          *     依次加载每一个对象（对象中的各属性是并发）
-         *     
+         *
          *         // 串行请求几个URL
          *         datasource = [
          *             { 'config': require('./datasource').constant('config') },
          *             { 'list': require('./datasource').remote('/model/list') }
          *         ];
-         *     
+         *
          *     注意使用该方案时，各对象中的键 **不要相同** ，否则会造成数据的覆盖
-         * 
+         *
          * - 嵌套配置
-         * 
+         *
          *     数组和对象可以相互嵌套，但有一个限制：
-         *     
+         *
          *     > 当一个对象中某个属性的值为普通对象（非数据加载配置项）或数组时，
          *     > 该属性名将不起作用，即不会在{@link Model}对象中存在以该属性名为键的值
-         *     
+         *
          *     以下为一个串行和并行混杂的数据源配置：
-         *     
+         *
          *         datasource = {
          *             'one': [getX, getY, getZ],
          *             'two': getA,
@@ -287,36 +292,36 @@ define(
          *                 { 'five': getC }
          *             ]
          *         };
-         * 
+         *
          *     以上对象将在最终的{@link Model}对象中生成`two`、`four`和`five`属性，
          *     而`one`、`two`和`three`因为属性值为普通对象或数组，将被忽略，
          *     其中`one`对应3个函数，将会把函数的返回值展开后添加到当前{@link Model}
-         * 
+         *
          *     同样，注意在嵌套的同时，各属性名 **不要相同** ，除非该属性名称没用，
          *     以避免出现数据相互覆盖的情况
-         * 
+         *
          * 通过数据获取配置项
-         * 
+         *
          * 上文所述的各种方案，均是数据获取配置项的简写，
          * 一个数据获取配置项的结构请参考{@link meta.DatasourceOption}的说明
-         * 
+         *
          * 因此，可以使用数据获取配置项来处理一些例外情况，比如并行加载2个对象，
          * 且2个对象均无对应的键值，需要完整添加到`Model`对象：
-         * 
+         *
          *     // 并行加载对象并完整添加到`Model`对象
          *     datasource = [
          *         {
-         *             retrieve: require('./datasource').remote('/model/list'), 
+         *             retrieve: require('./datasource').remote('/model/list'),
          *             dump: true
          *         },
          *         {
-         *             retrieve: require('./datasource').remote('/user/info'), 
+         *             retrieve: require('./datasource').remote('/user/info'),
          *             dump: true
          *         }
          *     ];
-         * 
+         *
          * 对于不同的简写，其与数据获取配置项的对应关系如下：
-         * 
+         *
          * - 普通的函数，映射为`{ retrieve: {fn}, dump: true }`
          * - 对象中的一个属性，映射为`{ retrieve: {fn}, name: {name} }`
          *
@@ -361,7 +366,7 @@ define(
 
         /**
          * 加载当前{@link Model}对象的数据
-         * 
+         *
          * @return {meta.Promise} 返回一个{@link meta.Promise}对象，
          * 在数据加载且{@link Model#prepare}方法执行后进入`resolved`状态，
          * 如果加载过程中出现错误，则进入`rejected`状态
@@ -379,16 +384,16 @@ define(
 
         /**
          * 处理加载后的数据
-         * 
+         *
          * 这个方法用于在{@link Model#load}完毕后，调整一些数据结构
-         * 
+         *
          * 在该方法执行时，当前的{@link Model}对象中
          * 已经有{@link Model#load}方法填充的数据，
          * 可使用{@link Model#get}、{@link Model#set}和{@link Model#remove}
          * 方法对数据进行调整
-         * 
+         *
          * 该方法默认不执行任何逻辑
-         * 
+         *
          * 如果在`prepare`方法中有异步的操作，
          * 可以让方法返回一个{@link meta.Promise}对象，
          * {@link Model#load}方法会等待其进入`resolved状态
@@ -442,8 +447,8 @@ define(
          * @param {string} name 属性名
          * @param {Mixed} value 对应的值
          * @param {Object} [options] 相关选项
-         * @param {boolean} [options.silent=false] 如果该值为`true`则
-         * 不触发{@link Model#change}事件
+         * @param {boolean} [options.silent=false] 如果该值为`true`则不触发{@link Model#change}事件
+         * @return {Mixed} 返回`value`对象
          * @fires change
          */
         Model.prototype.set = function (name, value, options) {
@@ -463,6 +468,8 @@ define(
                  */
                 this.fire('change', event);
             }
+
+            return value;
         };
 
         /**
@@ -470,8 +477,8 @@ define(
          *
          * @param {Object} extension 批量值的存放对象
          * @param {Object} [options] 相关选项
-         * @param {boolean} [options.silent=false] 如果该值为`true`则
-         * 不触发{@link Model#change}事件
+         * @param {boolean} [options.silent=false] 如果该值为`true`则不触发{@link Model#change}事件
+         * @return {Object} 返回`extension`对象
          * @fires change
          */
         Model.prototype.fill = function (extension, options) {
@@ -493,6 +500,8 @@ define(
                 };
                 this.fire('change', event);
             }
+
+            return extension;
         };
 
         /**
@@ -501,8 +510,7 @@ define(
          * @param {string} name 属性名
          * @return {Mixed} 在删除前`name`对应的值
          * @param {Object} [options] 相关选项
-         * @param {boolean} [options.silent=false] 如果该值为`true`则
-         * 不触发{@link Model#change}事件
+         * @param {boolean} [options.silent=false] 如果该值为`true`则不触发{@link Model#change}事件
          * @fires change
          */
         Model.prototype.remove = function (name, options) {
@@ -615,7 +623,7 @@ define(
          * 处理加载过程中发生的错误
          *
          * 加载过程中的每一个错误都会调用该方法，该方法可以决定错误的处理逻辑：
-         * 
+         *
          * - 如果方法正常返回，则认为错误已经处理完毕，返回值作为数据值加入到当前Model中
          * - 如果方法抛出异常，则认为错误未经处理，将错误继续向上抛出，当前Model加载失败
          *

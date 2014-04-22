@@ -12,11 +12,11 @@ define(
          * @class locator
          *
          * 地址监听对象
-         * 
+         *
          * 该对象用于监听地址中的`hash`部分的变化，以及根据要求更新`hash`值
-         * 
+         *
          * `locator`的基本工作流程：
-         * 
+         *
          * 1. 监听`hash`的变化
          * 2. 当`hash`变化时，如果确实发生变化（与上一次的值不同），则执行逻辑
          * 3. 保存当前的地址信息（高版本浏览器此时自动记录历史项）
@@ -40,9 +40,7 @@ define(
             // 在Firefox下获取会成为**abc=def**
             // 为了避免这一情况，需要从`location.href`中分解
             var index = location.href.indexOf('#');
-            var url = index === -1 
-                ? ''
-                : location.href.slice(index);
+            var url = index === -1 ? '' : location.href.slice(index);
 
             return url;
         }
@@ -97,9 +95,9 @@ define(
 
         /**
          * 更新当前的`hash`值，同时在历史记录中添加该项
-         * 
+         *
          * 如果hash值与当前的地址相同则不会进行更新
-         * 
+         *
          * 注意该函数不会触发`redirect`事件，需要跳转请使用`forward`方法，
          * 直接使用`updateURL`修改地址**后果自负**
          *
@@ -112,7 +110,7 @@ define(
             var changed = currentLocation !== url;
 
             // 存储当前信息
-            // 
+            //
             // Opera下，相同的hash重复写入会在历史堆栈中重复记录，
             // 需要再行与当前的hash比较
             if (changed && getLocation() !== url) {
@@ -182,13 +180,13 @@ define(
                      * @param {string} e.url 当前的URL
                      */
                     locator.fire(
-                        'redirect', 
+                        'redirect',
                         { url: url, referrer: referrer }
                     );
                 }
 
                 require('./events').fire(
-                    'redirect', 
+                    'redirect',
                     { url: url, referrer: referrer }
                 );
             }

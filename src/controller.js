@@ -35,10 +35,7 @@ define(
              * @param {meta.ActionConfig} actionConfig Action的相关配置
              */
             registerAction: function (actionConfig) {
-                assert.hasProperty(
-                    actionConfig, 'path',
-                    'action config should contains a "path" property'
-                );
+                assert.hasProperty(actionConfig, 'path', 'action config should contains a "path" property');
 
                 actionPathMapping[actionConfig.path] = actionConfig;
             },
@@ -150,9 +147,7 @@ define(
             }
 
             // 如果只允许子Action访问但当前是主Action，就当没找到
-            if (actionConfig &&
-                (actionConfig.childActionOnly && !actionContext.isChildAction)
-            ) {
+            if (actionConfig && (actionConfig.childActionOnly && !actionContext.isChildAction)) {
                 actionConfig = null;
             }
 
@@ -210,8 +205,7 @@ define(
                     )
                 );
 
-                var location = actionConfig.noAuthorityLocation
-                    || config.noAuthorityLocation;
+                var location = actionConfig.noAuthorityLocation || config.noAuthorityLocation;
                 actionContext.originalURL = actionContext.url;
                 actionContext.url = URL.parse(location);
                 return findEligibleActionConfig(actionContext);
@@ -235,16 +229,12 @@ define(
             var actionConfig = findEligibleActionConfig(actionContext);
             // 通过`resolveActionConfig`可以配置默认映射关系等，提供扩展点
             if (typeof controller.resolveActionConfig === 'function') {
-                actionConfig =
-                    controller.resolveActionConfig(actionConfig, actionContext);
+                actionConfig = controller.resolveActionConfig(actionConfig, actionContext);
             }
             if (!actionConfig) {
                 var failed = new Deferred();
                 failed.syncModeEnabled = false;
-                failed.reject(
-                    'no action configured for url '
-                    + actionContext.url.getPath()
-                );
+                failed.reject('no action configured for url ' + actionContext.url.getPath());
                 return failed.promise;
             }
 
@@ -259,19 +249,15 @@ define(
                 // 这种情况下以`renderChildAction`传过来的参数为优先，
                 // 因此不能直接覆盖，要先判断是否存在
                 for (var name in actionConfig.args) {
-                    if (actionConfig.args.hasOwnProperty(name)
-                        && !actionContext.args.hasOwnProperty(name)
-                    ) {
+                    if (actionConfig.args.hasOwnProperty(name) && !actionContext.args.hasOwnProperty(name)) {
                         actionContext.args[name] = actionConfig.args[name];
                     }
                 }
             }
 
             var loading = new Deferred();
-            // 别的地方无所谓，但`controller`用的`Deferred`对象必须是异步的，
-            // 否则已经加载的Action会变成同步加载，造成不一致性，
-            // 导致有些地方等Action加载完触发个事件的，很可能在事件绑上以前就触发了，
-            // 比如这种：
+            // 别的地方无所谓，但`controller`用的`Deferred`对象必须是异步的，否则已经加载的Action会变成同步加载，造成不一致性，
+            // 导致有些地方等Action加载完触发个事件的，很可能在事件绑上以前就触发了，比如这种：
             //
             //     function ActionLoader() {
             //          var loading = controller.renderChildAction(...);
@@ -308,8 +294,7 @@ define(
 
                     // 没有Action配置的`type`属性对应的模块实现
                     if (!SpecificAction) {
-                        var reason =
-                            'No action implement for ' + acrtionConfig.type;
+                        var reason = 'No action implement for ' + actionConfig.type;
 
                         var error = util.mix(
                             {
@@ -416,9 +401,7 @@ define(
                 currentAction = action;
 
                 // 只有主Action才有资格改`document.title`
-                document.title = actionContext.title
-                    || actionContext.documentTitle
-                    || config.systemName;
+                document.title = actionContext.title || actionContext.documentTitle || config.systemName;
             }
 
             events.fire(
@@ -447,9 +430,7 @@ define(
                         }
                     }
                     // 能够序列化
-                    else if (window.JSON
-                        && typeof JSON.stringify === 'function'
-                    ) {
+                    else if (window.JSON && typeof JSON.stringify === 'function') {
                         try {
                             message = JSON.stringify(reason);
                         }
@@ -526,9 +507,7 @@ define(
             if (typeof url === 'string') {
                 url = URL.parse(url);
             }
-            if (globalActionLoader
-                && typeof globalActionLoader.abort === 'function'
-            ) {
+            if (globalActionLoader && typeof globalActionLoader.abort === 'function') {
                 globalActionLoader.abort();
             }
 
@@ -604,6 +583,7 @@ define(
 
             var info = {
                 url: context.url,
+                container: container.id,
                 action: action,
                 hijack: hijack
             };
@@ -654,8 +634,7 @@ define(
                 // 强制全局跳转，直接使用`locator`即可，
                 // 但在这之前要把原来的`Action`灭掉
                 if (options.global) {
-                    var container =
-                        document.getElementById(actionContext.container);
+                    var container = document.getElementById(actionContext.container);
                     if (container) {
                         removeChildAction(container);
                     }
@@ -664,17 +643,16 @@ define(
                     return;
                 }
 
-                var actionContext = childActionMapping[actionContext.container];
-                var changed = url.toString() !== actionContext.url.toString();
+                var childActionInfo = childActionMapping[actionContext.container];
+                var changed = url.toString() !== childActionInfo.url.toString();
                 if (changed || options.force) {
                     // 静默跳转只要改掉原来映射的URL就行，为了下一次跳转的`referrer`
                     if (options.silent) {
-                        actionContext.url = url;
+                        childActionInfo.url = url;
                     }
                     else {
                         // `renderChildAction`中会把原来的Action销毁
-                        controller.renderChildAction(
-                            url, actionContext.container, extra);
+                        controller.renderChildAction(url, childActionInfo.container, extra);
                     }
                 }
             }
@@ -771,9 +749,7 @@ define(
             var loadingChildAction = loader
                 .then(enterChildAction)
                 .fail(util.bind(events.notifyError, events));
-            // `then`方法会返回一个新的`Promise`，
-            // 但原来的`loader`上有个`abort`方法，
-            // 要把这个方法留下来
+            // `then`方法会返回一个新的`Promise`，但原来的`loader`上有个`abort`方法，要把这个方法留下来
             loadingChildAction.abort = loader.abort;
             childActionLoaders[container] = loadingChildAction;
             return loadingChildAction;
