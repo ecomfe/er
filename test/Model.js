@@ -90,6 +90,13 @@ define(function (require) {
                 model.set('x', value);
                 expect(model.get('x')).toBe(value);
             });
+
+            it('should return the given value', function () {
+                var model = new Model();
+                var value = {};
+                var returnValue = model.set('x', value);
+                expect(returnValue).toBe(value);
+            });
         });
 
         describe('`fill` method', function () {
@@ -105,6 +112,13 @@ define(function (require) {
                 model.fill({ x: 2, y: 2 });
                 expect(model.get('x')).toBe(2);
                 expect(model.get('y')).toBe(2);
+            });
+
+            it('should return the given extension object', function () {
+                var model = new Model();
+                var value = { foo: 1, bar: 2 };
+                var returnValue = model.set('x', value);
+                expect(returnValue).toBe(value);
             });
         });
 
