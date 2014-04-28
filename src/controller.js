@@ -246,11 +246,17 @@ define(
             // 对应用框架的话就可以在`model`中拿到
             if (actionConfig.args) {
                 // 由于子Action可以传额外参数，可能会和这里的冲突，
-                // 这种情况下以`renderChildAction`传过来的参数为优先，
-                // 因此不能直接覆盖，要先判断是否存在
+                // 这种情况下以`renderChildAction`传过来的参数为优先，因此不能直接覆盖，要先判断是否存在
+                //
+                // 同时为了保持向后兼容，`args`中的东西要直接放到`actionContext`下面，同样考虑相互覆盖的问题
                 for (var name in actionConfig.args) {
-                    if (actionConfig.args.hasOwnProperty(name) && !actionContext.args.hasOwnProperty(name)) {
-                        actionContext.args[name] = actionConfig.args[name];
+                    if (actionConfig.args.hasOwnProperty(name)) {
+                        if (!actionContext.args.hasOwnProperty(name)) {
+                            actionContext.args[name] = actionConfig.args[name];
+                        }
+                        if (!actionContext.hasOwnProperty(name)) {
+                            actionContext[name] = actionConfig[name];
+                        }
                     }
                 }
             }
@@ -477,7 +483,7 @@ define(
                 container: container,
                 isChildAction: !!isChildAction
             };
-            actionContext.args = util.mix({}, actionContext);
+
             if (isChildAction) {
                 var referrerInfo = childActionMapping[container];
                 actionContext.referrer = referrerInfo ? referrerInfo.url : null;
@@ -486,12 +492,14 @@ define(
                 actionContext.referrer = currentURL;
             }
 
-            // 把URL中的参数和作为子Action传过来的参数都放进`args`属性里
-            util.mix(
-                actionContext.args,
-                url.getQuery(),
-                options
-            );
+            // 为了向后兼容性，`options`中的东西要放到`actionContext`上
+            util.mix(actionContext, options);
+
+            // `args`有一份和`actionContext`一模一样的数据
+            actionContext.args = util.mix({}, actionContext);
+
+            // 除此之外，再把URL中的参数和作为子Action传过来的参数都放进`args`属性里
+            util.mix(actionContext.args, url.getQuery());
 
             events.fire('forwardaction', util.mix({}, actionContext));
 
