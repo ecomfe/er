@@ -483,7 +483,7 @@ define(
                 container: container,
                 isChildAction: !!isChildAction
             };
-            actionContext.args = util.mix({}, actionContext);
+
             if (isChildAction) {
                 var referrerInfo = childActionMapping[container];
                 actionContext.referrer = referrerInfo ? referrerInfo.url : null;
@@ -492,15 +492,14 @@ define(
                 actionContext.referrer = currentURL;
             }
 
-            // 把URL中的参数和作为子Action传过来的参数都放进`args`属性里
-            util.mix(
-                actionContext.args,
-                url.getQuery(),
-                options
-            );
-
             // 为了向后兼容性，`options`中的东西要放到`actionContext`上
             util.mix(actionContext, options);
+
+            // `args`有一份和`actionContext`一模一样的数据
+            actionContext.args = util.mix({}, actionContext);
+
+            // 除此之外，再把URL中的参数和作为子Action传过来的参数都放进`args`属性里
+            util.mix(actionContext.args, url.getQuery());
 
             events.fire('forwardaction', util.mix({}, actionContext));
 
