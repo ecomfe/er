@@ -255,7 +255,7 @@ define(
                             actionContext.args[name] = actionConfig.args[name];
                         }
                         if (!actionContext.hasOwnProperty(name)) {
-                            actionContext[name] = actionConfig[name];
+                            actionContext[name] = actionConfig.args[name];
                         }
                     }
                 }
