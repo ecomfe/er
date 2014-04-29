@@ -137,7 +137,7 @@ define(
             }
             else {
                 /* jshint evil: true */
-                return new Function('return (' + text + ');');
+                return new Function('return (' + text + ');')();
             }
         };
 
