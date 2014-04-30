@@ -240,6 +240,7 @@ define(
 
             // 几个后续需要使用的配置项
             actionContext.title = actionConfig.title;
+            actionContext.args.title = actionConfig.title;
 
             // 可在`registerAction`的时候通过`args`属性添加固定的参数，
             // 在`Action`中就可以通过`enter`时的`context`参数里拿到，
