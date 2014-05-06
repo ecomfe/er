@@ -30,14 +30,22 @@ define(
          */
         var controller = {
             /**
-             * 注册一个Action
+             * 注册一个或一系列Action
              *
-             * @param {meta.ActionConfig} actionConfig Action的相关配置
+             * @param {meta.ActionConfig | meta.ActionConfig[]} actionConfigs Action的相关配置
              */
-            registerAction: function (actionConfig) {
-                assert.hasProperty(actionConfig, 'path', 'action config should contains a "path" property');
+            registerAction: function (actionConfigs) {
+                if (!actionConfigs.hasOwnProperty('length')) {
+                    actionConfigs = [actionConfigs];
+                }
 
-                actionPathMapping[actionConfig.path] = actionConfig;
+                for (var i = 0; i < actionConfigs.length; i++) {
+                    var actionConfig = actionConfigs[i];
+
+                    assert.hasProperty(actionConfig, 'path', 'action config should contains a "path" property');
+
+                    actionPathMapping[actionConfig.path] = actionConfig;
+                }
             },
 
             /**
