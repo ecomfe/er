@@ -652,17 +652,19 @@ define(
                 // 但在这之前要把原来的`Action`灭掉
                 if (options.global) {
                     var container = document.getElementById(actionContext.container);
-                    if (container) {
+
+                    var globalRedirectPerformed = locator.redirect(url, options);
+                    // 如果因为URL相等的原因没有完成跳转，那就别销毁子Action，相当于点击没任何效果
+                    if (globalRedirectPerformed && container) {
                         removeChildAction(container);
                     }
-
-                    locator.redirect(url, options);
-                    return;
+                    return globalRedirectPerformed;
                 }
 
                 var childActionInfo = childActionMapping[actionContext.container];
                 var changed = url.toString() !== childActionInfo.url.toString();
-                if (changed || options.force) {
+                var shouldPerformRedirect = changed || options.force;
+                if (shouldPerformRedirect) {
                     // 静默跳转只要改掉原来映射的URL就行，为了下一次跳转的`referrer`
                     if (options.silent) {
                         childActionInfo.url = url;
@@ -672,6 +674,8 @@ define(
                         controller.renderChildAction(url, childActionInfo.container, extra);
                     }
                 }
+
+                return shouldPerformRedirect;
             }
 
             // 需要把`container`上的链接点击全部拦截下来，

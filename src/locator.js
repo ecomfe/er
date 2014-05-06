@@ -170,7 +170,8 @@ define(
 
             var referrer = currentLocation;
             var isLocationChanged = updateURL(url, options);
-            if (isLocationChanged || options.force) {
+            var shouldPerformRedirect = isLocationChanged || options.force;
+            if (shouldPerformRedirect) {
                 if (!options.silent) {
                     /**
                      * URL跳转时触发
@@ -190,6 +191,8 @@ define(
                     { url: url, referrer: referrer }
                 );
             }
+
+            return shouldPerformRedirect;
         };
 
         /**
