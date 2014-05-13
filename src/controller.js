@@ -298,24 +298,54 @@ define(
                 currentURL = actionContext.url;
             }
 
-            // local require有可能不支持`callback`参数，
-            // 这里强制使用global require
-            window.require(
-                [actionConfig.type],
-                function (SpecificAction) {
-                    if (aborted) {
-                        return;
-                    }
+            function callback(SpecificAction) {
+                if (aborted) {
+                    return;
+                }
 
-                    // 没有Action配置的`type`属性对应的模块实现
-                    if (!SpecificAction) {
-                        var reason = 'No action implement for ' + actionConfig.type;
+                // 没有Action配置的`type`属性对应的模块实现
+                if (!SpecificAction) {
+                    var reason = 'No action implement for ' + actionConfig.type;
+
+                    var error = util.mix(
+                        {
+                            failType: 'NoModule',
+                            config: actionConfig,
+                            reason: reason
+                        },
+                        actionContext
+                    );
+                    events.fire('actionfail', error);
+                    events.notifyError(error);
+
+                    loading.reject(reason);
+                    return;
+                }
+
+                // 如果是个函数，则认为是Action的构造函数
+                if (typeof SpecificAction === 'function') {
+                    loading.resolve(new SpecificAction(), actionContext);
+                    return;
+                }
+
+                // 此时`SpecificAction`是一个对象，
+                // 有可能是Action工厂或直接是Action对象
+                var action = SpecificAction;
+                // 处理Action工厂，
+                // Action工厂是一个对象，它能生产出一个Action对象，
+                // 有`createRuntimeAction`方法的对象即为Action工厂
+                if (typeof action.createRuntimeAction === 'function') {
+                    // 此处不支持Action工厂返回Promise
+                    action = action.createRuntimeAction(actionContext);
+                    if (!action) {
+                        var reason = 'Action factory returns non-action';
 
                         var error = util.mix(
                             {
-                                failType: 'NoModule',
+                                failType: 'InvalidFactory',
                                 config: actionConfig,
-                                reason: reason
+                                reason: reason,
+                                action: action
                             },
                             actionContext
                         );
@@ -325,54 +355,28 @@ define(
                         loading.reject(reason);
                         return;
                     }
-
-                    // 如果是个函数，则认为是Action的构造函数
-                    if (typeof SpecificAction === 'function') {
-                        loading.resolve(new SpecificAction(), actionContext);
-                        return;
-                    }
-
-                    // 此时`SpecificAction`是一个对象，
-                    // 有可能是Action工厂或直接是Action对象
-                    var action = SpecificAction;
-                    // 处理Action工厂，
-                    // Action工厂是一个对象，它能生产出一个Action对象，
-                    // 有`createRuntimeAction`方法的对象即为Action工厂
-                    if (typeof action.createRuntimeAction === 'function') {
-                        // 此处不支持Action工厂返回Promise
-                        action = action.createRuntimeAction(actionContext);
-                        if (!action) {
-                            var reason = 'Action factory returns non-action';
-
-                            var error = util.mix(
-                                {
-                                    failType: 'InvalidFactory',
-                                    config: actionConfig,
-                                    reason: reason,
-                                    action: action
-                                },
-                                actionContext
-                            );
-                            events.fire('actionfail', error);
-                            events.notifyError(error);
-
-                            loading.reject(reason);
-                            return;
-                        }
-                    }
-
-                    events.fire(
-                        'actionloaded',
-                        {
-                            url: actionContext.url,
-                            config: actionConfig,
-                            action: SpecificAction
-                        }
-                    );
-
-                    loading.resolve(action, actionContext);
                 }
-            );
+
+                events.fire(
+                    'actionloaded',
+                    {
+                        url: actionContext.url,
+                        config: actionConfig,
+                        action: SpecificAction
+                    }
+                );
+
+                loading.resolve(action, actionContext);
+            }
+
+
+            // 如果`type`配置的直接是一个对象或者一个函数，则认为是一个已经加载了的模块
+            if (typeof actionConfig.type === 'string') {
+                window.require([actionConfig.type], callback);
+            }
+            else {
+                callback(actionConfig.type);
+            }
 
             return loader;
         }
