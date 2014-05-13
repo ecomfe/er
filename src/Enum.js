@@ -31,14 +31,14 @@ define(
          * 传入的参数的`value`由0开始今次递增。对于`value`非递增的枚举，在构造时对指定的项传入`value`属性即可，如：
          *
          *     var MouseButton = new Enum(
-         *         { alias: 'LEFT', text: '正常', value: 1 },
-         *         { alias: 'RIGHT', text: '禁用', value: 2 },
-         *         { alias: 'MIDDLE', text: '已删除', value: 4 }
+         *         { alias: 'LEFT', text: '左键', value: 1 },
+         *         { alias: 'RIGHT', text: '右键', value: 2 },
+         *         { alias: 'MIDDLE', text: '中键', value: 4 }
          *     );
          *
          * 枚举会维护2个映射，分别为`value`至`alias`及`alias`至`value`，因此可以简单地通过属性访问的方式获取`alias`或`value`：
          *
-         *     if (user.status = Status.DELETED) {
+         *     if (user.status === Status.DELETED) {
          *         warn('该用户已经删除');
          *     }
          *
