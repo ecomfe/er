@@ -93,7 +93,12 @@ define(
             // `actionContext.args`里有URL里的参数和子Action时传入的`options`，全部放到`Model`上去
             var args = util.mix({}, actionContext && actionContext.args);
 
-            this.model = this.createModel(args);
+            if (this.model) {
+                this.model.fill(args);
+            }
+            else {
+                this.model = this.createModel(args);
+            }
 
             if (this.model && typeof this.model.load === 'function') {
                 var loadingModel = this.model.load();
@@ -162,7 +167,10 @@ define(
              */
             this.fire('modelloaded');
 
-            this.view = this.createView();
+            if (!this.view) {
+                this.view = this.createView();
+            }
+
             if (this.view) {
                 this.view.model = this.model;
                 // 如果创建View的时候已经设置了`container`，就不要强行干扰了
