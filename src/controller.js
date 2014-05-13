@@ -298,7 +298,7 @@ define(
                 currentURL = actionContext.url;
             }
 
-            function callback(SpecificAction) {
+            var callback = function (SpecificAction) {
                 if (aborted) {
                     return;
                 }
@@ -322,41 +322,6 @@ define(
                     return;
                 }
 
-                // 如果是个函数，则认为是Action的构造函数
-                if (typeof SpecificAction === 'function') {
-                    loading.resolve(new SpecificAction(), actionContext);
-                    return;
-                }
-
-                // 此时`SpecificAction`是一个对象，
-                // 有可能是Action工厂或直接是Action对象
-                var action = SpecificAction;
-                // 处理Action工厂，
-                // Action工厂是一个对象，它能生产出一个Action对象，
-                // 有`createRuntimeAction`方法的对象即为Action工厂
-                if (typeof action.createRuntimeAction === 'function') {
-                    // 此处不支持Action工厂返回Promise
-                    action = action.createRuntimeAction(actionContext);
-                    if (!action) {
-                        var reason = 'Action factory returns non-action';
-
-                        var error = util.mix(
-                            {
-                                failType: 'InvalidFactory',
-                                config: actionConfig,
-                                reason: reason,
-                                action: action
-                            },
-                            actionContext
-                        );
-                        events.fire('actionfail', error);
-                        events.notifyError(error);
-
-                        loading.reject(reason);
-                        return;
-                    }
-                }
-
                 events.fire(
                     'actionloaded',
                     {
@@ -366,9 +331,49 @@ define(
                     }
                 );
 
-                loading.resolve(action, actionContext);
-            }
+                // 对获得的类型的处理逻辑：
+                //
+                // 1. 如果是一个函数，则认为是`Action`类构造函数，直接使用`new`生成实例
+                // 2. 如果是一个普通的对象，则
+                //     1. 如果对象没有`createRuntimeAction`方法，则认为是`Action`实例直接使用
+                //     2. 如果有`createRuntimeAction`方法，则认为是一个工厂，调用此方法获得`Action`实例，则
+                //         1. 如果工厂方法返回一个普通的对象，则直接作为`Action`实例使用
+                //         2. 如果工厂方法返回一个`Promise`，则等待`resolve`之后获取`Action`实例使用
 
+                // 如果是个函数，则认为是Action的构造函数
+                if (typeof SpecificAction === 'function') {
+                    loading.resolve(new SpecificAction(), actionContext);
+                }
+                // 处理Action工厂，Action工厂是一个对象，它能生产出一个Action对象，有`createRuntimeAction`方法的对象即为Action工厂
+                else if (typeof SpecificAction.createRuntimeAction === 'function') {
+                    // `createRuntimeAction`可能返回`Promise`，统一处理
+                    var resolveActionInstance = function (action) {
+                        if (!action) {
+                            var reason = 'Action factory returns non-action';
+
+                            var error = util.mix(
+                                {
+                                    failType: 'InvalidFactory',
+                                    config: actionConfig,
+                                    reason: reason,
+                                    action: action
+                                },
+                                actionContext
+                            );
+                            events.fire('actionfail', error);
+                            events.notifyError(error);
+
+                            loading.reject(reason);
+                        }
+                    };
+                    var actionFactoryProduct = SpecificAction.createRuntimeAction(actionContext);
+                    Deferred.when(actionFactoryProduct).then(resolveActionInstance);
+                }
+                // 直接是个`Action`实例
+                else {
+                    loading.resolve(SpecificAction, actionContext);
+                }
+            };
 
             // 如果`type`配置的直接是一个对象或者一个函数，则认为是一个已经加载了的模块
             if (typeof actionConfig.type === 'string') {
