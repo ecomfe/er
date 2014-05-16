@@ -1,7 +1,14 @@
 beforeEach(function() {
-    this.addMatchers({
-        toBeOfType: function(type) {
-            return {}.toString.call(this.actual).slice(8, -1).toUpperCase() === type.toUpperCase();
+    jasmine.addMatchers({
+        toBeOfType: function () {
+            return {
+                compare: function (actual, type) {
+                    var result = {
+                        pass: {}.toString.call(actual).slice(8, -1).toUpperCase() === type.toUpperCase()
+                    };
+                    return result;
+                }
+            }
         }
     });
 });

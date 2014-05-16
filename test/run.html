@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Jasmine Spec Runner</title>
+
+    <link rel="stylesheet" href="jasmine.css" />
+    <link rel="icon" href="http://www.baidu.com/favicon.ico" />
+    <script src="jasmine.js"></script>
+    <script src="jasmine-html.js"></script>
+    <script src="esl.js"></script>
+    <script src="boot.js"></script>
+    <script src="matchers.js"></script>
+    <script src="jasmine-ajax.js"></script>
+    <script>
+        require.config({
+            packages: [
+                {
+                    name: 'er',
+                    location: '../src',
+                    main: 'main'
+                },
+                {
+                    name: 'mini-event',
+                    location: '../dep/mini-event/1.0.0/src',
+                    main: 'main'
+                },
+                {
+                    name: 'etpl',
+                    location: '../dep/etpl/2.1.0/src',
+                    main: 'main'
+                }
+            ]
+        });
+    </script>
+</head>
+<body>
+    <script>
+        require(
+            [
+            ],
+            function () {
+            }
+        );
+    </script>
+</body>
+</html>
