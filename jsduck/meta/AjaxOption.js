@@ -41,7 +41,7 @@ function AjaxOption() {
      *
      * 请求超时时间，以毫秒为单位。超过此属性设置的时间将自动中断请求
      *
-     * 默认会使用{@link ajax#config}下的配置
+     * 默认会使用{@link Ajax#config}下的配置
      *
      * 如果不存在此属性或值小于等于0，则认为永不超时
      */
@@ -52,7 +52,7 @@ function AjaxOption() {
      *
      * 是否使用缓存。不使用缓存时，`GET`请求会加上时间戳
      *
-     * 默认会使用{@link ajax#config}下的配置
+     * 默认会使用{@link Ajax#config}下的配置
      */
     this.cache;
 
@@ -61,7 +61,7 @@ function AjaxOption() {
      *
      * 指定请求的编码，会添加到请求的`Content-Type`头后面
      *
-     * 默认会使用{@link ajax#config}下的配置
+     * 默认会使用{@link Ajax#config}下的配置
      */
     this.charset;
 

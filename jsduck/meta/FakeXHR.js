@@ -3,7 +3,7 @@
  *
  * 伪`XMLHttpRequest`对象
  *
- * 该对象是框架的{@link ajax}模块使用的请求对象，其在标准的`XMLHttpRequest`对象上封装，
+ * 该对象是框架的{@link Ajax}模块使用的请求对象，其在标准的`XMLHttpRequest`对象上封装，
  * 以使`XMLHttpRequest`可以与{@link meta.Promise}模型兼容
  *
  * 本对象提供{@link meta.Promise}对象的所有功能，
