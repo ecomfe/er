@@ -224,7 +224,7 @@ define(function (require) {
                 var handler = jasmine.createSpy();
                 model.on('change', handler);
                 model.set('x', 1);
-                expect(handler.mostRecentCall.args[0].type).toBe('change');
+                expect(handler.calls.mostRecent().args[0].type).toBe('change');
             });
 
             it('should have a `changes` array in its event object', function () {
@@ -232,7 +232,7 @@ define(function (require) {
                 var handler = jasmine.createSpy();
                 model.on('change', handler);
                 model.set('x', 1);
-                expect(handler.mostRecentCall.args[0].changes).toBeOfType('array');
+                expect(handler.calls.mostRecent().args[0].changes).toBeOfType('array');
             });
 
             it('should have a `type` property in its change record', function () {
@@ -240,7 +240,7 @@ define(function (require) {
                 var handler = jasmine.createSpy();
                 model.on('change', handler);
                 model.set('x', 1);
-                var record = handler.mostRecentCall.args[0].changes[0];
+                var record = handler.calls.mostRecent().args[0].changes[0];
                 expect(record.type).toBeOfType('string');
             });
 
@@ -249,7 +249,7 @@ define(function (require) {
                 var handler = jasmine.createSpy();
                 model.on('change', handler);
                 model.set('x', 1);
-                var record = handler.mostRecentCall.args[0].changes[0];
+                var record = handler.calls.mostRecent().args[0].changes[0];
                 expect(record.hasOwnProperty('oldValue')).toBe(true);
             });
 
@@ -258,7 +258,7 @@ define(function (require) {
                 var handler = jasmine.createSpy();
                 model.on('change', handler);
                 model.set('x', 1);
-                var record = handler.mostRecentCall.args[0].changes[0];
+                var record = handler.calls.mostRecent().args[0].changes[0];
                 expect(record.hasOwnProperty('newValue')).toBe(true);
             });
 
@@ -268,7 +268,7 @@ define(function (require) {
                 model.on('change', handler);
                 var value = {};
                 model.set('x', value);
-                var record = handler.mostRecentCall.args[0].changes[0];
+                var record = handler.calls.mostRecent().args[0].changes[0];
                 expect(record.type).toBe('add');
                 expect(record.newValue).toBe(value);
                 expect(record.oldValue).toBeUndefined();
@@ -280,7 +280,7 @@ define(function (require) {
                 model.on('change', handler);
                 var value = {};
                 model.set('x', value);
-                var record = handler.mostRecentCall.args[0].changes[0];
+                var record = handler.calls.mostRecent().args[0].changes[0];
                 expect(record.type).toBe('change');
                 expect(record.newValue).toBe(value);
                 expect(record.oldValue).toBe(1);
@@ -299,7 +299,7 @@ define(function (require) {
                 var handler = jasmine.createSpy();
                 model.on('change', handler);
                 model.fill({ x: 1, y: 2, z: 3 });
-                expect(handler.mostRecentCall.args[0].changes.length).toBe(2);
+                expect(handler.calls.mostRecent().args[0].changes.length).toBe(2);
             });
 
             it('should fire with type **remove** when removing a property', function () {
@@ -307,7 +307,7 @@ define(function (require) {
                 var handler = jasmine.createSpy();
                 model.on('change', handler);
                 model.remove('x');
-                var record = handler.mostRecentCall.args[0].changes[0];
+                var record = handler.calls.mostRecent().args[0].changes[0];
                 expect(record.type).toBe('remove');
                 expect(record.newValue).toBeUndefined();
                 expect(record.oldValue).toBe(1);
