@@ -8,34 +8,39 @@
  */
 define(
     function (require) {
+        var util = require('./util');
+
         /**
-         * @class events
+         * 事件总线类
          *
-         * 事件中心，ER框架的所有全局事件均通过此对象暴露
+         * 通过`require('er/events').EventBus`访问该类构造函数，其中`require('er/events')`是该类的全局实例
          *
-         * @mixins mini-event.EventTarget
-         * @singleton
+         * @extends mini-event.EventTarget
+         * @constructor
          */
-        var events = {
-            /**
-             * 通知一个错误的产生
-             *
-             * @param {Mixed} error 错误对象，如果是字符串则会被封装为一个Error对象
-             */
-            notifyError: function (error) {
-                if (typeof error === 'string') {
-                    error = new Error(error);
-                }
+        function EventBus() {
+        }
 
-                this.fire('error', { error: error });
+        util.inherits(EventBus, require('mini-event/EventTarget'));
 
-                return error;
+        /**
+         * 通知一个错误的产生
+         *
+         * @param {Mixed} error 错误对象，如果是字符串则会被封装为一个Error对象
+         */
+        EventBus.prototype.notifyError = function (error) {
+            if (typeof error === 'string') {
+                error = new Error(error);
             }
+
+            this.fire('error', { error: error });
+
+            return error;
         };
 
-        require('mini-event/EventTarget').enable(events);
-
-        return events;
+        var instance = new EventBus();
+        instance.EventBus = EventBus;
+        return instance;
 
         /**
          * @event error
