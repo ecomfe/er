@@ -14,6 +14,6 @@ define(
         ];
 
         var controller = require('er/controller');
-        _.forEach(actions, controller.registerAction);
+        _.forEach(actions, controller.registerAction, controller);
     }
 );

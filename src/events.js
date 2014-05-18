@@ -44,7 +44,7 @@ define(
 
         /**
          * @event error
-         * @member events
+         * @member EventBus
          *
          * 接收到错误时触发
          *
@@ -53,7 +53,7 @@ define(
 
         /**
          * @event forwardaction
-         * @member events
+         * @member EventBus
          *
          * 在重定向前往一个Action时，但执行任何Action查找、进入等逻辑前触发
          *
@@ -65,7 +65,7 @@ define(
 
         /**
          * @event actionmoved
-         * @member events
+         * @member EventBus
          *
          * 发现一个Action通过{@link meta.ActionConfig#movedTo}配置为移动后触发
          *
@@ -76,7 +76,7 @@ define(
 
         /**
          * @event actionnotfound
-         * @member events
+         * @member EventBus
          *
          * 发现一个Action通过{@link meta.ActionConfig#movedTo}配置为移动后触发
          *
@@ -88,7 +88,7 @@ define(
 
         /**
          * @event permissiondenied
-         * @member events
+         * @member EventBus
          *
          * 发现访问一个没有权限的Action时触发
          *
@@ -100,7 +100,7 @@ define(
 
         /**
          * @event actionabort
-         * @member events
+         * @member EventBus
          *
          * 发现访问一个没有权限的Action时触发
          *
@@ -109,7 +109,7 @@ define(
 
         /**
          * @event actionfail
-         * @member events
+         * @member EventBus
          *
          * 发现访问一个没有权限的Action时触发
          *
@@ -127,7 +127,7 @@ define(
 
         /**
          * @event actionloaded
-         * @member events
+         * @member EventBus
          *
          * 当Action模块加载完毕后触发
          *
@@ -138,7 +138,7 @@ define(
 
         /**
          * @event leaveaction
-         * @member events
+         * @member EventBus
          *
          * 当离开一个Action时触发，触发后调用{@link Action#method-leave}方法
          *
@@ -148,7 +148,7 @@ define(
 
         /**
          * @event enteraction
-         * @member events
+         * @member EventBus
          *
          * 在进入一个Action时触发，触发后调用{@link Action#method-enter}方法
          *
@@ -159,7 +159,7 @@ define(
 
         /**
          * @event enteractioncomplete
-         * @member events
+         * @member EventBus
          *
          * 在一个Action完成进入，即{@link Action#method-enter}的生命周期完成之后触发
          *
@@ -170,7 +170,7 @@ define(
 
         /**
          * @event enteractionfail
-         * @member events
+         * @member EventBus
          *
          * 在进入一个Action的过程中出现错误时触发
          *

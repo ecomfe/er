@@ -8,121 +8,284 @@
  */
 define(
     function (require) {
-        var actionPathMapping = {}; // 用于根据URL找Action配置
-        var currentURL = null;
-        var currentAction = null;
-
         var Deferred = require('./Deferred');
         var URL = require('./URL');
         var config = require('./config');
-        var events = require('./events');
         var util = require('./util');
         var assert = require('./assert');
 
         /**
-         * @class controller
+         * 控制器类，负责URL与Action的调度，将URL映射到具体的一个{@link Action}的执行上
          *
-         * URL与Action的调度器
+         * 通过`require('er/controller').Controller`访问该类构造函数，其中`require('er/controller')`是该类的全局实例
          *
-         * `controller`负责将URL映射到具体的一个{@link Action}的执行上
-         *
-         * @singleton
+         * @extends mini-event.EventTarget
+         * @constructor
          */
-        var controller = {
-            /**
-             * 注册一个或一系列Action
-             *
-             * @param {meta.ActionConfig | meta.ActionConfig[]} actionConfigs Action的相关配置
-             */
-            registerAction: function (actionConfigs) {
-                if (!actionConfigs.hasOwnProperty('length')) {
-                    actionConfigs = [actionConfigs];
-                }
+        function Controller() {
+            this.actionPathMapping = {};
+            this.childActionMapping = {};
+            this.currentURL = null;
+            this.currentAction = null;
+            this.globalActionLoader = null;
+            this.childActionLoaders = {};
+        }
 
-                for (var i = 0; i < actionConfigs.length; i++) {
-                    var actionConfig = actionConfigs[i];
+        util.inherits(Controller, require('mini-event/EventTarget'));
 
-                    assert.hasProperty(actionConfig, 'path', 'action config should contains a "path" property');
+        /**
+         * 注册一个或一系列Action
+         *
+         * @param {meta.ActionConfig | meta.ActionConfig[]} actionConfigs Action的相关配置
+         */
+        Controller.prototype.registerAction = function (actionConfigs) {
+            if (!actionConfigs.hasOwnProperty('length')) {
+                actionConfigs = [actionConfigs];
+            }
 
-                    actionPathMapping[actionConfig.path] = actionConfig;
-                }
-            },
+            for (var i = 0; i < actionConfigs.length; i++) {
+                var actionConfig = actionConfigs[i];
 
-            /**
-             * 开始`controller`对象的工作
-             */
-            start: function () {
-                if (!config.systemName) {
-                    config.systemName = document.title;
-                }
+                assert.hasProperty(actionConfig, 'path', 'action config should contains a "path" property');
 
-                // 干脆接管所有路由
-                require('./router').setBackup(renderAction);
-            },
+                this.actionPathMapping[actionConfig.path] = actionConfig;
+            }
+        };
 
-            /**
-             * 根据上下文查找适合的{@link meta.ActionConfig}对象
-             *
-             * @param {meta.ActionContext} actionContext 当前的执行上下文对象
-             * @return {meta.ActionConfig | null} 找到的配置对象，找不到返回`null`
-             */
-            findActionConfig: function (actionContext) {
-                var path = actionContext.url.getPath();
-                var actionConfig = actionPathMapping[path];
-                return actionConfig;
-            },
+        /**
+         * 获取当前实例控制的{@link Action}的默认标题，当一个{@link meta.ActionConfig}未提供`title`属性时，将使用此属性
+         *
+         * @return {string}
+         * @protected
+         */
+        Controller.prototype.getDefaultTitle = function () {
+            return this.defaultTitle;
+        };
 
-            /**
-             * 处理{@link meta.ActionConfig}配置，
-             * 在`controller`按默认逻辑查找Action配置后，
-             * 会将查找到的配置，以及进入时的{@link meta.ActionContext}参数交给该方法，
-             * 该方法可以额外进行一些操作，如在未找到配置时提供默认的映射规则
-             *
-             * @param {meta.ActionConfig | null} actionConfig 找到的Action配置
-             * @param {meta.ActionContext} actionContext 进入流程时提供的参数
-             * @return {meta.ActionConfig | null} 一个有效的Action配置对象，
-             * 如果确定不存在需要的配置，则返回null
-             */
-            resolveActionConfig: function (actionConfig, actionContext) {
-                return actionConfig;
-            },
+        /**
+         * 设置当前实例控制的{@link Action}的默认标题
+         *
+         * @param {string} title 默认的标题
+         */
+        Controller.prototype.setDefaultTitle = function (title) {
+            this.defaultTitle = title;
+        };
 
-            /**
-             * 检查是否拥有权限
-             *
-             * 关于框架的默认权限配置及判断策略，
-             * 请参考{@link meta.ActionConfig#authority}属性的说明
-             *
-             * 对于有复杂权限场景的系统，可通过重写此方法来判断权限
-             *
-             * @param {meta.ActionConfig} actionConfig 查找到的`Action`配置信息
-             * @param {meta.ActionContext} actionContext 进入当前`Action`的上下文
-             * @return {boolean} 有权限返回`true`，无权限则返回`false`
-             */
-            checkAuthority: function (actionConfig, actionContext) {
-                var authority = actionConfig.authority;
+        /**
+         * 获取当前实例使用的{@link Router}对象
+         *
+         * @return {Router}
+         * @protected
+         */
+        Controller.prototype.getRouter = function () {
+            return this.router;
+        };
 
-                if (!authority) {
+        /**
+         * 设置当前实例使用的{@link Router}对象
+         *
+         * @param {Router} router 关联的{@link Router}实例
+         */
+        Controller.prototype.setRouter = function (router) {
+            this.router = router;
+        };
+
+        /**
+         * 获取当前实例使用的{@link locator}对象
+         *
+         * @return {locator}
+         * @protected
+         */
+        Controller.prototype.getLocator = function () {
+            return this.locator;
+        };
+
+        /**
+         * 设置当前实例使用的{@link locator}对象
+         *
+         * 可以为任意对象，按{@link locator#event-redirect}实现此事件即可
+         *
+         * @param {locator} locator 关联的{@link locator}实例
+         */
+        Controller.prototype.setLocator = function (locator) {
+            this.locator = locator;
+        };
+
+        /**
+         * 获取当前实例使用的事件总线
+         *
+         * @return {mini-event.EventTarget}
+         * @protected
+         */
+        Controller.prototype.getEventBus = function () {
+            return this.eventBus;
+        };
+
+        /**
+         * 设置当前实例使用的事件总线
+         *
+         * 事件总线可以是任何对象，只要实现`fire`方法供事件触发即可
+         *
+         * @param {mini-event.EventTarget} eventBug 事件总线对象
+         */
+        Controller.prototype.setEventBus = function (eventBus) {
+            this.eventBus = eventBus;
+        };
+
+        /**
+         * 获取当前实例使用的权限控制对象
+         *
+         * @return {permission}
+         * @protected
+         */
+        Controller.prototype.getPermissionProvider = function () {
+            return this.permissionProvider;
+        };
+
+        /**
+         * 设置当前实例使用的权限控制对象
+         *
+         * @param {permission} permissionProvider 关联的权限控制对象
+         */
+        Controller.prototype.setPermissionProvider = function (permissionProvider) {
+            this.permissionProvider = permissionProvider;
+        };
+
+        /**
+         * 获取主Action的容器元素id
+         *
+         * @return {string}
+         * @protected
+         */
+        Controller.prototype.getMainContainer = function () {
+            return this.mainContainer || config.mainElement;
+        };
+
+        /**
+         * 设置主Action的容器元素id
+         *
+         * @param {string} mainContainer 主Action的容器元素id
+         */
+        Controller.prototype.setMainContainer = function (mainContainer) {
+            this.mainContainer = mainContainer;
+        };
+
+        /**
+         * 获取默认的无权限页URL
+         *
+         * @return {string}
+         * @protected
+         */
+        Controller.prototype.getNoAuthorityLocation = function () {
+            return this.noAuthorityLocation || config.noAuthorityLocation;
+        };
+
+        /**
+         * 设置默认的无权限页URL
+         *
+         * @param {string} noAuthorityLocation 无权限页的URL
+         */
+        Controller.prototype.setNoAuthorityLocation = function (noAuthorityLocation) {
+            this.noAuthorityLocation = noAuthorityLocation;
+        };
+
+        /**
+         * 获取当一个URL对应的Action未定义时的跳转URL
+         *
+         * @return {string}
+         * @protected
+         */
+        Controller.prototype.getNotFoundLocation = function () {
+            return this.notFoundLocation || config.notFoundLocation;
+        };
+
+        /**
+         * 设置当一个URL对应的Action未定义时的跳转URL
+         *
+         * @param {string} notFoundLocation 跳转URL
+         */
+        Controller.prototype.setNotFoundLocation = function (notFoundLocation) {
+            this.notFoundLocation = notFoundLocation;
+        };
+
+        /**
+         * 开始`controller`对象的工作
+         */
+        Controller.prototype.start = function () {
+            if (!this.getDefaultTitle()) {
+                this.setDefaultTitle(config.systemName || document.title);
+            }
+
+            // 干脆接管所有路由
+            this.getRouter().setBackup(util.bind(this.renderAction, this));
+        };
+
+        /**
+         * 根据上下文查找适合的{@link meta.ActionConfig}对象
+         *
+         * @param {meta.ActionContext} actionContext 当前的执行上下文对象
+         * @return {meta.ActionConfig | null} 找到的配置对象，找不到返回`null`
+         * @protected
+         */
+        Controller.prototype.findActionConfig = function (actionContext) {
+            var path = actionContext.url.getPath();
+            var actionConfig = this.actionPathMapping[path];
+            return actionConfig;
+        };
+
+        /**
+         * 处理{@link meta.ActionConfig}配置，
+         * 在`controller`按默认逻辑查找Action配置后，
+         * 会将查找到的配置，以及进入时的{@link meta.ActionContext}参数交给该方法，
+         * 该方法可以额外进行一些操作，如在未找到配置时提供默认的映射规则
+         *
+         * @param {meta.ActionConfig | null} actionConfig 找到的Action配置
+         * @param {meta.ActionContext} actionContext 进入流程时提供的参数
+         * @return {meta.ActionConfig | null} 一个有效的Action配置对象，
+         * 如果确定不存在需要的配置，则返回null
+         * @protected
+         */
+        Controller.prototype.resolveActionConfig = function (actionConfig, actionContext) {
+            return actionConfig;
+        };
+
+        /**
+         * 检查是否拥有权限
+         *
+         * 关于框架的默认权限配置及判断策略，
+         * 请参考{@link meta.ActionConfig#authority}属性的说明
+         *
+         * 对于有复杂权限场景的系统，可通过重写此方法来判断权限
+         *
+         * @param {meta.ActionConfig} actionConfig 查找到的`Action`配置信息
+         * @param {meta.ActionContext} actionContext 进入当前`Action`的上下文
+         * @return {boolean} 有权限返回`true`，无权限则返回`false`
+         * @protected
+         */
+        Controller.prototype.checkAuthority = function (actionConfig, actionContext) {
+            var authority = actionConfig.authority;
+
+            if (!authority) {
+                return true;
+            }
+
+            var permissionProvider = this.getPermissionProvider();
+
+            if (typeof authority === 'function') {
+                return authority(actionContext, actionConfig, permissionProvider);
+            }
+
+            if (typeof authority === 'string') {
+                authority = authority.split('|');
+            }
+
+            for (var i = 0; i < authority.length; i++) {
+                if (permissionProvider.isAllow(util.trim(authority[i]))) {
                     return true;
                 }
-
-                if (typeof authority === 'function') {
-                    return authority(actionContext, actionConfig);
-                }
-
-                if (typeof authority === 'string') {
-                    authority = authority.split('|');
-                }
-
-                var permission = require('./permission');
-                for (var i = 0; i < authority.length; i++) {
-                    if (permission.isAllow(util.trim(authority[i]))) {
-                        return true;
-                    }
-                }
-
-                return false;
             }
+
+            return false;
         };
 
         /**
@@ -130,19 +293,20 @@ define(
          *
          * @param {meta.ActionContext} actionContext 进入Action时的参数
          * @return {meta.ActionConfig | null} 对应的Action配置
-         * @ignore
+         * @protected
          */
-        function findEligibleActionConfig(actionContext) {
-            var actionConfig = controller.findActionConfig(actionContext);
+        Controller.prototype.findEligibleActionConfig = function (actionContext) {
+            var actionConfig = this.findActionConfig(actionContext);
 
             // 判断优先级：
             // movedTo > childActionOnly > 404 > authority
 
             // 检查Action的跳转，类似302跳转，但地址栏URL不会变，主要用于系统升级迁移
             if (actionConfig && actionConfig.movedTo) {
-                events.fire(
+                this.getEventBus().fire(
                     'actionmoved',
                     {
+                        controller: this,
                         url: actionContext.url,
                         config: actionConfig,
                         movedTo: actionConfig.movedTo
@@ -151,7 +315,7 @@ define(
 
                 actionContext.originalURL = actionContext.url;
                 actionContext.url = URL.parse(actionConfig.movedTo);
-                return findEligibleActionConfig(actionContext);
+                return this.findEligibleActionConfig(actionContext);
             }
 
             // 如果只允许子Action访问但当前是主Action，就当没找到
@@ -161,21 +325,19 @@ define(
 
             // 关于actionConfig配置项，参考{@link meta.ActionConfig}
 
-            // 以下所有和跳转相关的逻辑均不能用`redirect`，
-            // 因为一但有重定向，会在历史记录里多一帧，
-            // 此后使用浏览器的后退功能，又会进入重定向逻辑，变成死循环
-            // 因此在此处保持路径不变，但加载另一个Action
+            // 以下所有和跳转相关的逻辑均不能用`redirect`，因为一但有重定向，会在历史记录里多一帧，
+            // 此后使用浏览器的后退功能，又会进入重定向逻辑，变成死循环，因此在此处保持路径不变，但加载另一个Action
 
             // 同时，和跳转相关的逻辑均不能调用`forward`函数，
-            // 一但调用`forward`函数，`currentURL`和`referrer`都会变化，
-            // 这并不是希望实现的逻辑
+            // 一但调用`forward`函数，`currentURL`和`referrer`都会变化，这并不是希望实现的逻辑
 
             // 如果没有Action的配置，则跳转到404页面
             if (!actionConfig) {
-                events.fire(
+                this.getEventBus().fire(
                     'actionnotfound',
                     util.mix(
                         {
+                            controller: this,
                             failType: 'NotFound',
                             reason: 'Not found'
                         },
@@ -184,27 +346,25 @@ define(
                 );
 
                 actionContext.originalURL = actionContext.url;
-                actionContext.url = URL.parse(config.notFoundLocation);
+                actionContext.url = URL.parse(this.getNotFoundLocation());
 
-                // 对于404页面，是一切未找到的URL最终归宿，
-                // 因此如果404对应的Action没有配置，会进入死循环，
-                // 需要对这个配置进行特殊处理，如果没有404对应的Action，
-                // 就返回null
-                if (!actionPathMapping[actionContext.url.getPath()]) {
+                // 对于404页面，是一切未找到的URL最终归宿，因此如果404对应的Action没有配置，会进入死循环，
+                // 需要对这个配置进行特殊处理，如果没有404对应的Action，就返回null
+                if (!this.actionPathMapping[actionContext.url.getPath()]) {
                     return null;
                 }
 
-                return findEligibleActionConfig(actionContext);
+                return this.findEligibleActionConfig(actionContext);
             }
 
             // 检查权限，如果没有权限的话，根据Action或全局配置跳转
-            var hasAuthority =
-                controller.checkAuthority(actionConfig, actionContext);
+            var hasAuthority = this.checkAuthority(actionConfig, actionContext);
             if (!hasAuthority) {
-                events.fire(
+                this.getEventBus().fire(
                     'permissiondenied',
                     util.mix(
                         {
+                            controller: this,
                             failType: 'PermissionDenied',
                             reason: 'Permission denied',
                             config: actionConfig
@@ -213,32 +373,28 @@ define(
                     )
                 );
 
-                var location = actionConfig.noAuthorityLocation || config.noAuthorityLocation;
+                var location = actionConfig.noAuthorityLocation || this.getNoAuthorityLocation();
                 actionContext.originalURL = actionContext.url;
                 actionContext.url = URL.parse(location);
-                return findEligibleActionConfig(actionContext);
+                return this.findEligibleActionConfig(actionContext);
             }
 
             return actionConfig;
-        }
+        };
 
         /**
          * 根据URL加载对应的Action对象
          *
          * @param {meta.ActionContext} actionContext 调用Action的初始化参数
-         * @return {meta.Promise} 如果有相应的Action配置，
-         * 返回一个{@link meta.Promise}对象，如果正确创建了{@link Action}对象，
-         * 则该{@link meta.Promise}对象进入`resolved`状态。
-         * 如果没找到{@link Action}的配置或者加载{@link Action}失败，
-         * 则该{@link meta.Promise}进入`rejected`状态
-         * @ignore
+         * @return {meta.Promise} 如果有相应的Action配置，返回一个{@link meta.Promise}对象。
+         * 如果正确创建了{@link Action}对象，则该{@link meta.Promise}对象进入`resolved`状态。
+         * 如果没找到{@link Action}的配置或者加载{@link Action}失败，则该{@link meta.Promise}进入`rejected`状态
+         * @protected
          */
-        function loadAction(actionContext) {
-            var actionConfig = findEligibleActionConfig(actionContext);
+        Controller.prototype.loadAction = function (actionContext) {
+            var actionConfig = this.findEligibleActionConfig(actionContext);
             // 通过`resolveActionConfig`可以配置默认映射关系等，提供扩展点
-            if (typeof controller.resolveActionConfig === 'function') {
-                actionConfig = controller.resolveActionConfig(actionConfig, actionContext);
-            }
+            actionConfig = this.resolveActionConfig(actionConfig, actionContext);
             if (!actionConfig) {
                 var failed = new Deferred();
                 failed.syncModeEnabled = false;
@@ -251,8 +407,7 @@ define(
             actionContext.args.title = actionConfig.title;
 
             // 可在`registerAction`的时候通过`args`属性添加固定的参数，
-            // 在`Action`中就可以通过`enter`时的`context`参数里拿到，
-            // 对应用框架的话就可以在`model`中拿到
+            // 在`Action`中就可以通过`enter`时的`context`参数里拿到，对应用框架的话就可以在`model`中拿到
             if (actionConfig.args) {
                 // 由于子Action可以传额外参数，可能会和这里的冲突，
                 // 这种情况下以`renderChildAction`传过来的参数为优先，因此不能直接覆盖，要先判断是否存在
@@ -283,19 +438,19 @@ define(
             //     loader.on('actionloaded', ...); // 这里会错过触发
             loading.syncModeEnabled = false;
 
-            // 让loadAction返回一个特殊的Promise，
-            // 可以通过调用`abort()`取消Action加载完的后续执行
+            // 让loadAction返回一个特殊的Promise，可以通过调用`abort()`取消Action加载完的后续执行
             var loader = loading.promise;
             var aborted = false;
-            loader.abort = function () {
+            var abort = function () {
                 if (!aborted) {
                     aborted = true;
-                    events.fire('actionabort', util.mix({}, actionContext));
+                    this.getEventBus().fire('actionabort', util.mix({ controller: this }, actionContext));
                 }
             };
+            loader.abort = util.bind(abort, this);
 
             if (!actionContext.isChildAction) {
-                currentURL = actionContext.url;
+                this.currentURL = actionContext.url;
             }
 
             var callback = function (SpecificAction) {
@@ -309,22 +464,24 @@ define(
 
                     var error = util.mix(
                         {
+                            controller: this,
                             failType: 'NoModule',
                             config: actionConfig,
                             reason: reason
                         },
                         actionContext
                     );
-                    events.fire('actionfail', error);
-                    events.notifyError(error);
+                    this.getEventBus().fire('actionfail', error);
+                    this.getEventBus().notifyError(error);
 
                     loading.reject(reason);
                     return;
                 }
 
-                events.fire(
+                this.getEventBus().fire(
                     'actionloaded',
                     {
+                        controller: this,
                         url: actionContext.url,
                         config: actionConfig,
                         action: SpecificAction
@@ -353,6 +510,7 @@ define(
 
                             var error = util.mix(
                                 {
+                                    controller: this,
                                     failType: 'InvalidFactory',
                                     config: actionConfig,
                                     reason: reason,
@@ -360,12 +518,16 @@ define(
                                 },
                                 actionContext
                             );
-                            events.fire('actionfail', error);
-                            events.notifyError(error);
+                            this.getEventBus().fire('actionfail', error);
+                            this.getEventBus().notifyError(error);
 
                             loading.reject(reason);
                         }
+                        else {
+                            loading.resolve(action, actionContext);
+                        }
                     };
+                    resolveActionInstance = util.bind(resolveActionInstance, this);
                     var actionFactoryProduct = SpecificAction.createRuntimeAction(actionContext);
                     Deferred.when(actionFactoryProduct).then(resolveActionInstance);
                 }
@@ -374,6 +536,7 @@ define(
                     loading.resolve(SpecificAction, actionContext);
                 }
             };
+            callback = util.bind(callback, this);
 
             // 如果`type`配置的直接是一个对象或者一个函数，则认为是一个已经加载了的模块
             if (typeof actionConfig.type === 'string') {
@@ -384,16 +547,16 @@ define(
             }
 
             return loader;
-        }
+        };
 
         /**
          * 进入Action的执行周期
          *
          * @param {Action} action {@link Action}对象
          * @param {meta.ActionContext} actionContext Action执行的上下文
-         * @ignore
+         * @protected
          */
-        function enterAction(action, actionContext) {
+        Controller.prototype.enterAction = function (action, actionContext) {
             if (!actionContext.isChildAction) {
                 // 未防止在加载Action模块的时候，用户的操作导致进入其它模块，
                 // 这里需要判断当前的URL是否依旧是加载时指定的URL。
@@ -404,110 +567,114 @@ define(
                 // 因此不用担心ActionA被初始化2次的情况出现
                 //
                 // 该判断仅在主Action时有效，子Action需要外部逻辑自己控制
-                if (actionContext.url !== currentURL) {
+                if (actionContext.url !== this.currentURL) {
                     return;
                 }
 
                 // 是主Action的话，要销毁前面用的那个，并设定当前Action实例
-                if (currentAction) {
-                    events.fire(
+                if (this.currentAction) {
+                    this.getEventBus().fire(
                         'leaveaction',
                         {
-                            action: currentAction,
+                            controller: this,
+                            action: this.currentAction,
                             to: util.mix({}, actionContext)
                         }
                     );
 
-                    if (typeof currentAction.leave === 'function') {
-                        currentAction.leave();
+                    if (typeof this.currentAction.leave === 'function') {
+                        this.currentAction.leave();
                     }
                 }
-                currentAction = action;
+                this.currentAction = action;
 
                 // 只有主Action才有资格改`document.title`
-                document.title = actionContext.title || actionContext.documentTitle || config.systemName;
+                document.title = actionContext.title || actionContext.documentTitle || this.getDefaultTitle();
             }
 
-            events.fire(
+            this.getEventBus().fire(
                 'enteraction',
-                util.mix({ action: action }, actionContext)
+                util.mix({ controller: this, action: action }, actionContext)
             );
 
-            var entering = action.enter(actionContext);
-            entering.then(
-                function () {
-                    events.fire(
-                        'enteractioncomplete',
-                        util.mix({ action: action }, actionContext)
-                    );
-                },
-                function (reason) {
-                    var message = '';
-                    if (!reason) {
-                        message = 'Invoke action.enter() causes error';
+            var notifyEnterComplete = function () {
+                this.getEventBus().fire(
+                    'enteractioncomplete',
+                    util.mix({ controller: this, action: action }, actionContext)
+                );
+            };
+            notifyEnterComplete = util.bind(notifyEnterComplete, this);
+
+            var notifyEnterFail = function (reason) {
+                var message = '';
+                if (!reason) {
+                    message = 'Invoke action.enter() causes error';
+                }
+                // 普通异常
+                else if (reason.message) {
+                    message = reason.message;
+                    if (reason.stack) {
+                        message += '\n' + reason.stack;
                     }
-                    // 普通异常
-                    else if (reason.message) {
-                        message = reason.message;
-                        if (reason.stack) {
-                            message += '\n' + reason.stack;
-                        }
+                }
+                // 能够序列化
+                else if (window.JSON && typeof JSON.stringify === 'function') {
+                    try {
+                        message = JSON.stringify(reason);
                     }
-                    // 能够序列化
-                    else if (window.JSON && typeof JSON.stringify === 'function') {
-                        try {
-                            message = JSON.stringify(reason);
-                        }
-                        catch (parseJSONError) {
-                            message = reason;
-                        }
-                    }
-                    else {
+                    catch (parseJSONError) {
                         message = reason;
                     }
-
-                    var error = util.mix(
-                        {
-                            failType: 'EnterFail',
-                            reason: message
-                        },
-                        actionContext
-                    );
-                    events.fire('enteractionfail', error);
-                    events.notifyError(error);
                 }
-            );
+                else {
+                    message = reason;
+                }
+
+                var error = util.mix(
+                    {
+                        failType: 'EnterFail',
+                        reason: message
+                    },
+                    actionContext
+                );
+                this.getEventBus().fire('enteractionfail', error);
+                this.getEventBus().notifyError(error);
+            };
+            notifyEnterFail = util.bind(notifyEnterFail, this);
+
+            var entering = action.enter(actionContext);
+            entering.then(notifyEnterComplete, notifyEnterFail);
 
             return entering;
-        }
-
-        var childActionMapping = {};
+        };
 
         /**
          * 将URL变更转换到Action的加载
+         *
+         * `forward`方法是核心方法，{@link Controller#renderAction}和{@link Controller#renderChildAction}最终都调用此方法
          *
          * @param {URL} url 当前的URL对象
          * @param {string} container 指定容器元素的id
          * @param {Object | null | undefined} options 额外的参数
          * @param {boolean} isChildAction 标识是否为子Action
-         * @return {meta.Promise} 一个特殊的{@link meta.Promise}对象，
-         * 该对象可以通过`abort()`取消Action加载完成后的执行
+         * @return {meta.Promise} 一个特殊的{@link meta.Promise}对象，该对象可以通过`abort()`取消Action加载完成后的执行
+         * @protected
          */
-        function forward(url, container, options, isChildAction) {
-            // 如果想要把这个方法暴露出去的话，
-            // 需要判断URL与currentURL是否相同（正常情况下`locator`层有判断）
+        Controller.prototype.forward = function (url, container, options, isChildAction) {
+            // 如果想要把这个方法暴露出去的话，需要判断URL与currentURL是否相同（正常情况下`locator`层有判断）
             var actionContext = {
                 url: url,
                 container: container,
                 isChildAction: !!isChildAction
             };
 
+            // 如果是子Action的话，从保存的之前的`ActionContext`中拿到`referrer`
             if (isChildAction) {
-                var referrerInfo = childActionMapping[container];
+                var referrerInfo = this.childActionMapping[container];
                 actionContext.referrer = referrerInfo ? referrerInfo.url : null;
             }
             else {
-                actionContext.referrer = currentURL;
+                actionContext.referrer = this.currentURL;
             }
 
             // 为了向后兼容性，`options`中的东西要放到`actionContext`上
@@ -519,46 +686,57 @@ define(
             // 除此之外，再把URL中的参数和作为子Action传过来的参数都放进`args`属性里
             util.mix(actionContext.args, url.getQuery());
 
-            events.fire('forwardaction', util.mix({}, actionContext));
+            this.getEventBus().fire('forwardaction', util.mix({ controller: this }, actionContext));
 
-            var loader = loadAction(actionContext);
+            var loader = this.loadAction(actionContext);
 
             assert.has(loader, 'loadAction should always return a Promise');
 
             return loader;
-        }
+        };
 
-        var globalActionLoader;
-        function renderAction(url) {
+        /**
+         * 在主Action区域加载并渲染指定URL对应的Action
+         *
+         * @param {string | URL} url 需要加载的URL
+         */
+        Controller.prototype.renderAction = function (url) {
             if (typeof url === 'string') {
                 url = URL.parse(url);
             }
-            if (globalActionLoader && typeof globalActionLoader.abort === 'function') {
-                globalActionLoader.abort();
+            if (this.globalActionLoader && typeof this.globalActionLoader.abort === 'function') {
+                this.globalActionLoader.abort();
             }
 
-            if (currentAction
-                && typeof currentAction.filterRedirect === 'function'
-                && currentAction.filterRedirect(url) === false
+            if (this.currentAction
+                && typeof this.currentAction.filterRedirect === 'function'
+                && this.currentAction.filterRedirect(url) === false
             ) {
                 return Deferred.rejected('Redirect aborted by previous action');
             }
 
-            globalActionLoader = forward(url, config.mainElement, null, false);
-            return globalActionLoader
-                .then(enterAction)
+            this.globalActionLoader = this.forward(url, this.getMainContainer(), null, false);
+            var events = this.getEventBus();
+            return this.globalActionLoader
+                .then(util.bind(this.enterAction, this))
                 .fail(util.bind(events.notifyError, events));
-        }
+        };
 
-        controller.renderAction = renderAction;
-
-        function removeChildAction(container, targetContext) {
-            var info = childActionMapping[container.id];
+        /**
+         * 移除指定容器上的子Action
+         *
+         * @param {Controller} controller 对应的控制器实例
+         * @param {HTMLElement} container 指定的容器
+         * @param {meta.ActionContext} [targetContext] 如果是因跳转引起的移除操作，则传递目标{@link meta.ActionContext}对象
+         * @ignore
+         */
+        function removeChildAction(controller, container, targetContext) {
+            var info = controller.childActionMapping[container.id];
             if (!info) {
                 return;
             }
 
-            childActionMapping[container.id] = undefined;
+            controller.childActionMapping[container.id] = undefined;
 
             // 把挂在容器上的拦截`click`事件的处理函数去掉
             if (info.hijack) {
@@ -579,9 +757,9 @@ define(
                         isChildAction: true
                     };
                 }
-                events.fire(
+                controller.getEventBus().fire(
                     'leaveaction',
-                    { action: info.action, to: targetContext }
+                    { controller: controller, action: info.action, to: targetContext }
                 );
 
                 if (typeof info.action.leave === 'function') {
@@ -590,14 +768,22 @@ define(
             }
         }
 
-        function addChildAction(container, action, hijack, context) {
+        /**
+         * 向指定容器添加一个子Action
+         *
+         * @param {Controller} controller 对应的控制器实例
+         * @param {HTMLElement} container 指定的容器
+         * @param {Object} action 对应的Action对象
+         * @param {Function} hijack 一个用来拦截子Action内部点击的处理函数
+         * @param {meta.ActionContext} context 对应的Action上下文
+         * @ignore
+         */
+        function addChildAction(controller, container, action, hijack, context) {
             // 如果发现还有老的信息绑在容器上，先去掉，这个老的不能留，
-            // 一般来说，因为`redirect`和`leave`上都有销毁原Action的逻辑，
-            // 所以一般上面不会留着东西了。
+            // 一般来说，因为`redirect`和`leave`上都有销毁原Action的逻辑，所以一般上面不会留着东西了。
             // 唯一留着的可能性是，Action是一个普通对象（没有`leave`事件），
-            // 而且不是使用`redirect`跳转或用`renderChildAction`再次在这个容器上渲染，
-            // 而是直接销毁了那个Action。
-            removeChildAction(container, context);
+            // 而且不是使用`redirect`跳转或用`renderChildAction`再次在这个容器上渲染，而是直接销毁了那个Action。
+            removeChildAction(controller, container, context);
 
             // 添加拦截`click`事件的处理函数
             if (container.addEventListener) {
@@ -613,7 +799,7 @@ define(
                 action: action,
                 hijack: hijack
             };
-            childActionMapping[container.id] = info;
+            controller.childActionMapping[container.id] = info;
 
             var EventTarget = require('mini-event/EventTarget');
             if (action instanceof EventTarget) {
@@ -621,44 +807,40 @@ define(
                 action.on(
                     'leave',
                     function () {
-                        removeChildAction(container);
+                        removeChildAction(controller, container);
                     }
                 );
             }
         }
-
-        var childActionLoaders = {};
 
         /**
          * 进入子Action
          *
          * @param {Action} action 子Action实例
          * @param {meta.ActionContext} actionContext Action执行上下文
-         * @ignore
+         * @protected
          */
-        function enterChildAction(action, actionContext) {
+        Controller.prototype.enterChildAction = function (action, actionContext) {
             // 把加载用的`loader`去掉回收内存
-            childActionLoaders[actionContext.container] = null;
+            this.childActionLoaders[actionContext.container] = null;
 
             var container = document.getElementById(actionContext.container);
             if (!container) {
                 return;
             }
 
-            // 这个函数里有`context.container`和`container`两个东西，
-            // 其中`context.container`是容器的id，是个字符串，
-            // `container`是一个容器DOM元素
+            // 这个函数里有`context.container`和`container`两个东西，区别在于：
+            // - `context.container`是容器的id，是个字符串，
+            // - `container`是一个容器DOM元素
 
-            // 用于处理子Action中跳转的特殊`redirect`方法，
-            // 接口与`locator.redirect`保持一致，
+            // 用于处理子Action中跳转的特殊`redirect`方法，接口与`locator.redirect`保持一致，
             // 但由于`renderChildAction`可以传额外参数，因此也再加一个参数
+            var locator = this.getLocator();
             function redirect(url, options, extra) {
                 options = options || {};
-                var locator = require('./locator');
                 var url = locator.resolveURL(url, options);
 
-                // 强制全局跳转，直接使用`locator`即可，
-                // 但在这之前要把原来的`Action`灭掉
+                // 强制全局跳转，直接使用`locator`即可，但在这之前要把原来的`Action`灭掉
                 if (options.global) {
                     var container = document.getElementById(actionContext.container);
 
@@ -670,7 +852,7 @@ define(
                     return globalRedirectPerformed;
                 }
 
-                var childActionInfo = childActionMapping[actionContext.container];
+                var childActionInfo = this.childActionMapping[actionContext.container];
                 var changed = url.toString() !== childActionInfo.url.toString();
                 var shouldPerformRedirect = changed || options.force;
                 if (shouldPerformRedirect) {
@@ -680,15 +862,14 @@ define(
                     }
                     else {
                         // `renderChildAction`中会把原来的Action销毁
-                        controller.renderChildAction(url, childActionInfo.container, extra);
+                        this.renderChildAction(url, childActionInfo.container, extra);
                     }
                 }
 
                 return shouldPerformRedirect;
             }
 
-            // 需要把`container`上的链接点击全部拦截下来，
-            // 如果是hash跳转，则转到controller上来
+            // 需要把`container`上的链接点击全部拦截下来，如果是hash跳转，则转到controller上来
             function hijack(e) {
                 // 下面两行是以主流浏览器为主，兼容IE的事件属性操作
                 e = e || window.event;
@@ -737,12 +918,10 @@ define(
                 this.redirect(url, null, extra);
             };
 
-            // TODO: 添加`back`方法，传递`extra`参数
+            addChildAction(this, container, action, hijack, actionContext);
 
-            addChildAction(container, action, hijack, actionContext);
-
-            return enterAction(action, actionContext);
-        }
+            return this.enterAction(action, actionContext);
+        };
 
         /**
          * 在指定的元素中渲染一个子Action
@@ -750,23 +929,21 @@ define(
          * @param {string | URL} Action对应的url
          * @param {string} container 指定容器元素的id
          * @param {Object} [options] 交给{@link Action}的额外参数
-         * @return {meta.Promise} 一个带取消功能的{@link meta.Promise}对象，
-         * 当渲染完成后进行`resolved`状态，但可在之前调用`abort()`取消
+         * @return {meta.Promise} 一个可取消的{@link meta.Promise}对象，当渲染完成后进行`resolved`状态，但可在之前调用`abort()`取消
          */
-        controller.renderChildAction = function (url, container, options) {
-            var assert = require('./assert');
+        Controller.prototype.renderChildAction = function (url, container, options) {
             assert.has(container);
 
             if (typeof url === 'string') {
-                url = require('./URL').parse(url);
+                url = URL.parse(url);
             }
 
-            var previousLoader = childActionLoaders[container];
+            var previousLoader = this.childActionLoaders[container];
             if (previousLoader && typeof previousLoader.abort === 'function') {
                 previousLoader.abort();
             }
 
-            var actionInfo = childActionMapping[container];
+            var actionInfo = this.childActionMapping[container];
             var previousAction = actionInfo && actionInfo.action;
             if (previousAction
                 && typeof previousAction.filterRedirect === 'function'
@@ -775,16 +952,23 @@ define(
                 return Deferred.rejected('Redirect aborted by previous action');
             }
 
-            var loader = forward(url, container, options, true);
+            var loader = this.forward(url, container, options, true);
+            var events = this.getEventBus();
             var loadingChildAction = loader
-                .then(enterChildAction)
+                .then(util.bind(this.enterChildAction, this))
                 .fail(util.bind(events.notifyError, events));
             // `then`方法会返回一个新的`Promise`，但原来的`loader`上有个`abort`方法，要把这个方法留下来
             loadingChildAction.abort = loader.abort;
-            childActionLoaders[container] = loadingChildAction;
+            this.childActionLoaders[container] = loadingChildAction;
             return loadingChildAction;
         };
 
-        return controller;
+        var instance = new Controller();
+        instance.setLocator(require('./locator'));
+        instance.setRouter(require('./router'));
+        instance.setEventBus(require('./events'));
+        instance.setPermissionProvider(require('./permission'));
+        instance.Controller = Controller;
+        return instance;
     }
 );

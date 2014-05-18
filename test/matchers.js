@@ -8,7 +8,17 @@ beforeEach(function() {
                     };
                     return result;
                 }
-            }
+            };
+        },
+        toFail: function () {
+            return {
+                compare: function (message) {
+                    return {
+                        pass: false,
+                        message: 'Fail to ' + message
+                    }
+                }
+            };
         }
     });
 });

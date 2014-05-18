@@ -36,9 +36,11 @@
 </head>
 <body>
     <script>
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 200;
         require(
             [
                 'spec/ajax.spec',
+                'spec/controller.spec',
                 'spec/Deferred.spec',
                 'spec/events.spec',
                 'spec/Model.spec',

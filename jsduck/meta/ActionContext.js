@@ -46,7 +46,7 @@ function ActionContext () {
      *
      * - 从URL中获取的参数
      * - 在{@link meta.ActionConfig#args}中配置的参数
-     * - 通过{@link controller#renderChildAction}加载时传递的`options`参数
+     * - 通过{@link Controller#renderChildAction}加载时传递的`options`参数
      */
     this.args;
 }
