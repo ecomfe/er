@@ -20,7 +20,7 @@ define(function() {
         it('should export `then` Object', function() {
             expect(def.then).toBeOfType('function');
         });
-        
+
         it('should export `Deferred.isPromise` method', function() {
             expect(Deferred.isPromise).toBeOfType('function');
         });
@@ -72,7 +72,7 @@ define(function() {
             def.ensure(always);
             def.resolve();
             //def.reject();
-            it('resolved or rejected, the callback function "always" should be executed ', 
+            it('resolved or rejected, the callback function "always" should be executed ',
                 function() {
                     expect(always).toHaveBeenCalled();
             });
@@ -104,7 +104,7 @@ define(function() {
         });
         describe('`resolved` method', function() {
             var def = Deferred.resolved();
-            it('should return a promise object with the state of "resolved"', 
+            it('should return a promise object with the state of "resolved"',
                 function() {
                     expect(Deferred.isPromise(def)).toBeTruthy();
             });
@@ -124,7 +124,7 @@ define(function() {
                 deferred.promise.done(callback);
                 deferred.resolver.resolve(1);
                 expect(callback).toHaveBeenCalled();
-                expect(callback.mostRecentCall.args[0]).toBe(1);
+                expect(callback.calls.mostRecent().args[0]).toBe(1);
             });
 
             it('should invoke `fail` callbacks immediately when resolved', function () {
@@ -134,7 +134,7 @@ define(function() {
                 deferred.promise.fail(callback);
                 deferred.resolver.reject(1);
                 expect(callback).toHaveBeenCalled();
-                expect(callback.mostRecentCall.args[0]).toBe(1);
+                expect(callback.calls.mostRecent().args[0]).toBe(1);
             });
 
             it('should invoke `done` callbacks attached after resolution immediately', function () {
@@ -144,7 +144,7 @@ define(function() {
                 deferred.resolver.resolve(1);
                 deferred.promise.done(callback);
                 expect(callback).toHaveBeenCalled();
-                expect(callback.mostRecentCall.args[0]).toBe(1);
+                expect(callback.calls.mostRecent().args[0]).toBe(1);
             });
 
             it('should invoke `fail` callbacks attached after rejection immediately', function () {
@@ -154,7 +154,7 @@ define(function() {
                 deferred.resolver.reject(1);
                 deferred.promise.fail(callback);
                 expect(callback).toHaveBeenCalled();
-                expect(callback.mostRecentCall.args[0]).toBe(1);
+                expect(callback.calls.mostRecent().args[0]).toBe(1);
             });
 
             it('should spawn a promise object with sync mode enabled from its `then` method', function () {
@@ -167,7 +167,7 @@ define(function() {
 
                 deferred.resolver.reject(1);
                 expect(callback).toHaveBeenCalled();
-                expect(callback.mostRecentCall.args[0]).toBe(1);
+                expect(callback.calls.mostRecent().args[0]).toBe(1);
             });
         });
 
@@ -214,7 +214,7 @@ define(function() {
                 deferred.resolve(1, 2, 3);
                 expect(handler).toHaveBeenCalled();
                 Deferred.un('resolve', handler);
-                var event = handler.mostRecentCall.args[0];
+                var event = handler.calls.mostRecent().args[0];
                 expect(event).toBeOfType('object');
                 expect(event.deferred).toBe(deferred);
                 expect(event.type).toBe('resolve');
@@ -238,7 +238,7 @@ define(function() {
                 deferred.reject(1, 2, 3);
                 expect(handler).toHaveBeenCalled();
                 Deferred.un('reject', handler);
-                var event = handler.mostRecentCall.args[0];
+                var event = handler.calls.mostRecent().args[0];
                 expect(event).toBeOfType('object');
                 expect(event.deferred).toBe(deferred);
                 expect(event.type).toBe('reject');

@@ -21,11 +21,10 @@ define(
              *
              * @type {string}
              */
-            version: '3.1.0-beta.2',
+            version: '3.1.0-beta.3',
 
             /**
-             * 启动ER框架，此方法按顺序启动{@link controller}、
-             * {@link router}和{@link locator}组件
+             * 启动ER框架，此方法按顺序启动默认的{@link Controller}、{@link Router}和{@link locator}组件
              */
             start: function () {
                 require('./controller').start();

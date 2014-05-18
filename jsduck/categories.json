@@ -7,8 +7,8 @@
                 "classes": [
                     "main",
                     "locator",
-                    "router",
-                    "controller"
+                    "Router",
+                    "Controller"
                 ]
             },
             {
@@ -18,14 +18,14 @@
                     "Model",
                     "View",
                     "permission",
-                    "events"
+                    "EventBus"
                 ]
             },
             {
                 "name": "工具组件",
                 "classes": [
                     "Deferred",
-                    "ajax",
+                    "Ajax",
                     "config",
                     "datasource",
                     "URL",

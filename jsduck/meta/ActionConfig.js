@@ -70,7 +70,7 @@ function ActionConfig() {
      * 指定Action是否仅能被作为子Action加载
      *
      * 如果此配置为`true`，则不能通过修改浏览器地址栏来进入此Action，
-     * 仅能通过{@link controller#renderChildAction}来进入此Action
+     * 仅能通过{@link Controller#renderChildAction}来进入此Action
      *
      * 通常在开发期间我们希望可以直接在地址栏中输入地址调试Action，而上线后则不允许如此，
      * 因此建议每个系统都有一个类似`window.DEBUG`的开关，

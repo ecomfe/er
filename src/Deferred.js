@@ -420,7 +420,7 @@ define(
                 return value;
             }
 
-            // `when`返回的`Promise`必须开启同步模式，以便保留堆栈供单步调度
+            // `when`返回的`Promise`必须开启同步模式，以便保留堆栈供单步调试
             var deferred = new Deferred();
             deferred.syncModeEnabled = true;
             deferred.resolve(value);

@@ -1,7 +1,7 @@
 /**
  * @class meta.AjaxHook
  *
- * AJAX钩子配置，通过{@link ajax#hooks}提供，
+ * AJAX钩子配置，通过{@link Ajax#hooks}提供，
  * 通过重写方法来改变AJAX的执行行为
  */
 function AjaxHook() {

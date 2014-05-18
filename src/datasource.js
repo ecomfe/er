@@ -35,7 +35,7 @@ define(
          * 加载远程数据
          *
          * @param {string} url 加载的URL
-         * @param {Object} [options] 调用{@link ajax#request}时的其它配置项
+         * @param {Object} [options] 调用{@link Ajax#request}时的其它配置项
          * @return {Function} 数据获取函数
          */
         datasource.remote = function (url, options) {
