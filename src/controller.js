@@ -836,6 +836,7 @@ define(
             // 用于处理子Action中跳转的特殊`redirect`方法，接口与`locator.redirect`保持一致，
             // 但由于`renderChildAction`可以传额外参数，因此也再加一个参数
             var locator = this.getLocator();
+            var currentController = this;
             function redirect(url, options, extra) {
                 options = options || {};
                 var url = locator.resolveURL(url, options);
@@ -852,7 +853,7 @@ define(
                     return globalRedirectPerformed;
                 }
 
-                var childActionInfo = this.childActionMapping[actionContext.container];
+                var childActionInfo = currentController.childActionMapping[actionContext.container];
                 var changed = url.toString() !== childActionInfo.url.toString();
                 var shouldPerformRedirect = changed || options.force;
                 if (shouldPerformRedirect) {
@@ -862,7 +863,7 @@ define(
                     }
                     else {
                         // `renderChildAction`中会把原来的Action销毁
-                        this.renderChildAction(url, childActionInfo.container, extra);
+                        currentController.renderChildAction(url, childActionInfo.container, extra);
                     }
                 }
 
