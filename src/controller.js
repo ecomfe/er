@@ -901,8 +901,13 @@ define(
                 // 直接使用专供子Action上的`redirect`方法，
                 // 会自动处理`hijack`的解绑定、URL比对、进入子Action等事，
                 // 为免Action重写`redirect`方法，这里用闭包内的这个
-                var global = target.getAttribute('data-redirect') === 'global';
-                redirect(url, { global: global });
+                var redirectAttributes = (target.getAttribute('data-redirect') || '').split(/[,\s]/);
+                var redirectOptions = {};
+                for (var i = 0; i < redirectAttributes.length; i++) {
+                    var redirectAttributeName = util.trim(redirectAttributes[i]);
+                    redirectOptions[redirectAttributeName] = true;
+                }
+                redirect(url, redirectOptions);
             }
 
             // 把子Action的`redirect`方法改掉，以免影响全局主Action，
