@@ -848,7 +848,7 @@ define(
                     var globalRedirectPerformed = locator.redirect(url, options);
                     // 如果因为URL相等的原因没有完成跳转，那就别销毁子Action，相当于点击没任何效果
                     if (globalRedirectPerformed && container) {
-                        removeChildAction(container);
+                        removeChildAction(currentController, container);
                     }
                     return globalRedirectPerformed;
                 }
