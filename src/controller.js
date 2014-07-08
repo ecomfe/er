@@ -888,6 +888,26 @@ define(
                     return;
                 }
 
+                // 如果是2层以上的子Action嵌套，下层Action处理完跳转后，因为没有（也不能）阻止冒泡，
+                // 所以上层的Action容器也会抓到这个事件，此时再去跳转是不合理的，需要有个判断
+                var innermostContainer = target;
+                while (innermostContainer) {
+                    // 是Action容器的元素肯定符合以下条件：
+                    //
+                    // - 有个`id`，因为没有`id`不能渲染子Action
+                    // - 这个`id`在`childActionMapping`里是有对应的值的
+                    if (innermostContainer.id && currentController[innermostContainer.id]) {
+                        break;
+                    }
+
+                    innermostContainer = innermostContainer.parentNode;
+                }
+                // 如果最接近被点击的链接的Action容器是不是当前的这个容器，就说明在当前容器和链接之间还有一层以上的子Action，
+                // 那么这个子Action肯定会处理掉这个链接的跳转，不需要这里处理了
+                if (innermostContainer.id !== actionContext.container) {
+                    return;
+                }
+
                 if (e.preventDefault) {
                     e.preventDefault();
                 }
