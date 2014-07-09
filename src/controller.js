@@ -896,7 +896,7 @@ define(
                     //
                     // - 有个`id`，因为没有`id`不能渲染子Action
                     // - 这个`id`在`childActionMapping`里是有对应的值的
-                    if (innermostContainer.id && currentController[innermostContainer.id]) {
+                    if (innermostContainer.id && currentController.childActionMapping[innermostContainer.id]) {
                         break;
                     }
 
