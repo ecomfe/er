@@ -870,6 +870,38 @@ define(
                 return shouldPerformRedirect;
             }
 
+            // 判断一个子Action中链接点击是否已经由对应的子Action处理了跳转,
+            // 如果是2层以上的子Action嵌套，下层Action处理完跳转后，因为没有（也不能）阻止冒泡，
+            // 所以上层的Action容器也会抓到这个事件，此时再去跳转是不合理的，需要有个判断
+            function isChildActionRedirected(e) {
+                // 除低版本IE外，其它浏览器是可以在事件对象上加自定义属性的，IE每次都生成新的事件对象所以保留不了这些属性，
+                // 在这里优先用自定义属性控制，避免对DOM树无意义的遍历，只有在没有属性的时候，才向后兼容至DOM树的遍历
+                if (e.isChildActionRedirected) {
+                    return true;
+                }
+
+                var innermostContainer = e.target || e.srcElement;
+                while (innermostContainer) {
+                    // 是Action容器的元素肯定符合以下条件：
+                    //
+                    // - 有个`id`，因为没有`id`不能渲染子Action
+                    // - 这个`id`在`childActionMapping`里是有对应的值的
+                    if (innermostContainer.id && currentController.childActionMapping[innermostContainer.id]) {
+                        break;
+                    }
+
+                    innermostContainer = innermostContainer.parentNode;
+                }
+                // 如果最接近被点击的链接的Action容器是不是当前的这个容器，就说明在当前容器和链接之间还有一层以上的子Action，
+                // 那么这个子Action肯定会处理掉这个链接的跳转，不需要这里处理了
+                if (innermostContainer.id !== actionContext.container) {
+                    e.isChildActionRedirected = true;
+                    return true;
+                }
+
+                return false;
+            }
+
             // 需要把`container`上的链接点击全部拦截下来，如果是hash跳转，则转到controller上来
             function hijack(e) {
                 // 下面两行是以主流浏览器为主，兼容IE的事件属性操作
@@ -887,24 +919,8 @@ define(
                 if (href.charAt(0) !== '#') {
                     return;
                 }
-
-                // 如果是2层以上的子Action嵌套，下层Action处理完跳转后，因为没有（也不能）阻止冒泡，
-                // 所以上层的Action容器也会抓到这个事件，此时再去跳转是不合理的，需要有个判断
-                var innermostContainer = target;
-                while (innermostContainer) {
-                    // 是Action容器的元素肯定符合以下条件：
-                    //
-                    // - 有个`id`，因为没有`id`不能渲染子Action
-                    // - 这个`id`在`childActionMapping`里是有对应的值的
-                    if (innermostContainer.id && currentController.childActionMapping[innermostContainer.id]) {
-                        break;
-                    }
-
-                    innermostContainer = innermostContainer.parentNode;
-                }
-                // 如果最接近被点击的链接的Action容器是不是当前的这个容器，就说明在当前容器和链接之间还有一层以上的子Action，
-                // 那么这个子Action肯定会处理掉这个链接的跳转，不需要这里处理了
-                if (innermostContainer.id !== actionContext.container) {
+                // 如果有下面的子Action处理了跳转，那这里就啥也不干了
+                if (isChildActionRedirected(e)) {
                     return;
                 }
 
