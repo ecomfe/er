@@ -71,4 +71,13 @@ function AjaxOption() {
      * 请求的数据格式，作为`Content-Type`头发送，同时可能影响到数据序列化的算法
      */
     this.contentType;
+
+    /**
+     * @property {Object} [xhrFields]
+     *
+     * 额外赋值到原生的`XMLHttpRequest`实例上的属性，该对象将被混合当本次请求创建的`XMLHttpRequest`实例上
+     *
+     * 根据现有标准，唯一有用的属性是`withCrentials`
+     */
+    this.xhrFields;
 }
