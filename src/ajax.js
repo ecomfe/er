@@ -133,6 +133,8 @@ define(
                 ? new XMLHttpRequest()
                 : new window.ActiveXObject('Microsoft.XMLHTTP');
 
+            util.mix(xhr, options.xhrFields);
+
             var fakeXHR = requesting.promise;
             var xhrWrapper = {
                 abort: function () {
