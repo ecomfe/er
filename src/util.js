@@ -106,7 +106,6 @@ define(
                 if(originalPrototype.hasOwnProperty(key)) {
                     proto[key] = originalPrototype[key];
                 }
-                
             }
 
             type.prototype.constructor = type;
