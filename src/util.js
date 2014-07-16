@@ -87,8 +87,6 @@ define(
          */
         util.noop = function () {};
 
-        var dontEnumBug = !(({ toString: 1 }).propertyIsEnumerable('toString'));
-
         /**
          * 设置继承关系
          *
@@ -105,17 +103,12 @@ define(
             type.prototype = proto;
 
             for (var key in originalPrototype) {
-                proto[key] = originalPrototype[key];
-            }
-            if (dontEnumBug) {
-                // 其实还有好多其它的，但应该不会撞上吧(╯‵□′)╯︵┻━┻
-                if (originalPrototype.hasOwnProperty('toString')) {
-                    proto.toString = originalPrototype.toString;
+                if(originalPrototype.hasOwnProperty(key)) {
+                    proto[key] = originalPrototype[key];
                 }
-                if (originalPrototype.hasOwnProperty('valueOf')) {
-                    proto.valueOf = originalPrototype.valueOf;
-                }
+                
             }
+
             type.prototype.constructor = type;
 
             return type;
