@@ -106,6 +106,70 @@ define(function (require) {
                     )
                     .ensure(done);
             });
+
+            it('should fire done event when request success', function (done) {
+                var handler = jasmine.createSpy('done');
+                ajax.on('done', handler);
+                var loading = ajax.request({ url: 'foo' });
+
+                jasmine.Ajax.requests.mostRecent().response({ status: 200 });
+
+                loading
+                    .then(
+                        function () {
+                            expect(handler).toHaveBeenCalled();
+                            var event = handler.calls.mostRecent().args[0];
+                            expect(event).toBeOfType('object');
+                            expect(event.xhr).toBe(loading);
+                            expect(event.options.url).toBe('foo');
+                        },
+                        function (xhr) {
+                            throw new Error(xhr.status);
+                        }
+                    )
+                    .ensure(done);
+            });
+
+            it('should fire fail event when request fail', function (done) {
+                var handler = jasmine.createSpy('fail');
+                ajax.on('fail', handler);
+                var loading = ajax.request({ url: 'foo' });
+
+                jasmine.Ajax.requests.mostRecent().response({ status: 500 });
+
+                loading
+                    .then(
+                        function () {
+                            expect(handler).toHaveBeenCalled();
+                            var event = handler.calls.mostRecent().args[0];
+                            expect(event).toBeOfType('object');
+                            expect(event.xhr).toBe(loading);
+                            expect(event.options.url).toBe('foo');
+                        },
+                        function (xhr) {
+                            throw new Error(xhr.status);
+                        }
+                    )
+                    .ensure(done);
+            });
+
+            it('should fire timeout event when request timeout', function (done) {
+                var handler = jasmine.createSpy('timeout');
+                ajax.on('timeout', handler);
+                var loading = ajax.request({ url: 'foo', timeout: 1 });
+
+                loading
+                    .fail(
+                        function () {
+                            expect(handler).toHaveBeenCalled();
+                            var event = handler.calls.mostRecent().args[0];
+                            expect(event).toBeOfType('object');
+                            expect(event.xhr).toBe(loading);
+                            expect(event.options.url).toBe('foo');
+                        }
+                    )
+                    .ensure(done);
+            });
         });
 
         describe('hooks', function () {

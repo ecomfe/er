@@ -133,6 +133,8 @@ define(
                 ? new XMLHttpRequest()
                 : new window.ActiveXObject('Microsoft.XMLHTTP');
 
+            util.mix(xhr, options.xhrFields);
+
             var fakeXHR = requesting.promise;
             var xhrWrapper = {
                 abort: function () {
@@ -161,39 +163,33 @@ define(
                 },
                 getResponseHeader: function (name) {
                     return xhr.getResponseHeader(name);
+                },
+                getRequestOption: function (name) {
+                    return options[name];
                 }
             };
             util.mix(fakeXHR, xhrWrapper);
 
+            var eventObject = { xhr: fakeXHR, options: options };
             fakeXHR.then(
-                function () {
-                    /**
-                     * @event done
-                     *
-                     * 任意一个请求成功时触发
-                     *
-                     * @param {meta.AjaxOption} options 请求的配置信息
-                     * @param {meta.FakeXHR} xhr 请求对象
-                     */
-                    this.fire(
-                        'done',
-                        { xhr: fakeXHR, options: options }
-                    );
-                },
-                function () {
-                    /**
-                     * @event fail
-                     *
-                     * 任意一个请求失败时触发
-                     *
-                     * @param {meta.FakeXHR} xhr 请求对象
-                     * @param {meta.AjaxOption} options 请求的配置信息
-                     */
-                    this.fire(
-                        'fail',
-                        { xhr: fakeXHR, options: options }
-                    );
-                }
+                /**
+                 * @event done
+                 *
+                 * 任意一个请求成功时触发
+                 *
+                 * @param {meta.AjaxOption} options 请求的配置信息
+                 * @param {meta.FakeXHR} xhr 请求对象
+                 */
+                util.bind(this.fire, this, 'done', eventObject),
+                /**
+                 * @event fail
+                 *
+                 * 任意一个请求失败时触发
+                 *
+                 * @param {meta.FakeXHR} xhr 请求对象
+                 * @param {meta.AjaxOption} options 请求的配置信息
+                 */
+                util.bind(this.fire, this, 'fail', eventObject)
             );
 
             var processRequestStatus = function () {

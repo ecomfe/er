@@ -79,16 +79,18 @@ define(
          *
          * @param {meta.ActionContext} actionContext 进入Action的上下文
          * @return {meta.Promise}
+         * @fires enter
+         * @fires beforemodelload
          */
         Action.prototype.enter = function (actionContext) {
+            this.context = actionContext || {};
+
             /**
              * @event enter
              *
              * Action生命周期开始执行时触发
              */
             this.fire('enter');
-
-            this.context = actionContext || {};
 
             // `actionContext.args`里有URL里的参数和子Action时传入的`options`，全部放到`Model`上去
             var args = util.mix({}, actionContext && actionContext.args);
@@ -99,6 +101,13 @@ define(
             else {
                 this.model = this.createModel(args);
             }
+
+            /**
+             * @event beforemodelload
+             *
+             * `Model`已经创建完毕，开始进行数据加载前触发
+             */
+            this.fire('beforemodelload');
 
             if (this.model && typeof this.model.load === 'function') {
                 var loadingModel = this.model.load();

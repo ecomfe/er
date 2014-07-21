@@ -57,6 +57,16 @@ function FakeXHR() {
     this.getResponseHeader;
 
     /**
+     * @method getRequestOption
+     *
+     * 获取指定的请求配置
+     *
+     * @param {string} name 需要获取的配置项的名称
+     * @return {Mixed} 发起请求时给定的配置对象中对应名称的值
+     */
+    this.getRequestOption;
+
+    /**
      * @property {number} status
      *
      * 服务器返回状态码
