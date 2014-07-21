@@ -163,6 +163,9 @@ define(
                 },
                 getResponseHeader: function (name) {
                     return xhr.getResponseHeader(name);
+                },
+                getRequestOption: function (name) {
+                    return options[name];
                 }
             };
             util.mix(fakeXHR, xhrWrapper);
