@@ -8,9 +8,9 @@
  */
 define(
     function (require) {
-        var util = require('./util');
-
         /**
+         * @class Router
+         *
          * 路由类
          *
          * 通过`require('er/router').Router`访问该类构造函数，其中`require('er/router')`是该类的全局实例
@@ -27,12 +27,12 @@ define(
          * @extends mini-event.EventTarget
          * @constructor
          */
-        function Router() {
+        var exports = {};
+
+        exports.constructor = function () {
             this.routes = [];
             this.backup = null;
-        }
-
-        util.inherits(Router, require('mini-event/EventTarget'));
+        };
 
         /**
          * 在{{@locator#redirect}事件中，执行路由逻辑
@@ -66,7 +66,7 @@ define(
          * @param {string | RegExp} rule 匹配URL的`path`部分的字符串或正则表达式
          * @param {Function} handler 匹配成功时执行的函数
          */
-        Router.prototype.add = function (rule, handler) {
+        exports.add = function (rule, handler) {
             this.routes.push({ rule: rule, handler: handler });
         };
 
@@ -75,7 +75,7 @@ define(
          *
          * @param {Function} handler 后备处理函数
          */
-        Router.prototype.setBackup = function (handler) {
+        exports.setBackup = function (handler) {
             this.backup = handler;
         };
 
@@ -85,7 +85,7 @@ define(
          * @return {locator}
          * @protected
          */
-        Router.prototype.getLocator = function () {
+        exports.getLocator = function () {
             return this.locator;
         };
 
@@ -96,7 +96,7 @@ define(
          *
          * @param {locator} locator 关联的{@link locator}实例
          */
-        Router.prototype.setLocator = function (locator) {
+        exports.setLocator = function (locator) {
             this.locator = locator;
         };
 
@@ -106,7 +106,7 @@ define(
          * @return {mini-event.EventTarget}
          * @protected
          */
-        Router.prototype.getEventBus = function () {
+        exports.getEventBus = function () {
             return this.eventBus;
         };
 
@@ -117,17 +117,18 @@ define(
          *
          * @param {mini-event.EventTarget} eventBug 事件总线对象
          */
-        Router.prototype.setEventBus = function (eventBus) {
+        exports.setEventBus = function (eventBus) {
             this.eventBus = eventBus;
         };
 
         /**
          * 开始`router`对象的工作
          */
-        Router.prototype.start = function () {
+        exports.start = function () {
             this.getLocator().on('redirect', executeRoute, this);
         };
 
+        var Router = require('eoo').create(require('mini-event/EventTarget'), exports);
         var instance = new Router();
         instance.setLocator(require('./locator'));
         instance.setEventBus(require('./events'));

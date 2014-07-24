@@ -8,8 +8,6 @@
  */
 define(
     function (require) {
-        var util = require('./util');
-
         var TIMESTAMP_PARAM_KEY = '_';
 
         function serializeArray(prefix, array) {
@@ -60,6 +58,8 @@ define(
         };
 
         /**
+         * @class Ajax
+         *
          * Ajax类
          *
          * 通过`require('er/ajax').Ajax`访问该类构造函数，其中`require('er/ajax')`是该类的全局实例
@@ -67,7 +67,8 @@ define(
          * @extends mini-event.EventTarget
          * @constructor
          */
-        function Ajax() {
+        var exports = {};
+        exports.constructor = function () {
             /**
              * AJAX钩子
              *
@@ -88,9 +89,7 @@ define(
                 timeout: 0,
                 charset: ''
             };
-        }
-
-        util.inherits(Ajax, require('mini-event/EventTarget'));
+        };
 
         /**
          * 发起`XMLHttpRequest`请求
@@ -98,7 +97,7 @@ define(
          * @param {meta.AjaxOption} options 相关配置
          * @return {meta.FakeXHR}
          */
-        Ajax.prototype.request = function (options) {
+        exports.request = function (options) {
             if (typeof this.hooks.beforeExecute === 'function') {
                 this.hooks.beforeExecute(options);
             }
@@ -313,7 +312,7 @@ define(
          * @param {boolean} [cache] 决定是否允许缓存
          * @return {meta.FakeXHR}
          */
-        Ajax.prototype.get = function (url, data, cache) {
+        exports.get = function (url, data, cache) {
             var options = {
                 method: 'GET',
                 url: url,
@@ -331,7 +330,7 @@ define(
          * @param {boolean} [cache] 决定是否允许缓存
          * @return {meta.FakeXHR}
          */
-        Ajax.prototype.getJSON = function (url, data, cache) {
+        exports.getJSON = function (url, data, cache) {
             var options = {
                 method: 'GET',
                 url: url,
@@ -351,7 +350,7 @@ define(
          * @param {string} [dataType="json"] 指定响应的数据格式
          * @return {meta.FakeXHR}
          */
-        Ajax.prototype.post = function (url, data, dataType) {
+        exports.post = function (url, data, dataType) {
             var options = {
                 method: 'POST',
                 url: url,
@@ -367,7 +366,7 @@ define(
          * @param {string} url 发送的目标URL
          * @param {Object} [data] 额外添加的参数
          */
-        Ajax.prototype.log = function (url, data) {
+        exports.log = function (url, data) {
             var img = new Image();
             var pool = window.ER_LOG_POOL || (window.ER_LOG_POOL = {});
             var id = +new Date();
@@ -399,6 +398,7 @@ define(
             img.src = url;
         };
 
+        var Ajax = require('eoo').create(require('mini-event/EventTarget'), exports);
         var instance = new Ajax();
         instance.Ajax = Ajax;
         return instance;
