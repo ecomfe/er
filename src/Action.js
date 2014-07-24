@@ -9,7 +9,6 @@
 define(
     function (require) {
         var util = require('./util');
-        var EventTarget = require('mini-event/EventTarget');
 
         /**
          * 收集Model加载时产生的错误并通知到Action
@@ -32,6 +31,8 @@ define(
         }
 
         /**
+         * @class Action
+         *
          * Action类
          *
          * 在ER框架中，Action并不一定要继承该类，
@@ -42,13 +43,15 @@ define(
          * @extends mini-event.EventTarget
          * @constructor
          */
-        function Action() {
+        var exports = {};
+
+        exports.constructor = function () {
             this.disposed = false;
 
             this.initialize();
-        }
+        };
 
-        Action.prototype.initialize = util.noop;
+        exports.initialize = util.noop;
 
         /**
          * 当前Action运行上下文
@@ -56,7 +59,7 @@ define(
          * @type {meta.ActionContext}
          * @protected
          */
-        Action.prototype.context = null;
+        exports.context = null;
 
         /**
          * 指定对应的Model类型，{@link Action#createModel}默认使用此属性
@@ -64,7 +67,7 @@ define(
          * @type {Function}
          * @protected
          */
-        Action.prototype.modelType = null;
+        exports.modelType = null;
 
         /**
          * 指定对应的View类型，{@link Action#createView}默认使用此属性
@@ -72,7 +75,7 @@ define(
          * @type {Function}
          * @protected
          */
-        Action.prototype.viewType = null;
+        exports.viewType = null;
 
         /**
          * 进入Action执行周期
@@ -82,7 +85,7 @@ define(
          * @fires enter
          * @fires beforemodelload
          */
-        Action.prototype.enter = function (actionContext) {
+        exports.enter = function (actionContext) {
             this.context = actionContext || {};
 
             /**
@@ -133,7 +136,7 @@ define(
          * @param {Object[]} 错误集合
          * @ignore
          */
-        Action.prototype.handleError = function (errors) {
+        exports.handleError = function (errors) {
             throw errors;
         };
 
@@ -144,7 +147,7 @@ define(
          * @return {Model | Object} 当前Action需要使用的Model对象
          * @protected
          */
-        Action.prototype.createModel = function (context) {
+        exports.createModel = function (context) {
             if (this.modelType) {
                 var model = new this.modelType(context);
                 return model;
@@ -163,7 +166,7 @@ define(
          * @fires rendered
          * @fires entercomplete
          */
-        Action.prototype.forwardToView = function () {
+        exports.forwardToView = function () {
             // 如果已经销毁了就别再继续下去
             if (this.disposed) {
                 return this;
@@ -225,7 +228,7 @@ define(
          *
          * @return {Object} 当前Action需要使用的View对象
          */
-        Action.prototype.createView = function () {
+        exports.createView = function () {
             return this.viewType ? new this.viewType() : null;
         };
 
@@ -234,7 +237,7 @@ define(
          *
          * @protected
          */
-        Action.prototype.initBehavior = util.noop;
+        exports.initBehavior = util.noop;
 
         /**
          * 过滤重定向操作，本方法返回`false`则会取消重定向，由当前Action处理新的URL
@@ -242,7 +245,7 @@ define(
          * @param {URL} targetURL 重定向的目标URL
          * @return {boolean}
          */
-        Action.prototype.filterRedirect = util.noop;
+        exports.filterRedirect = util.noop;
 
         /**
          * 离开当前Action，清理Model和View
@@ -251,7 +254,7 @@ define(
          * @fires beforeleave
          * @fires leave
          */
-        Action.prototype.leave = function () {
+        exports.leave = function () {
             // 如果已经销毁了就别再继续下去
             if (this.disposed) {
                 return this;
@@ -304,7 +307,7 @@ define(
          * @param {string | URL} url 需要重定向的目标URL
          * @param {meta.RedirectOption} [options] 额外附加的参数对象
          */
-        Action.prototype.redirect = function (url, options) {
+        exports.redirect = function (url, options) {
             var locator = require('./locator');
             locator.redirect(url, options);
         };
@@ -312,7 +315,7 @@ define(
         /**
          * 重加载当前Action
          */
-        Action.prototype.reload = function () {
+        exports.reload = function () {
             var locator = require('./locator');
             locator.reload();
         };
@@ -323,7 +326,7 @@ define(
          * @param {string | URL} [defaultURL] 无来源URL时的跳转地址，
          * 如果无此参数，则无来源URL时不进行跳转
          */
-        Action.prototype.back = function (defaultURL) {
+        exports.back = function (defaultURL) {
             var referrer = this.context && this.context.referrer;
             var url = referrer || defaultURL;
             if (url) {
@@ -331,7 +334,7 @@ define(
             }
         };
 
-        util.inherits(Action, EventTarget);
+        var Action = require('eoo').create(require('mini-event/EventTarget'), exports);
         return Action;
     }
 );

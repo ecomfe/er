@@ -11,6 +11,8 @@ define(
         var util = require('./util');
 
         /**
+         * @class URL
+         *
          * URL信息类
          *
          * 该类是一个不可变类型，构建后可以读取其中的内容，但不能修改
@@ -28,7 +30,9 @@ define(
          * @param {string} [searchSeparator="~"] 分隔path与search的分隔符
          * @constructor
          */
-        function URL(path, search, searchSeparator) {
+        var exports = {};
+
+        exports.constructor = function (path, search, searchSeparator) {
             path = path || '/';
             search = search || '';
             searchSeparator = searchSeparator || '~';
@@ -84,7 +88,7 @@ define(
                 }
                 return key ? query[key] : util.mix({}, query);
             };
-        }
+        };
 
         /**
          * 对比2个URL的差异
@@ -92,7 +96,7 @@ define(
          * @param {string | URL} another 另一个URL
          * @return {meta.URLDifference}
          */
-        URL.prototype.compare = function (another) {
+        exports.compare = function (another) {
             if (typeof another === 'string') {
                 another = URL.parse(another);
             }
@@ -151,6 +155,8 @@ define(
 
             return result;
         };
+
+        var URL = require('eoo').create(exports);
 
         /**
          * 解析完整的URL
