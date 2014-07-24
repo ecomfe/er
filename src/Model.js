@@ -652,7 +652,7 @@ define(
             this.pendingWorkers = null;
         };
 
-        var Model = require('eoo').create(require('mini-event.EventTarget'), exports);
+        var Model = require('eoo').create(require('mini-event/EventTarget'), exports);
 
         return Model;
     }
