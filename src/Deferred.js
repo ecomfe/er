@@ -299,7 +299,8 @@ define(
         // 暂不支持`progress`，
         // 社区对`progress`处理函数的返回值和异常的传递还在讨论中
 
-        var Deferred = require('eoo').create(require('mini-event/EventTarget'), exports);
+        var Deferred = require('eoo').create(exports);
+        require('mini-event.EventTarget').enable(Deferred);
 
         /**
          * 判断一个对象是否是一个{@link meta.Promise}对象
