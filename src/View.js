@@ -81,7 +81,7 @@ define(
             }
 
             var visit = function (propertyPath) {
-                var path = propertyPath.split('.');
+                var path = propertyPath.replace(/\[(\d+)\]/g, '.$1').split('.');
                 var propertyName = path.shift();
                 var value = model.get(propertyName);
 

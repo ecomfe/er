@@ -639,13 +639,15 @@ define(
          * 销毁当前{@link Model}对象，会尝试停止所有正在加载的数据
          */
         Model.prototype.dispose = function () {
-            for (var i = 0; i < this.pendingWorkers.length; i++) {
-                var worker = this.pendingWorkers[i];
-                if (typeof worker.abort === 'function') {
-                    try {
-                        worker.abort();
-                    }
-                    catch (ex) {
+            if (this.pendingWorkers) {
+                for (var i = 0; i < this.pendingWorkers.length; i++) {
+                    var worker = this.pendingWorkers[i];
+                    if (typeof worker.abort === 'function') {
+                        try {
+                            worker.abort();
+                        }
+                        catch (ex) {
+                        }
                     }
                 }
             }

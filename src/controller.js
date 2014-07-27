@@ -836,6 +836,7 @@ define(
             // 用于处理子Action中跳转的特殊`redirect`方法，接口与`locator.redirect`保持一致，
             // 但由于`renderChildAction`可以传额外参数，因此也再加一个参数
             var locator = this.getLocator();
+            var currentController = this;
             function redirect(url, options, extra) {
                 options = options || {};
                 var url = locator.resolveURL(url, options);
@@ -847,12 +848,12 @@ define(
                     var globalRedirectPerformed = locator.redirect(url, options);
                     // 如果因为URL相等的原因没有完成跳转，那就别销毁子Action，相当于点击没任何效果
                     if (globalRedirectPerformed && container) {
-                        removeChildAction(container);
+                        removeChildAction(currentController, container);
                     }
                     return globalRedirectPerformed;
                 }
 
-                var childActionInfo = this.childActionMapping[actionContext.container];
+                var childActionInfo = currentController.childActionMapping[actionContext.container];
                 var changed = url.toString() !== childActionInfo.url.toString();
                 var shouldPerformRedirect = changed || options.force;
                 if (shouldPerformRedirect) {
@@ -862,11 +863,43 @@ define(
                     }
                     else {
                         // `renderChildAction`中会把原来的Action销毁
-                        this.renderChildAction(url, childActionInfo.container, extra);
+                        currentController.renderChildAction(url, childActionInfo.container, extra);
                     }
                 }
 
                 return shouldPerformRedirect;
+            }
+
+            // 判断一个子Action中链接点击是否已经由对应的子Action处理了跳转,
+            // 如果是2层以上的子Action嵌套，下层Action处理完跳转后，因为没有（也不能）阻止冒泡，
+            // 所以上层的Action容器也会抓到这个事件，此时再去跳转是不合理的，需要有个判断
+            function isChildActionRedirected(e) {
+                // 除低版本IE外，其它浏览器是可以在事件对象上加自定义属性的，IE每次都生成新的事件对象所以保留不了这些属性，
+                // 在这里优先用自定义属性控制，避免对DOM树无意义的遍历，只有在没有属性的时候，才向后兼容至DOM树的遍历
+                if (e.isChildActionRedirected) {
+                    return true;
+                }
+
+                var innermostContainer = e.target || e.srcElement;
+                while (innermostContainer) {
+                    // 是Action容器的元素肯定符合以下条件：
+                    //
+                    // - 有个`id`，因为没有`id`不能渲染子Action
+                    // - 这个`id`在`childActionMapping`里是有对应的值的
+                    if (innermostContainer.id && currentController.childActionMapping[innermostContainer.id]) {
+                        break;
+                    }
+
+                    innermostContainer = innermostContainer.parentNode;
+                }
+                // 如果最接近被点击的链接的Action容器是不是当前的这个容器，就说明在当前容器和链接之间还有一层以上的子Action，
+                // 那么这个子Action肯定会处理掉这个链接的跳转，不需要这里处理了
+                if (innermostContainer.id !== actionContext.container) {
+                    e.isChildActionRedirected = true;
+                    return true;
+                }
+
+                return false;
             }
 
             // 需要把`container`上的链接点击全部拦截下来，如果是hash跳转，则转到controller上来
@@ -886,6 +919,10 @@ define(
                 if (href.charAt(0) !== '#') {
                     return;
                 }
+                // 如果有下面的子Action处理了跳转，那这里就啥也不干了
+                if (isChildActionRedirected(e)) {
+                    return;
+                }
 
                 if (e.preventDefault) {
                     e.preventDefault();
@@ -900,8 +937,13 @@ define(
                 // 直接使用专供子Action上的`redirect`方法，
                 // 会自动处理`hijack`的解绑定、URL比对、进入子Action等事，
                 // 为免Action重写`redirect`方法，这里用闭包内的这个
-                var global = target.getAttribute('data-redirect') === 'global';
-                redirect(url, { global: global });
+                var redirectAttributes = (target.getAttribute('data-redirect') || '').split(/[,\s]/);
+                var redirectOptions = {};
+                for (var i = 0; i < redirectAttributes.length; i++) {
+                    var redirectAttributeName = util.trim(redirectAttributes[i]);
+                    redirectOptions[redirectAttributeName] = true;
+                }
+                redirect(url, redirectOptions);
             }
 
             // 把子Action的`redirect`方法改掉，以免影响全局主Action，
