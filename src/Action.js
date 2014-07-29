@@ -21,7 +21,7 @@ define(
          */
         function reportErrors() {
             var errors = [];
-            for (var i = 0; i < arguments.length; i++) {
+            for (var i = 0, len = arguments.length; i < len; i++) {
                 var result = arguments[i];
                 if (!result.success) {
                     errors.push(result);
