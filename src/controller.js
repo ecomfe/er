@@ -408,8 +408,8 @@ define(
                 actionContext.args.title = actionConfig.title;
             }
             if (actionConfig.documentTitle) {
-                actionContext.title = actionConfig.title;
-                actionContext.args.title = actionConfig.title;
+                actionContext.documentTitle = actionConfig.documentTitle;
+                actionContext.args.documentTitle = actionConfig.documentTitle;
             }
 
             // 可在`registerAction`的时候通过`args`属性添加固定的参数，
