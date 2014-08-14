@@ -214,7 +214,7 @@ define(
          * @ignore
          */
         function removePendingWorker(model, worker) {
-            // 需要判断pendingWorkers是否已经被销毁
+            // 如果pendingWorkers已经为空，直接退出
             if (!model.pendingWorkers) {
                 return;
             }
