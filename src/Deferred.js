@@ -123,7 +123,7 @@ define(
         }
 
         /**
-         * Deferred类
+         * @class Deferred
          *
          * 类似于jQuery的`Deferred`对象，是对异步操作的一种封装
          *
@@ -136,7 +136,9 @@ define(
          * @mixins mini-event.EventTarget
          * @constructor
          */
-        function Deferred() {
+        var exports = {};
+
+        exports.constructor = function () {
             /**
              * @property {string} state
              *
@@ -177,20 +179,6 @@ define(
                 resolve: util.bind(this.resolve, this),
                 reject: util.bind(this.reject, this)
             };
-        }
-
-        require('mini-event/EventTarget').enable(Deferred);
-
-        /**
-         * 判断一个对象是否是一个{@link meta.Promise}对象
-         *
-         * 该方法采用灵活的判断方式，并非要求`value`为`Deferred`的实例
-         *
-         * @param {Mixed} value 需要判断的对象
-         * @return {boolean} 如果`value`是{@link meta.Promise}对象，则返回`true`
-         */
-        Deferred.isPromise = function (value) {
-            return value && typeof value.then === 'function';
         };
 
         /**
@@ -202,12 +190,12 @@ define(
          *
          * @type {boolean}
          */
-        Deferred.prototype.syncModeEnabled = false;
+        exports.syncModeEnabled = false;
 
         /**
          * @inheritdoc meta.Resolver#resolve
          */
-        Deferred.prototype.resolve = function () {
+        exports.resolve = function () {
             if (this.state !== 'pending') {
                 return;
             }
@@ -241,7 +229,7 @@ define(
         /**
          * @inheritdoc meta.Resolver#reject
          */
-        Deferred.prototype.reject = function () {
+        exports.reject = function () {
             if (this.state !== 'pending') {
                 return;
             }
@@ -275,28 +263,28 @@ define(
         /**
          * @inheritdoc meta.Promise#done
          */
-        Deferred.prototype.done = function (callback) {
+        exports.done = function (callback) {
             return this.then(callback);
         };
 
         /**
          * @inheritdoc meta.Promise#fail
          */
-        Deferred.prototype.fail = function (callback) {
+        exports.fail = function (callback) {
             return this.then(null, callback);
         };
 
         /**
          * @inheritdoc meta.Promise#ensure
          */
-        Deferred.prototype.ensure = function (callback) {
+        exports.ensure = function (callback) {
             return this.then(callback, callback);
         };
 
         /**
          * @inheritdoc meta.Promise#then
          */
-        Deferred.prototype.then = function (done, fail) {
+        exports.then = function (done, fail) {
             var deferred = new Deferred();
             deferred.syncModeEnabled = this.syncModeEnabled;
 
@@ -310,6 +298,21 @@ define(
 
         // 暂不支持`progress`，
         // 社区对`progress`处理函数的返回值和异常的传递还在讨论中
+
+        var Deferred = require('eoo').create(exports);
+        require('mini-event/EventTarget').enable(Deferred);
+
+        /**
+         * 判断一个对象是否是一个{@link meta.Promise}对象
+         *
+         * 该方法采用灵活的判断方式，并非要求`value`为`Deferred`的实例
+         *
+         * @param {Mixed} value 需要判断的对象
+         * @return {boolean} 如果`value`是{@link meta.Promise}对象，则返回`true`
+         */
+        Deferred.isPromise = function (value) {
+            return value && typeof value.then === 'function';
+        };
 
         /**
          * 生成一个新的{@link meta.Promise}对象，当所有给定的{@link meta.Promise}对象完成后触发

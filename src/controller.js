@@ -15,6 +15,8 @@ define(
         var assert = require('./assert');
 
         /**
+         * @class Controller
+         *
          * 控制器类，负责URL与Action的调度，将URL映射到具体的一个{@link Action}的执行上
          *
          * 通过`require('er/controller').Controller`访问该类构造函数，其中`require('er/controller')`是该类的全局实例
@@ -22,23 +24,23 @@ define(
          * @extends mini-event.EventTarget
          * @constructor
          */
-        function Controller() {
+        var exports = {};
+
+        exports.constructor = function () {
             this.actionPathMapping = {};
             this.childActionMapping = {};
             this.currentURL = null;
             this.currentAction = null;
             this.globalActionLoader = null;
             this.childActionLoaders = {};
-        }
-
-        util.inherits(Controller, require('mini-event/EventTarget'));
+        };
 
         /**
          * 注册一个或一系列Action
          *
          * @param {meta.ActionConfig | meta.ActionConfig[]} actionConfigs Action的相关配置
          */
-        Controller.prototype.registerAction = function (actionConfigs) {
+        exports.registerAction = function (actionConfigs) {
             if (!actionConfigs.hasOwnProperty('length')) {
                 actionConfigs = [actionConfigs];
             }
@@ -58,7 +60,7 @@ define(
          * @return {string}
          * @protected
          */
-        Controller.prototype.getDefaultTitle = function () {
+        exports.getDefaultTitle = function () {
             return this.defaultTitle;
         };
 
@@ -67,7 +69,7 @@ define(
          *
          * @param {string} title 默认的标题
          */
-        Controller.prototype.setDefaultTitle = function (title) {
+        exports.setDefaultTitle = function (title) {
             this.defaultTitle = title;
         };
 
@@ -77,7 +79,7 @@ define(
          * @return {Router}
          * @protected
          */
-        Controller.prototype.getRouter = function () {
+        exports.getRouter = function () {
             return this.router;
         };
 
@@ -86,7 +88,7 @@ define(
          *
          * @param {Router} router 关联的{@link Router}实例
          */
-        Controller.prototype.setRouter = function (router) {
+        exports.setRouter = function (router) {
             this.router = router;
         };
 
@@ -96,7 +98,7 @@ define(
          * @return {locator}
          * @protected
          */
-        Controller.prototype.getLocator = function () {
+        exports.getLocator = function () {
             return this.locator;
         };
 
@@ -107,7 +109,7 @@ define(
          *
          * @param {locator} locator 关联的{@link locator}实例
          */
-        Controller.prototype.setLocator = function (locator) {
+        exports.setLocator = function (locator) {
             this.locator = locator;
         };
 
@@ -117,7 +119,7 @@ define(
          * @return {mini-event.EventTarget}
          * @protected
          */
-        Controller.prototype.getEventBus = function () {
+        exports.getEventBus = function () {
             return this.eventBus;
         };
 
@@ -128,7 +130,7 @@ define(
          *
          * @param {mini-event.EventTarget} eventBug 事件总线对象
          */
-        Controller.prototype.setEventBus = function (eventBus) {
+        exports.setEventBus = function (eventBus) {
             this.eventBus = eventBus;
         };
 
@@ -138,7 +140,7 @@ define(
          * @return {permission}
          * @protected
          */
-        Controller.prototype.getPermissionProvider = function () {
+        exports.getPermissionProvider = function () {
             return this.permissionProvider;
         };
 
@@ -147,7 +149,7 @@ define(
          *
          * @param {permission} permissionProvider 关联的权限控制对象
          */
-        Controller.prototype.setPermissionProvider = function (permissionProvider) {
+        exports.setPermissionProvider = function (permissionProvider) {
             this.permissionProvider = permissionProvider;
         };
 
@@ -157,7 +159,7 @@ define(
          * @return {string}
          * @protected
          */
-        Controller.prototype.getMainContainer = function () {
+        exports.getMainContainer = function () {
             return this.mainContainer || config.mainElement;
         };
 
@@ -166,7 +168,7 @@ define(
          *
          * @param {string} mainContainer 主Action的容器元素id
          */
-        Controller.prototype.setMainContainer = function (mainContainer) {
+        exports.setMainContainer = function (mainContainer) {
             this.mainContainer = mainContainer;
         };
 
@@ -176,7 +178,7 @@ define(
          * @return {string}
          * @protected
          */
-        Controller.prototype.getNoAuthorityLocation = function () {
+        exports.getNoAuthorityLocation = function () {
             return this.noAuthorityLocation || config.noAuthorityLocation;
         };
 
@@ -185,7 +187,7 @@ define(
          *
          * @param {string} noAuthorityLocation 无权限页的URL
          */
-        Controller.prototype.setNoAuthorityLocation = function (noAuthorityLocation) {
+        exports.setNoAuthorityLocation = function (noAuthorityLocation) {
             this.noAuthorityLocation = noAuthorityLocation;
         };
 
@@ -195,7 +197,7 @@ define(
          * @return {string}
          * @protected
          */
-        Controller.prototype.getNotFoundLocation = function () {
+        exports.getNotFoundLocation = function () {
             return this.notFoundLocation || config.notFoundLocation;
         };
 
@@ -204,14 +206,14 @@ define(
          *
          * @param {string} notFoundLocation 跳转URL
          */
-        Controller.prototype.setNotFoundLocation = function (notFoundLocation) {
+        exports.setNotFoundLocation = function (notFoundLocation) {
             this.notFoundLocation = notFoundLocation;
         };
 
         /**
          * 开始`controller`对象的工作
          */
-        Controller.prototype.start = function () {
+        exports.start = function () {
             if (!this.getDefaultTitle()) {
                 this.setDefaultTitle(config.systemName || document.title);
             }
@@ -227,7 +229,7 @@ define(
          * @return {meta.ActionConfig | null} 找到的配置对象，找不到返回`null`
          * @protected
          */
-        Controller.prototype.findActionConfig = function (actionContext) {
+        exports.findActionConfig = function (actionContext) {
             var path = actionContext.url.getPath();
             var actionConfig = this.actionPathMapping[path];
             return actionConfig;
@@ -245,7 +247,7 @@ define(
          * 如果确定不存在需要的配置，则返回null
          * @protected
          */
-        Controller.prototype.resolveActionConfig = function (actionConfig, actionContext) {
+        exports.resolveActionConfig = function (actionConfig, actionContext) {
             return actionConfig;
         };
 
@@ -262,7 +264,7 @@ define(
          * @return {boolean} 有权限返回`true`，无权限则返回`false`
          * @protected
          */
-        Controller.prototype.checkAuthority = function (actionConfig, actionContext) {
+        exports.checkAuthority = function (actionConfig, actionContext) {
             var authority = actionConfig.authority;
 
             if (!authority) {
@@ -295,7 +297,7 @@ define(
          * @return {meta.ActionConfig | null} 对应的Action配置
          * @protected
          */
-        Controller.prototype.findEligibleActionConfig = function (actionContext) {
+        exports.findEligibleActionConfig = function (actionContext) {
             var actionConfig = this.findActionConfig(actionContext);
 
             // 判断优先级：
@@ -391,7 +393,7 @@ define(
          * 如果没找到{@link Action}的配置或者加载{@link Action}失败，则该{@link meta.Promise}进入`rejected`状态
          * @protected
          */
-        Controller.prototype.loadAction = function (actionContext) {
+        exports.loadAction = function (actionContext) {
             var actionConfig = this.findEligibleActionConfig(actionContext);
             // 通过`resolveActionConfig`可以配置默认映射关系等，提供扩展点
             actionConfig = this.resolveActionConfig(actionConfig, actionContext);
@@ -562,7 +564,7 @@ define(
          * @param {meta.ActionContext} actionContext Action执行的上下文
          * @protected
          */
-        Controller.prototype.enterAction = function (action, actionContext) {
+        exports.enterAction = function (action, actionContext) {
             if (!actionContext.isChildAction) {
                 // 未防止在加载Action模块的时候，用户的操作导致进入其它模块，
                 // 这里需要判断当前的URL是否依旧是加载时指定的URL。
@@ -666,7 +668,7 @@ define(
          * @return {meta.Promise} 一个特殊的{@link meta.Promise}对象，该对象可以通过`abort()`取消Action加载完成后的执行
          * @protected
          */
-        Controller.prototype.forward = function (url, container, options, isChildAction) {
+        exports.forward = function (url, container, options, isChildAction) {
             // 如果想要把这个方法暴露出去的话，需要判断URL与currentURL是否相同（正常情况下`locator`层有判断）
             var actionContext = {
                 url: url,
@@ -706,7 +708,7 @@ define(
          *
          * @param {string | URL} url 需要加载的URL
          */
-        Controller.prototype.renderAction = function (url) {
+        exports.renderAction = function (url) {
             if (typeof url === 'string') {
                 url = URL.parse(url);
             }
@@ -826,7 +828,7 @@ define(
          * @param {meta.ActionContext} actionContext Action执行上下文
          * @protected
          */
-        Controller.prototype.enterChildAction = function (action, actionContext) {
+        exports.enterChildAction = function (action, actionContext) {
             // 把加载用的`loader`去掉回收内存
             this.childActionLoaders[actionContext.container] = null;
 
@@ -979,7 +981,7 @@ define(
          * @param {Object} [options] 交给{@link Action}的额外参数
          * @return {meta.Promise} 一个可取消的{@link meta.Promise}对象，当渲染完成后进行`resolved`状态，但可在之前调用`abort()`取消
          */
-        Controller.prototype.renderChildAction = function (url, container, options) {
+        exports.renderChildAction = function (url, container, options) {
             assert.has(container);
 
             if (typeof url === 'string') {
@@ -1011,6 +1013,7 @@ define(
             return loadingChildAction;
         };
 
+        var Controller = require('eoo').create(require('mini-event/EventTarget'), exports);
         var instance = new Controller();
         instance.setLocator(require('./locator'));
         instance.setRouter(require('./router'));

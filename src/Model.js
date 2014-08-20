@@ -171,10 +171,8 @@ define(
             return loadParallel(model, datasource);
         }
 
-        var EventTarget = require('mini-event/EventTarget');
-
         /**
-         * Model类声明
+         * @class Model
          *
          * 在ER框架中，Model并不一定要继承该类，任何对象都可以作为Model使用
          *
@@ -193,7 +191,9 @@ define(
          * @param {Object} [context] 初始化的数据
          * @constructor
          */
-        function Model(context) {
+        var exports = {};
+
+        exports.constructor = function (context) {
             this.store = {};
             this.pendingWorkers = [];
 
@@ -202,9 +202,9 @@ define(
             }
 
             this.initialize();
-        }
+        };
 
-        Model.prototype.initialize = util.noop;
+        exports.initialize = util.noop;
 
         /**
          * 移除一个已完成的工作对象
@@ -233,7 +233,7 @@ define(
          *
          * @param {meta.Promise} worker 工作对象
          */
-        Model.prototype.addPendingWorker = function (worker) {
+        exports.addPendingWorker = function (worker) {
             this.pendingWorkers.push(worker);
             worker.ensure(util.bind(removePendingWorker, null, this, worker));
         };
@@ -328,14 +328,14 @@ define(
          * @type {Object | Array | Function}
          * @protected
          */
-        Model.prototype.datasource = null;
+        exports.datasource = null;
 
         /**
          * 获取数据源配置，默认直接返回{@link Model#datasource}属性
          *
          * @return {Object | Array | Function}
          */
-        Model.prototype.getDatasource = function () {
+        exports.getDatasource = function () {
             return this.datasource;
         };
 
@@ -371,7 +371,7 @@ define(
          * 在数据加载且{@link Model#prepare}方法执行后进入`resolved`状态，
          * 如果加载过程中出现错误，则进入`rejected`状态
          */
-        Model.prototype.load = function () {
+        exports.load = function () {
             try {
                 var datasource = this.getDatasource();
                 var loading = load(this, datasource);
@@ -402,7 +402,7 @@ define(
          * 则返回一个{@link meta.Promise}对象，通知调用者等待
          * @protected
          */
-        Model.prototype.prepare = util.noop;
+        exports.prepare = util.noop;
 
         /**
          * 获取对应键的值
@@ -410,7 +410,7 @@ define(
          * @param {string} name 属性名
          * @return {Mixed} `name`对应的值
          */
-        Model.prototype.get = function (name) {
+        exports.get = function (name) {
             return this.store[name];
         };
 
@@ -451,7 +451,7 @@ define(
          * @return {Mixed} 返回`value`对象
          * @fires change
          */
-        Model.prototype.set = function (name, value, options) {
+        exports.set = function (name, value, options) {
             options = options || {};
 
             var record = setProperty(this, name, value);
@@ -481,7 +481,7 @@ define(
          * @return {Object} 返回`extension`对象
          * @fires change
          */
-        Model.prototype.fill = function (extension, options) {
+        exports.fill = function (extension, options) {
             options = options || {};
 
             var changes = [];
@@ -513,7 +513,7 @@ define(
          * @param {boolean} [options.silent=false] 如果该值为`true`则不触发{@link Model#change}事件
          * @fires change
          */
-        Model.prototype.remove = function (name, options) {
+        exports.remove = function (name, options) {
             // 如果原来就没这个值，就不触发`change`事件了
             if (!this.store.hasOwnProperty(name)) {
                 return;
@@ -546,7 +546,7 @@ define(
          * @param {string} name 属性名
          * @return {Model} `name`对应的值组装成的新的{@link Model}对象
          */
-        Model.prototype.getAsModel = function (name) {
+        exports.getAsModel = function (name) {
             var value = this.get(name);
             if (!value || {}.toString.call(value) !== '[object Object]') {
                 return new Model();
@@ -561,7 +561,7 @@ define(
          *
          * @return {Object} 一个普通的对象，修改该对象不会影响到当前{@link Model}对象
          */
-        Model.prototype.dump = function () {
+        exports.dump = function () {
             // 为保证获取对象后修改不会影响到当前`Model`对象，
             // 需要做一次克隆的操作
             return util.mix({}, this.store);
@@ -573,7 +573,7 @@ define(
          * @param {string} name 属性名
          * @return {boolean}
          */
-        Model.prototype.has = function (name) {
+        exports.has = function (name) {
             return this.store.hasOwnProperty(name);
         };
 
@@ -583,7 +583,7 @@ define(
          * @param {string} name 属性名
          * @return {boolean}
          */
-        Model.prototype.hasValue = function (name) {
+        exports.hasValue = function (name) {
             // 不要用`this.get`，有可能`Model`重写`get`还依赖这个方法
             return this.has(name) && this.store[name] != null;
         };
@@ -595,7 +595,7 @@ define(
          * @param {string} name 属性名
          * @return {boolean}
          */
-        Model.prototype.hasReadableValue = function (name) {
+        exports.hasReadableValue = function (name) {
             return this.hasValue(name) && this.store[name] !== '';
         };
 
@@ -606,7 +606,7 @@ define(
          * @override
          * @deprecated 建议使用{@link Model#dump}方法
          */
-        Model.prototype.valueOf = function () {
+        exports.valueOf = function () {
             return this.dump();
         };
 
@@ -615,7 +615,7 @@ define(
          *
          * @return {Model} 克隆后的新{@link Model}对象
          */
-        Model.prototype.clone = function () {
+        exports.clone = function () {
             return new Model(this.store);
         };
 
@@ -631,14 +631,14 @@ define(
          * @param {string} [error.name] 对应的数据键名
          * @param {Mixed} error.error 错误对象
          */
-        Model.prototype.handleError = function (error) {
+        exports.handleError = function (error) {
             throw error;
         };
 
         /**
          * 销毁当前{@link Model}对象，会尝试停止所有正在加载的数据
          */
-        Model.prototype.dispose = function () {
+        exports.dispose = function () {
             for (var i = 0; i < this.pendingWorkers.length; i++) {
                 var worker = this.pendingWorkers[i];
                 if (typeof worker.abort === 'function') {
@@ -652,7 +652,7 @@ define(
             this.pendingWorkers = null;
         };
 
-        util.inherits(Model, EventTarget);
+        var Model = require('eoo').create(require('mini-event/EventTarget'), exports);
 
         return Model;
     }
