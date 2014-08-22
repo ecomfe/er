@@ -14,23 +14,29 @@
     <script src="jasmine-ajax.js"></script>
     <script>
         require.config({
-            packages: [
+            'packages': [
                 {
-                    name: 'er',
-                    location: '../src',
-                    main: 'main'
+                    'name': 'er',
+                    'location': '../src',
+                    'main': 'main'
                 },
                 {
-                    name: 'mini-event',
-                    location: '../dep/mini-event/1.0.0/src',
-                    main: 'main'
+                    'name': 'mini-event',
+                    'location': '../dep/mini-event/1.0.2/src',
+                    'main': 'main'
                 },
                 {
-                    name: 'etpl',
-                    location: '../dep/etpl/2.1.0/src',
-                    main: 'main'
+                    'name': 'etpl',
+                    'location': '../dep/etpl/2.1.2/src',
+                    'main': 'main'
+                },
+                {
+                    'name': 'eoo',
+                    'location': '../dep/eoo/0.0.8/src',
+                    'main': 'oo'
                 }
-            ]
+            ],
+            'paths': {}
         });
     </script>
 </head>

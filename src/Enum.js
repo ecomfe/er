@@ -8,8 +8,10 @@
  * @date $DATE$
  */
 define(
-    function () {
+    function (require) {
         /**
+         * @class Enum
+         *
          * 通用枚举类，用于生成一个枚举对象
          *
          * 枚举对象是业务系统中非常普遍使用的一个类型，其基本功能是将一个数字和具体的含义对应起来
@@ -45,7 +47,9 @@ define(
          * @param {meta.EnumItem...} 枚举项
          * @constructor
          */
-        function Enum() {
+        var exports = {};
+
+        exports.constructor = function () {
             this.valueIndex = [];
             this.aliasIndex = {};
             this.textIndex = {};
@@ -57,7 +61,7 @@ define(
                 }
                 this.addElement(element);
             }
-        }
+        };
 
         /**
          * 为当前枚举对象添加一个{@link meta.EnumItem 枚举项}
@@ -65,7 +69,7 @@ define(
          * @param {meta.EnumItem} element 待添加的枚举项
          * @throws {Error} 如果`value`或`alias`存在重复则抛出异常
          */
-        Enum.prototype.addElement = function (element) {
+        exports.addElement = function (element) {
             if (this.hasOwnProperty(element.value)) {
                 throw new Error('Already defined an element with value' + element.value + ' in this enum type');
             }
@@ -88,7 +92,7 @@ define(
          * @param {number} value 数值
          * @return {meta.EnumItem} 对应的枚举项
          */
-        Enum.prototype.fromValue = function (value) {
+        exports.fromValue = function (value) {
             return this.valueIndex[value];
         };
 
@@ -98,7 +102,7 @@ define(
          * @param {string} alias 别名
          * @return {meta.EnumItem} 对应的枚举项
          */
-        Enum.prototype.fromAlias = function (alias) {
+        exports.fromAlias = function (alias) {
             return this.aliasIndex[alias];
         };
 
@@ -108,7 +112,7 @@ define(
          * @param {string} text 文字
          * @return {meta.EnumItem} 对应的枚举项
          */
-        Enum.prototype.fromText = function (text) {
+        exports.fromText = function (text) {
             return this.textIndex[text];
         };
 
@@ -118,7 +122,7 @@ define(
          * @param {number} value 数值
          * @return {string} 对应的文字
          */
-        Enum.prototype.getTextFromValue = function (value) {
+        exports.getTextFromValue = function (value) {
             return this.fromValue(value).text;
         };
 
@@ -128,7 +132,7 @@ define(
          * @param {string} alias 文字
          * @return {string} 对应的文字
          */
-        Enum.prototype.getTextFromAlias = function (alias) {
+        exports.getTextFromAlias = function (alias) {
             return this.fromAlias(alias).text;
         };
 
@@ -138,7 +142,7 @@ define(
          * @param {string} alias 数值
          * @return {number} 对应的数值
          */
-        Enum.prototype.getValueFromAlias = function (alias) {
+        exports.getValueFromAlias = function (alias) {
             return this.fromAlias(alias).value;
         };
 
@@ -148,7 +152,7 @@ define(
          * @param {string} text 文字
          * @return {number} 对应的数值
          */
-        Enum.prototype.getValueFromText = function (text) {
+        exports.getValueFromText = function (text) {
             return this.fromText(text).value;
         };
 
@@ -158,7 +162,7 @@ define(
          * @param {number} value 数值
          * @return {string} 对应的别名
          */
-        Enum.prototype.getAliasFromValue = function (value) {
+        exports.getAliasFromValue = function (value) {
             return this.fromValue(value).alias;
         };
 
@@ -168,7 +172,7 @@ define(
          * @param {string} text 文字
          * @return {string} 对应的别名
          */
-        Enum.prototype.getAliasFromText = function (text) {
+        exports.getAliasFromText = function (text) {
             return this.fromText(text).alias;
         };
 
@@ -180,7 +184,7 @@ define(
          * 不提供此参数则直接将枚举按`value`属性进行排序生成数组返回
          * @return {meta.EnumItem[]} 每次返回一个全新的数组副本
          */
-        Enum.prototype.toArray = function () {
+        exports.toArray = function () {
             var array = [];
             if (arguments.length > 0) {
                 for (var i = 0; i < arguments.length; i++) {
@@ -205,6 +209,7 @@ define(
             return array;
         };
 
+        var Enum = require('eoo').create(exports);
         return Enum;
     }
 );
