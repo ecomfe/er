@@ -921,6 +921,12 @@ define(
                     return;
                 }
 
+                // 不要任何不在本页面内打开的东西，包括`_blank`、`_tab`以及指定其它`iframe`等
+                var linkTarget = target.getAttribute('target');
+                if (linkTarget && linkTarget !== '_self') {
+                    return;
+                }
+
                 // `<a>`元素也可能没有`href`属性
                 var href = target.getAttribute('href', 2) || '';
                 // 是hash跳转的链接就取消掉默认的跳转行为
