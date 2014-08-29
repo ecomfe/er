@@ -13,8 +13,12 @@ define(
         var assert = require('./assert');
 
         var setImmediate = typeof window.setImmediate === 'function'
-            ? function (fn) { window.setImmediate(fn); }
-            : function (fn) { window.setTimeout(fn, 0); };
+            ? function (fn) {
+                window.setImmediate(fn);
+            }
+            : function (fn) {
+                window.setTimeout(fn, 0);
+            };
 
         /**
          * 尝试执行相关的回调函数
@@ -64,7 +68,7 @@ define(
          *
          * @param {Deferred} original 原`Deferred`对象
          * @param {Deferred} deferred 新`Deferred`对象
-         * @param {callback} 当`original`运行完毕后，需要执行的函数
+         * @param {Function} callback 当`original`运行完毕后，需要执行的函数
          * @param {string} actionType 关联的动作类型，`"resolve"`或`"reject"`
          * @return {Function} 关联函数，可注册在`original`的相关回调函数上
          * @ignore

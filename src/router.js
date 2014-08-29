@@ -115,7 +115,7 @@ define(
          *
          * 事件总线可以是任何对象，只要实现`fire`方法供事件触发即可
          *
-         * @param {mini-event.EventTarget} eventBug 事件总线对象
+         * @param {mini-event.EventTarget} eventBus 事件总线对象
          */
         exports.setEventBus = function (eventBus) {
             this.eventBus = eventBus;

@@ -209,6 +209,7 @@ define(
         /**
          * 移除一个已完成的工作对象
          *
+         * @param {Model} model 当前的`Model`对象
          * @param {meta.Promise} worker 工作对象
          * @ignore
          */
@@ -340,7 +341,7 @@ define(
         };
 
         function forwardToPrepare() {
-            function processError (ex) {
+            function processError(ex) {
                 var error = {
                     success: false,
                     name: '$prepare',
@@ -417,7 +418,7 @@ define(
         /**
          * 设置单个属性值
          *
-         * @param {Model} 作为容器的Model对象
+         * @param {Model} model 作为容器的Model对象
          * @param {string} name 属性名
          * @param {Mixed} value 对应的值
          * @return {meta.ChangeRecord} 一个变化记录项

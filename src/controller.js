@@ -128,7 +128,7 @@ define(
          *
          * 事件总线可以是任何对象，只要实现`fire`方法供事件触发即可
          *
-         * @param {mini-event.EventTarget} eventBug 事件总线对象
+         * @param {mini-event.EventTarget} eventBus 事件总线对象
          */
         exports.setEventBus = function (eventBus) {
             this.eventBus = eventBus;
@@ -982,7 +982,7 @@ define(
         /**
          * 在指定的元素中渲染一个子Action
          *
-         * @param {string | URL} Action对应的url
+         * @param {string | URL} url Action对应的url
          * @param {string} container 指定容器元素的id
          * @param {Object} [options] 交给{@link Action}的额外参数
          * @return {meta.Promise} 一个可取消的{@link meta.Promise}对象，当渲染完成后进行`resolved`状态，但可在之前调用`abort()`取消
