@@ -47,9 +47,7 @@ define(
                     }
                     return result.join('&');
                 default:
-                    return encodedKey
-                        ? encodedKey + '=' + encodeURIComponent(data)
-                        : encodeURIComponent(data);
+                    return encodedKey ? encodedKey + '=' + encodeURIComponent(data) : encodeURIComponent(data);
             }
         }
 
@@ -298,7 +296,10 @@ define(
                     fakeXHR.abort();
                 };
                 var tick = setTimeout(util.bind(notifyTimeout, this), options.timeout);
-                fakeXHR.ensure(function () { clearTimeout(tick); });
+                var clearTick = function () {
+                    clearTimeout(tick);
+                };
+                fakeXHR.ensure(clearTick);
             }
 
             return fakeXHR;

@@ -128,7 +128,7 @@ define(
          *
          * 事件总线可以是任何对象，只要实现`fire`方法供事件触发即可
          *
-         * @param {mini-event.EventTarget} eventBug 事件总线对象
+         * @param {mini-event.EventTarget} eventBus 事件总线对象
          */
         exports.setEventBus = function (eventBus) {
             this.eventBus = eventBus;
@@ -921,6 +921,12 @@ define(
                     return;
                 }
 
+                // 不要任何不在本页面内打开的东西，包括`_blank`、`_tab`以及指定其它`iframe`等
+                var linkTarget = target.getAttribute('target');
+                if (linkTarget && linkTarget !== '_self') {
+                    return;
+                }
+
                 // `<a>`元素也可能没有`href`属性
                 var href = target.getAttribute('href', 2) || '';
                 // 是hash跳转的链接就取消掉默认的跳转行为
@@ -976,7 +982,7 @@ define(
         /**
          * 在指定的元素中渲染一个子Action
          *
-         * @param {string | URL} Action对应的url
+         * @param {string | URL} url Action对应的url
          * @param {string} container 指定容器元素的id
          * @param {Object} [options] 交给{@link Action}的额外参数
          * @return {meta.Promise} 一个可取消的{@link meta.Promise}对象，当渲染完成后进行`resolved`状态，但可在之前调用`abort()`取消
