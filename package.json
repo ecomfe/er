@@ -33,7 +33,7 @@
         "loaderUrl": "http://s1.bdstatic.com/r/www/cache/ecom/esl/1-8-2/esl.js",
         "dependencies": {
             "mini-event": "1.x",
-            "etpl": ">=2.0.8",
+            "etpl": "2.x",
             "eoo": "0.x"
         }
     }
