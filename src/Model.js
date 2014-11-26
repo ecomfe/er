@@ -209,10 +209,16 @@ define(
         /**
          * 移除一个已完成的工作对象
          *
+         * @param {Model} model 用于存放数据的`Model`对象
          * @param {meta.Promise} worker 工作对象
          * @ignore
          */
         function removePendingWorker(model, worker) {
+            // 如果pendingWorkers已经为空，直接退出
+            if (!model.pendingWorkers) {
+                return;
+            }
+
             for (var i = 0; i < model.pendingWorkers.length; i++) {
                 if (model.pendingWorkers[i] === worker) {
                     model.pendingWorkers.splice(i, 1);
