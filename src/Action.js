@@ -9,12 +9,11 @@
 define(
     function (require) {
         var util = require('./util');
+        var Deferred = require('./Deferred');
 
         /**
          * 收集Model加载时产生的错误并通知到Action
          *
-         * @param {Action} this 当前Action实例
-         * @param {Object...} results 模块加载的结果集
          * @return {Mixed} 错误处理结果
          * @ignore
          */
@@ -119,10 +118,8 @@ define(
                     util.bind(reportErrors, this)
                 );
             }
-            else {
-                this.forwardToView();
-                return require('./Deferred').resolved(this);
-            }
+
+            return this.forwardToView();
         };
 
         /**
@@ -149,17 +146,18 @@ define(
          */
         exports.createModel = function (context) {
             if (this.modelType) {
-                var model = new this.modelType(context);
+                var Model = this.modelType;
+                var model = new Model(context);
                 return model;
             }
-            else {
-                return {};
-            }
+
+            return {};
         };
 
         /**
          * 加载完Model后，进入View相关的逻辑
          *
+         * @return {meta.Promise}
          * @protected
          * @fires modelloaded
          * @fires beforerender
@@ -169,7 +167,7 @@ define(
         exports.forwardToView = function () {
             // 如果已经销毁了就别再继续下去
             if (this.disposed) {
-                return this;
+                return Deferred.resolved(this);
             }
 
             /**
@@ -213,17 +211,17 @@ define(
                      * Action进入完毕后触发
                      */
                     this.fire('entercomplete');
+
+                    return this;
                 };
 
-                Deferred.when(this.view.render()).then(util.bind(initBehavior, this));
+                return Deferred.when(this.view.render()).then(util.bind(initBehavior, this));
 
             }
-            else {
-                var events = require('./events');
-                events.notifyError('No view attached to this action');
-            }
 
-            return this;
+            var events = require('./events');
+            events.notifyError('No view attached to this action');
+            return Deferred.resolved(this);
         };
 
         /**
@@ -232,7 +230,8 @@ define(
          * @return {Object} 当前Action需要使用的View对象
          */
         exports.createView = function () {
-            return this.viewType ? new this.viewType() : null;
+            var View = this.viewType;
+            return View ? new View() : null;
         };
 
         /**
@@ -253,6 +252,7 @@ define(
         /**
          * 离开当前Action，清理Model和View
          *
+         * @return {Action} 当前实例
          * @protected
          * @fires beforeleave
          * @fires leave

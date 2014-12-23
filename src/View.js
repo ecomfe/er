@@ -96,7 +96,7 @@ define(
                 return value;
             };
 
-            return { get: visit, relatedModel: model };
+            return {get: visit, relatedModel: model};
         };
 
         /**
@@ -113,16 +113,15 @@ define(
             if (Deferred.isPromise(rendering)) {
                 return rendering.then(util.bind(this.enterDocument, this));
             }
-            else {
-                // 为了向前兼容，如果`renderContent`没有返回`Promise`，这里要同步执行，不能使用`Deferred.resolved`封装为异步
-                this.enterDocument();
-            }
+
+            // 为了向前兼容，如果`renderContent`没有返回`Promise`，这里要同步执行，不能使用`Deferred.resolved`封装为异步
+            this.enterDocument();
         };
 
         /**
          * 在渲染过程中填充内容
          *
-         * @return {meta.Promise?} 如果返回`Promise`对象则视为异步
+         * @return {meta.Promise|undefined} 如果返回`Promise`对象则视为异步
          */
         exports.renderContent = function () {
             var container = this.getContainerElement();
@@ -137,6 +136,8 @@ define(
             var template = require('etpl');
             var html = template.render(this.getTemplateName(), this.getTemplateData());
             container.innerHTML = html;
+
+            return undefined;
         };
 
 
