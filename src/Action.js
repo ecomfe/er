@@ -197,23 +197,26 @@ define(
                  */
                 this.fire('beforerender');
 
-                this.view.render();
+                var initBehavior = function () {
+                    /**
+                     * @event rendered
+                     *
+                     * 视图渲染完毕后触发
+                     */
+                    this.fire('rendered');
 
-                /**
-                 * @event rendered
-                 *
-                 * 视图渲染完毕后触发
-                 */
-                this.fire('rendered');
+                    this.initBehavior();
 
-                this.initBehavior();
+                    /**
+                     * @event entercomplete
+                     *
+                     * Action进入完毕后触发
+                     */
+                    this.fire('entercomplete');
+                };
 
-                /**
-                 * @event entercomplete
-                 *
-                 * Action进入完毕后触发
-                 */
-                this.fire('entercomplete');
+                Deferred.when(this.view.render()).then(util.bind(initBehavior, this));
+
             }
             else {
                 var events = require('./events');

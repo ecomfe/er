@@ -9,6 +9,7 @@
 define(
     function (require) {
         var util = require('./util');
+        var Deferred = require('./Deferred');
 
         /**
          * @class View
@@ -103,8 +104,27 @@ define(
          *
          * ER的默认实现是使用[etpl](https://github.com/ecomfe/etpl)渲染容器，
          * 如果需要使用其它的模板，或自己有视图的管理，建议重写此方法
+         *
+         * @return {meta.Promise}
          */
         exports.render = function () {
+            var rendering = this.renderContent();
+
+            if (Deferred.isPromise(rendering)) {
+                return rendering.then(util.bind(this.enterDocument, this));
+            }
+            else {
+                // 为了向前兼容，如果`renderContent`没有返回`Promise`，这里要同步执行，不能使用`Deferred.resolved`封装为异步
+                this.enterDocument();
+            }
+        };
+
+        /**
+         * 在渲染过程中填充内容
+         *
+         * @return {meta.Promise?} 如果返回`Promise`对象则视为异步
+         */
+        exports.renderContent = function () {
             var container = this.getContainerElement();
             // 容器没有还不一定是没配置好，很可能是主Action销毁了子Action才刚加载完
             if (!container) {
@@ -117,8 +137,6 @@ define(
             var template = require('etpl');
             var html = template.render(this.getTemplateName(), this.getTemplateData());
             container.innerHTML = html;
-
-            this.enterDocument();
         };
 
 
