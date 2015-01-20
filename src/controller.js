@@ -933,8 +933,10 @@ define(
                 if (href.charAt(0) !== '#') {
                     return;
                 }
-                // 如果有下面的子Action处理了跳转，那这里就啥也不干了
-                if (isChildActionRedirected(e)) {
+
+                // 如果非全局跳转且下面的子Action处理了跳转，那这里就啥也不干了
+                var scope = target.getAttribute('data-redirect');
+                if (scope !== 'global' && isChildActionRedirected(e)) {
                     return;
                 }
 
@@ -951,7 +953,7 @@ define(
                 // 直接使用专供子Action上的`redirect`方法，
                 // 会自动处理`hijack`的解绑定、URL比对、进入子Action等事，
                 // 为免Action重写`redirect`方法，这里用闭包内的这个
-                var redirectAttributes = (target.getAttribute('data-redirect') || '').split(/[,\s]/);
+                var redirectAttributes = (scope || '').split(/[,\s]/);
                 var redirectOptions = {};
                 for (var i = 0; i < redirectAttributes.length; i++) {
                     var redirectAttributeName = util.trim(redirectAttributes[i]);
