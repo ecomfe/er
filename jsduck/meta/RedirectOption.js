@@ -18,4 +18,11 @@ function RedirectOption() {
      * 强制跳转，即URL无变化时也重新加载
      */
     this.force;
+
+    /**
+     * @property {boolean} [global=false]
+     *
+     * 全局跳转，即子Action中的链接会刷新最顶层的Action
+     */
+    this.global;
 }

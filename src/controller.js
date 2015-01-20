@@ -847,7 +847,7 @@ define(
             var currentController = this;
             function redirect(url, options, extra) {
                 options = options || {};
-                var url = locator.resolveURL(url, options);
+                var url = locator.resolveURL(url);
 
                 // 强制全局跳转，直接使用`locator`即可，但在这之前要把原来的`Action`灭掉
                 if (options.global) {
@@ -934,9 +934,18 @@ define(
                     return;
                 }
 
+                // 处理一下`data-redirect`
+                var redirectAttributes = (target.getAttribute('data-redirect') || '').split(/[,\s]/);
+                var redirectOptions = {};
+                for (var i = 0; i < redirectAttributes.length; i++) {
+                    var redirectAttributeName = util.trim(redirectAttributes[i]);
+                    if (redirectAttributeName) {
+                        redirectOptions[redirectAttributeName] = true;
+                    }
+                }
+
                 // 如果非全局跳转且下面的子Action处理了跳转，那这里就啥也不干了
-                var scope = target.getAttribute('data-redirect');
-                if (scope !== 'global' && isChildActionRedirected(e)) {
+                if (!redirectOptions.global && isChildActionRedirected(e)) {
                     return;
                 }
 
@@ -953,12 +962,6 @@ define(
                 // 直接使用专供子Action上的`redirect`方法，
                 // 会自动处理`hijack`的解绑定、URL比对、进入子Action等事，
                 // 为免Action重写`redirect`方法，这里用闭包内的这个
-                var redirectAttributes = (scope || '').split(/[,\s]/);
-                var redirectOptions = {};
-                for (var i = 0; i < redirectAttributes.length; i++) {
-                    var redirectAttributeName = util.trim(redirectAttributes[i]);
-                    redirectOptions[redirectAttributeName] = true;
-                }
                 redirect(url, redirectOptions);
             }
 
