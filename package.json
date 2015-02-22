@@ -19,8 +19,7 @@
             "email": "killeryyl@outlook.com"
         }
     ],
-    "dependencies": {
-    },
+    "dependencies": {},
     "main": "main",
     "description": "ER是一个富浏览器端web应用的框架，适用于并能很方便地构建一个整站式的AJAX web应用。",
     "homepage": "https://github.com/ecomfe/er",
@@ -34,7 +33,10 @@
         "dependencies": {
             "mini-event": "1.x",
             "etpl": ">=2.0.8",
-            "eoo": "0.x"
+            "eoo": "0.x",
+            "emc": "~1.0.0",
+            "promise": "~1.0.0",
+            "underscore": "~1.6.0"
         }
     }
 }

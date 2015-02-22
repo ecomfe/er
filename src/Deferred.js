@@ -168,7 +168,11 @@ define(
                 done: util.bind(this.done, this),
                 fail: util.bind(this.fail, this),
                 ensure: util.bind(this.ensure, this),
-                then: util.bind(this.then, this)
+                then: util.bind(this.then, this),
+                thenGetProperty: this.thenGetProperty,
+                thenReturn: this.thenReturn,
+                thenBind: this.thenBind,
+                thenSwallowException: this.thenSwallowException
             };
             // 形成环引用，保证`.promise.promise`能运行
             this.promise.promise = this.promise;
@@ -298,6 +302,40 @@ define(
             tryFlush(this);
 
             return deferred.promise;
+        };
+
+        /**
+         * @inheritdoc meta.Promise#thenGetProperty
+         */
+        exports.thenGetProperty = function (propertyName) {
+            var handler = function (result) {
+                return result[propertyName];
+            }
+            return this.then(handler);
+        };
+
+        /**
+         * @inheritdoc meta.Promise#thenReturn
+         */
+        exports.thenReturn = function (value) {
+            var handler = function () {
+                return value;
+            };
+            return this.then(handler);
+        };
+
+        /**
+         * @inheritdoc meta.Promise#thenBind
+         */
+        exports.thenBind = function () {
+            return this.then(util.bind.apply(util, arguments));
+        };
+
+        /**
+         * @inheritdoc meta.Promise#thenSwallowException
+         */
+        exports.thenSwallowException = function () {
+            return this.fail(util.noop);
         };
 
         // 暂不支持`progress`，
