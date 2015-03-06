@@ -640,6 +640,8 @@ define(
 
                 var error = util.mix(
                     {
+                        controller: this,
+                        action: action,
                         failType: 'EnterFail',
                         reason: message
                     },
