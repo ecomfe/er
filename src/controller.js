@@ -452,7 +452,7 @@ define(
             var abort = function () {
                 if (!aborted) {
                     aborted = true;
-                    this.getEventBus().fire('actionabort', util.mix({ controller: this }, actionContext));
+                    this.getEventBus().fire('actionabort', util.mix({controller: this}, actionContext));
                 }
             };
             loader.abort = util.bind(abort, this);
@@ -562,6 +562,7 @@ define(
          *
          * @param {Action} action {@link Action}对象
          * @param {meta.ActionContext} actionContext Action执行的上下文
+         * @return {meta.Promise}
          * @protected
          */
         exports.enterAction = function (action, actionContext) {
@@ -602,13 +603,13 @@ define(
 
             this.getEventBus().fire(
                 'enteraction',
-                util.mix({ controller: this, action: action }, actionContext)
+                util.mix({controller: this, action: action}, actionContext)
             );
 
             var notifyEnterComplete = function () {
                 this.getEventBus().fire(
                     'enteractioncomplete',
-                    util.mix({ controller: this, action: action }, actionContext)
+                    util.mix({controller: this, action: action}, actionContext)
                 );
             };
             notifyEnterComplete = util.bind(notifyEnterComplete, this);
@@ -696,7 +697,7 @@ define(
             // 除此之外，再把URL中的参数和作为子Action传过来的参数都放进`args`属性里
             util.mix(actionContext.args, url.getQuery());
 
-            this.getEventBus().fire('forwardaction', util.mix({ controller: this }, actionContext));
+            this.getEventBus().fire('forwardaction', util.mix({controller: this}, actionContext));
 
             var loader = this.loadAction(actionContext);
 
@@ -709,6 +710,7 @@ define(
          * 在主Action区域加载并渲染指定URL对应的Action
          *
          * @param {string | URL} url 需要加载的URL
+         * @return {meta.Promise}
          */
         exports.renderAction = function (url) {
             if (typeof url === 'string') {
@@ -769,7 +771,7 @@ define(
                 }
                 controller.getEventBus().fire(
                     'leaveaction',
-                    { controller: controller, action: info.action, to: targetContext }
+                    {controller: controller, action: info.action, to: targetContext}
                 );
 
                 if (typeof info.action.leave === 'function') {
@@ -828,6 +830,7 @@ define(
          *
          * @param {Action} action 子Action实例
          * @param {meta.ActionContext} actionContext Action执行上下文
+         * @return {meta.Promise}
          * @protected
          */
         exports.enterChildAction = function (action, actionContext) {
@@ -849,7 +852,7 @@ define(
             var currentController = this;
             function redirect(url, options, extra) {
                 options = options || {};
-                var url = locator.resolveURL(url);
+                url = locator.resolveURL(url);
 
                 // 强制全局跳转，直接使用`locator`即可，但在这之前要把原来的`Action`灭掉
                 if (options.global) {
@@ -972,7 +975,7 @@ define(
             action.redirect = redirect;
             // 同样增加`reload`方法
             action.reload = function (extra) {
-                this.redirect(actionContext.url, { force: true }, extra);
+                this.redirect(actionContext.url, {force: true}, extra);
             };
             // 同样增加`back`方法
             action.back = function (defaultURL, extra) {
