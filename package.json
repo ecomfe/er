@@ -32,11 +32,10 @@
         "loaderUrl": "http://s1.bdstatic.com/r/www/cache/ecom/esl/1-8-2/esl.js",
         "dependencies": {
             "mini-event": "1.x",
-            "etpl": ">=2.0.8",
+            "etpl": "latest",
             "eoo": "0.x",
-            "emc": "~1.0.0",
-            "promise": "~1.0.0",
-            "underscore": "~1.6.0"
-        }
+            "underscore": "1.x"
+        },
+        "layout": "v2"
     }
 }
