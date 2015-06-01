@@ -165,14 +165,15 @@ define(
              * 与当前对象关联的{@link meta.Promise}对象
              */
             this.promise =  {
-                done: util.bind(this.done, this),
-                fail: util.bind(this.fail, this),
-                ensure: util.bind(this.ensure, this),
-                then: util.bind(this.then, this),
-                thenGetProperty: this.thenGetProperty,
-                thenReturn: this.thenReturn,
-                thenBind: this.thenBind,
-                thenSwallowException: this.thenSwallowException
+                'done': util.bind(this.done, this),
+                'fail': util.bind(this.fail, this),
+                'ensure': util.bind(this.ensure, this),
+                'then': util.bind(this.then, this),
+                'catch': util.bind(this.catch, this),
+                'thenGetProperty': this.thenGetProperty,
+                'thenReturn': this.thenReturn,
+                'thenBind': this.thenBind,
+                'thenSwallowException': this.thenSwallowException
             };
             // 形成环引用，保证`.promise.promise`能运行
             this.promise.promise = this.promise;
@@ -281,6 +282,13 @@ define(
         exports.fail = function (callback) {
             return this.then(null, callback);
         };
+
+        /**
+         * @inheritdoc meta.Promise#catch
+         */
+        exports['catch'] = function (callback) {
+            return this.then(null, callback);
+        }
 
         /**
          * @inheritdoc meta.Promise#ensure
