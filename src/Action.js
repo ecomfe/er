@@ -284,6 +284,15 @@ define(
             }
 
             /**
+             * 如果Action本身也有dispose方法，则执行
+             * 主要用来dispose掉一些DOM事就绑定，因为我们经常在Action中通过bindEvent来绑定DOM事件
+             * 而destroyEvents只能dispose掉er事件
+             */
+            if (typeof this.dispose === 'function') {
+                this.dispose();
+            }
+
+            /**
              * @event leave
              *
              * 离开Action后触发
