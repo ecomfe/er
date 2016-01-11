@@ -1029,12 +1029,28 @@ define(
             return loadingChildAction;
         };
 
+        /**
+         * `controller`默认的事件处理
+         */
+        exports.bindEvents = function () {
+            var currentController = this;
+            this.getEventBus().on('redirect', function (e) {
+
+                // silent的跳转不会进入Action加载流程，无法更新controller的currentURL
+                // 需要单独处理一下
+                if (e.options.silent) {
+                    currentController.currentURL = e.url;
+                }
+            });
+        };
+
         var Controller = require('eoo').create(require('mini-event/EventTarget'), exports);
         var instance = new Controller();
         instance.setLocator(require('./locator'));
         instance.setRouter(require('./router'));
         instance.setEventBus(require('./events'));
         instance.setPermissionProvider(require('./permission'));
+        instance.bindEvents();
         instance.Controller = Controller;
         return instance;
     }
