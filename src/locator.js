@@ -182,13 +182,13 @@ define(
                      */
                     locator.fire(
                         'redirect',
-                        { url: url, referrer: referrer }
+                        {url: url, referrer: referrer}
                     );
                 }
 
                 require('./events').fire(
                     'redirect',
-                    { url: url, referrer: referrer }
+                    {url: url, referrer: referrer, options: options}
                 );
             }
 
@@ -200,7 +200,7 @@ define(
          */
         locator.reload = function () {
             if (currentLocation) {
-                locator.redirect(currentLocation, { force: true });
+                locator.redirect(currentLocation, {force: true});
             }
         };
 
