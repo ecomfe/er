@@ -1036,8 +1036,8 @@ define(
             this.getEventBus().on('redirect', function (e) {
 
                 // silent的跳转不会进入Action加载流程，无法更新controller的currentURL
-                // 需要单独处理一下，同时要先判断一下事件是否由对应的locator触发
-                if (e.target === this.getLocator() && e.options.silent) {
+                // 需要单独处理一下
+                if (e.options.silent) {
                     this.currentURL = e.url;
                 }
             }, this);
