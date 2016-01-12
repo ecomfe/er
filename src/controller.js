@@ -1033,15 +1033,14 @@ define(
          * `controller`默认的事件处理
          */
         exports.bindEvents = function () {
-            var currentController = this;
             this.getEventBus().on('redirect', function (e) {
 
                 // silent的跳转不会进入Action加载流程，无法更新controller的currentURL
-                // 需要单独处理一下
-                if (e.options.silent) {
-                    currentController.currentURL = e.url;
+                // 需要单独处理一下，同时要先判断一下事件是否由对应的locator触发
+                if (e.target === this.getLocator() && e.options.silent) {
+                    this.currentURL = e.url;
                 }
-            });
+            }, this);
         };
 
         var Controller = require('eoo').create(require('mini-event/EventTarget'), exports);
