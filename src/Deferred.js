@@ -13,8 +13,12 @@ define(
         var assert = require('./assert');
 
         var setImmediate = typeof window.setImmediate === 'function'
-            ? function (fn) { window.setImmediate(fn); }
-            : function (fn) { window.setTimeout(fn, 0); };
+            ? function (fn) {
+                window.setImmediate(fn);
+            }
+            : function (fn) {
+                window.setTimeout(fn, 0);
+            };
 
         /**
          * 尝试执行相关的回调函数
@@ -64,7 +68,7 @@ define(
          *
          * @param {Deferred} original 原`Deferred`对象
          * @param {Deferred} deferred 新`Deferred`对象
-         * @param {callback} 当`original`运行完毕后，需要执行的函数
+         * @param {Function} callback 当`original`运行完毕后，需要执行的函数
          * @param {string} actionType 关联的动作类型，`"resolve"`或`"reject"`
          * @return {Function} 关联函数，可注册在`original`的相关回调函数上
          * @ignore
@@ -161,10 +165,15 @@ define(
              * 与当前对象关联的{@link meta.Promise}对象
              */
             this.promise =  {
-                done: util.bind(this.done, this),
-                fail: util.bind(this.fail, this),
-                ensure: util.bind(this.ensure, this),
-                then: util.bind(this.then, this)
+                'done': util.bind(this.done, this),
+                'fail': util.bind(this.fail, this),
+                'ensure': util.bind(this.ensure, this),
+                'then': util.bind(this.then, this),
+                'catch': util.bind(this.catch, this),
+                'thenGetProperty': this.thenGetProperty,
+                'thenReturn': this.thenReturn,
+                'thenBind': this.thenBind,
+                'thenSwallowException': this.thenSwallowException
             };
             // 形成环引用，保证`.promise.promise`能运行
             this.promise.promise = this.promise;
@@ -275,6 +284,13 @@ define(
         };
 
         /**
+         * @inheritdoc meta.Promise#catch
+         */
+        exports['catch'] = function (callback) {
+            return this.then(null, callback);
+        }
+
+        /**
          * @inheritdoc meta.Promise#ensure
          */
         exports.ensure = function (callback) {
@@ -294,6 +310,40 @@ define(
             tryFlush(this);
 
             return deferred.promise;
+        };
+
+        /**
+         * @inheritdoc meta.Promise#thenGetProperty
+         */
+        exports.thenGetProperty = function (propertyName) {
+            var handler = function (result) {
+                return result[propertyName];
+            }
+            return this.then(handler);
+        };
+
+        /**
+         * @inheritdoc meta.Promise#thenReturn
+         */
+        exports.thenReturn = function (value) {
+            var handler = function () {
+                return value;
+            };
+            return this.then(handler);
+        };
+
+        /**
+         * @inheritdoc meta.Promise#thenBind
+         */
+        exports.thenBind = function () {
+            return this.then(util.bind.apply(util, arguments));
+        };
+
+        /**
+         * @inheritdoc meta.Promise#thenSwallowException
+         */
+        exports.thenSwallowException = function () {
+            return this.fail(util.noop);
         };
 
         // 暂不支持`progress`，

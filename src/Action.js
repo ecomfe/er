@@ -133,7 +133,7 @@ define(
          * - 如果该方法正常返回，则认为错误已经处理完毕，继续进入下一步
          * - 如果该方法抛出异常，则认为错误未处理，中断执行流程
          *
-         * @param {Object[]} 错误集合
+         * @param {Object[]} errors 错误集合
          * @ignore
          */
         exports.handleError = function (errors) {

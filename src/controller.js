@@ -128,7 +128,7 @@ define(
          *
          * 事件总线可以是任何对象，只要实现`fire`方法供事件触发即可
          *
-         * @param {mini-event.EventTarget} eventBug 事件总线对象
+         * @param {mini-event.EventTarget} eventBus 事件总线对象
          */
         exports.setEventBus = function (eventBus) {
             this.eventBus = eventBus;
@@ -452,7 +452,7 @@ define(
             var abort = function () {
                 if (!aborted) {
                     aborted = true;
-                    this.getEventBus().fire('actionabort', util.mix({ controller: this }, actionContext));
+                    this.getEventBus().fire('actionabort', util.mix({controller: this}, actionContext));
                 }
             };
             loader.abort = util.bind(abort, this);
@@ -562,6 +562,7 @@ define(
          *
          * @param {Action} action {@link Action}对象
          * @param {meta.ActionContext} actionContext Action执行的上下文
+         * @return {meta.Promise}
          * @protected
          */
         exports.enterAction = function (action, actionContext) {
@@ -602,13 +603,13 @@ define(
 
             this.getEventBus().fire(
                 'enteraction',
-                util.mix({ controller: this, action: action }, actionContext)
+                util.mix({controller: this, action: action}, actionContext)
             );
 
             var notifyEnterComplete = function () {
                 this.getEventBus().fire(
                     'enteractioncomplete',
-                    util.mix({ controller: this, action: action }, actionContext)
+                    util.mix({controller: this, action: action}, actionContext)
                 );
             };
             notifyEnterComplete = util.bind(notifyEnterComplete, this);
@@ -640,6 +641,8 @@ define(
 
                 var error = util.mix(
                     {
+                        controller: this,
+                        action: action,
                         failType: 'EnterFail',
                         reason: message
                     },
@@ -694,7 +697,7 @@ define(
             // 除此之外，再把URL中的参数和作为子Action传过来的参数都放进`args`属性里
             util.mix(actionContext.args, url.getQuery());
 
-            this.getEventBus().fire('forwardaction', util.mix({ controller: this }, actionContext));
+            this.getEventBus().fire('forwardaction', util.mix({controller: this}, actionContext));
 
             var loader = this.loadAction(actionContext);
 
@@ -707,6 +710,7 @@ define(
          * 在主Action区域加载并渲染指定URL对应的Action
          *
          * @param {string | URL} url 需要加载的URL
+         * @return {meta.Promise}
          */
         exports.renderAction = function (url) {
             if (typeof url === 'string') {
@@ -767,7 +771,7 @@ define(
                 }
                 controller.getEventBus().fire(
                     'leaveaction',
-                    { controller: controller, action: info.action, to: targetContext }
+                    {controller: controller, action: info.action, to: targetContext}
                 );
 
                 if (typeof info.action.leave === 'function') {
@@ -826,6 +830,7 @@ define(
          *
          * @param {Action} action 子Action实例
          * @param {meta.ActionContext} actionContext Action执行上下文
+         * @return {meta.Promise}
          * @protected
          */
         exports.enterChildAction = function (action, actionContext) {
@@ -847,7 +852,7 @@ define(
             var currentController = this;
             function redirect(url, options, extra) {
                 options = options || {};
-                var url = locator.resolveURL(url, options);
+                url = locator.resolveURL(url);
 
                 // 强制全局跳转，直接使用`locator`即可，但在这之前要把原来的`Action`灭掉
                 if (options.global) {
@@ -921,14 +926,31 @@ define(
                     return;
                 }
 
+                // 不要任何不在本页面内打开的东西，包括`_blank`、`_tab`以及指定其它`iframe`等
+                var linkTarget = target.getAttribute('target');
+                if (linkTarget && linkTarget !== '_self') {
+                    return;
+                }
+
                 // `<a>`元素也可能没有`href`属性
                 var href = target.getAttribute('href', 2) || '';
                 // 是hash跳转的链接就取消掉默认的跳转行为
                 if (href.charAt(0) !== '#') {
                     return;
                 }
-                // 如果有下面的子Action处理了跳转，那这里就啥也不干了
-                if (isChildActionRedirected(e)) {
+
+                // 处理一下`data-redirect`
+                var redirectAttributes = (target.getAttribute('data-redirect') || '').split(/[,\s]/);
+                var redirectOptions = {};
+                for (var i = 0; i < redirectAttributes.length; i++) {
+                    var redirectAttributeName = util.trim(redirectAttributes[i]);
+                    if (redirectAttributeName) {
+                        redirectOptions[redirectAttributeName] = true;
+                    }
+                }
+
+                // 如果非全局跳转且下面的子Action处理了跳转，那这里就啥也不干了
+                if (!redirectOptions.global && isChildActionRedirected(e)) {
                     return;
                 }
 
@@ -945,12 +967,6 @@ define(
                 // 直接使用专供子Action上的`redirect`方法，
                 // 会自动处理`hijack`的解绑定、URL比对、进入子Action等事，
                 // 为免Action重写`redirect`方法，这里用闭包内的这个
-                var redirectAttributes = (target.getAttribute('data-redirect') || '').split(/[,\s]/);
-                var redirectOptions = {};
-                for (var i = 0; i < redirectAttributes.length; i++) {
-                    var redirectAttributeName = util.trim(redirectAttributes[i]);
-                    redirectOptions[redirectAttributeName] = true;
-                }
                 redirect(url, redirectOptions);
             }
 
@@ -959,7 +975,7 @@ define(
             action.redirect = redirect;
             // 同样增加`reload`方法
             action.reload = function (extra) {
-                this.redirect(actionContext.url, { force: true }, extra);
+                this.redirect(actionContext.url, {force: true}, extra);
             };
             // 同样增加`back`方法
             action.back = function (defaultURL, extra) {
@@ -976,7 +992,7 @@ define(
         /**
          * 在指定的元素中渲染一个子Action
          *
-         * @param {string | URL} Action对应的url
+         * @param {string | URL} url Action对应的url
          * @param {string} container 指定容器元素的id
          * @param {Object} [options] 交给{@link Action}的额外参数
          * @return {meta.Promise} 一个可取消的{@link meta.Promise}对象，当渲染完成后进行`resolved`状态，但可在之前调用`abort()`取消
@@ -1013,12 +1029,27 @@ define(
             return loadingChildAction;
         };
 
+        /**
+         * `controller`默认的事件处理
+         */
+        exports.bindEvents = function () {
+            this.getEventBus().on('redirect', function (e) {
+
+                // silent的跳转不会进入Action加载流程，无法更新controller的currentURL
+                // 需要单独处理一下
+                if (e.options.silent) {
+                    this.currentURL = e.url;
+                }
+            }, this);
+        };
+
         var Controller = require('eoo').create(require('mini-event/EventTarget'), exports);
         var instance = new Controller();
         instance.setLocator(require('./locator'));
         instance.setRouter(require('./router'));
         instance.setEventBus(require('./events'));
         instance.setPermissionProvider(require('./permission'));
+        instance.bindEvents();
         instance.Controller = Controller;
         return instance;
     }

@@ -36,18 +36,33 @@
                 },
                 {
                     'name': 'eoo',
-                    'location': '../dep/eoo/0.0.8/src',
-                    'main': 'oo'
+                    'location': '../dep/eoo/src',
+                    'main': 'main'
                 },
                 {
                     'name': 'etpl',
-                    'location': '../dep/etpl/2.1.2/src',
+                    'location': '../dep/etpl/src',
                     'main': 'main'
                 },
                 {
                     'name': 'mini-event',
-                    'location': '../dep/mini-event/1.0.2/src',
+                    'location': '../dep/mini-event/src',
                     'main': 'main'
+                },
+                {
+                    'name': 'emc',
+                    'location': '../dep/emc/1.0.0/src',
+                    'main': 'main'
+                },
+                {
+                    'name': 'promise',
+                    'location': '../dep/promise/1.0.0/src',
+                    'main': 'main'
+                },
+                {
+                    'name': 'underscore',
+                    'location': '../dep/underscore/src',
+                    'main': 'underscore'
                 }
             ],
             'paths': {}
@@ -100,7 +115,7 @@
                     'click',
                     function() {
                         var url = URL.withQuery(
-                            'add', 
+                            'add',
                             { content: $('#content').val() }
                         );
                         locator.redirect(url);

@@ -21,7 +21,7 @@ define(
              *
              * @type {string}
              */
-            version: '3.1.0-beta.5',
+            version: '3.1.0',
 
             /**
              * 启动ER框架，此方法按顺序启动默认的{@link Controller}、{@link Router}和{@link locator}组件

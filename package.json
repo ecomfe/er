@@ -1,6 +1,6 @@
 {
     "name": "er",
-    "version": "3.1.0-beta.6",
+    "version": "3.1.0",
     "contributors": [
         {
             "name": "otakustay",
@@ -19,8 +19,7 @@
             "email": "killeryyl@outlook.com"
         }
     ],
-    "dependencies": {
-    },
+    "dependencies": {},
     "main": "main",
     "description": "ER是一个富浏览器端web应用的框架，适用于并能很方便地构建一个整站式的AJAX web应用。",
     "homepage": "https://github.com/ecomfe/er",
@@ -33,8 +32,10 @@
         "loaderUrl": "http://s1.bdstatic.com/r/www/cache/ecom/esl/1-8-2/esl.js",
         "dependencies": {
             "mini-event": "1.x",
-            "etpl": "2.x",
-            "eoo": "0.x"
-        }
+            "etpl": "latest",
+            "eoo": "0.x",
+            "underscore": "1.x"
+        },
+        "layout": "v2"
     }
 }
