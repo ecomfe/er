@@ -334,7 +334,7 @@ define(
             }
         };
 
-        var Action = require('eoo').create(require('mini-event/EventTarget'), exports);
+        var Action = require('./inheritEventTarget')(exports);
         return Action;
     }
 );

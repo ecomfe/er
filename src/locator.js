@@ -204,7 +204,7 @@ define(
             }
         };
 
-        require('mini-event/EventTarget').enable(locator);
+        require('./enableEvent')(locator);
         return locator;
     }
 );

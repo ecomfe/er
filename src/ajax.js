@@ -399,7 +399,7 @@ define(
             img.src = url;
         };
 
-        var Ajax = require('eoo').create(require('mini-event/EventTarget'), exports);
+        var Ajax = require('./inheritEventTarget')(exports);
         var instance = new Ajax();
         instance.Ajax = Ajax;
         return instance;

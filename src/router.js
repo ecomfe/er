@@ -128,7 +128,7 @@ define(
             this.getLocator().on('redirect', executeRoute, this);
         };
 
-        var Router = require('eoo').create(require('mini-event/EventTarget'), exports);
+        var Router = require('./inheritEventTarget')(exports);
         var instance = new Router();
         instance.setLocator(require('./locator'));
         instance.setEventBus(require('./events'));
