@@ -14,7 +14,7 @@ define(
          * 收集Model加载时产生的错误并通知到Action
          *
          * @param {Action} this 当前Action实例
-         * @param {Object...} results 模块加载的结果集
+         * @param {...Object} results 模块加载的结果集
          * @return {Mixed} 错误处理结果
          * @ignore
          */
@@ -119,10 +119,9 @@ define(
                     util.bind(reportErrors, this)
                 );
             }
-            else {
-                this.forwardToView();
-                return require('./Deferred').resolved(this);
-            }
+
+            this.forwardToView();
+            return require('./Deferred').resolved(this);
         };
 
         /**
@@ -149,18 +148,20 @@ define(
          */
         exports.createModel = function (context) {
             if (this.modelType) {
+                /* eslint-disable new-cap */
                 var model = new this.modelType(context);
+                /* eslint-enable new-cap */
                 return model;
             }
-            else {
-                return {};
-            }
+
+            return {};
         };
 
         /**
          * 加载完Model后，进入View相关的逻辑
          *
          * @protected
+         * @return {Action} 当前实例
          * @fires modelloaded
          * @fires beforerender
          * @fires rendered
@@ -229,7 +230,9 @@ define(
          * @return {Object} 当前Action需要使用的View对象
          */
         exports.createView = function () {
+            /* eslint-disable new-cap */
             return this.viewType ? new this.viewType() : null;
+            /* eslint-enable new-cap */
         };
 
         /**
@@ -251,6 +254,7 @@ define(
          * 离开当前Action，清理Model和View
          *
          * @protected
+         * @return {Action} 返回当前实例
          * @fires beforeleave
          * @fires leave
          */
@@ -291,6 +295,8 @@ define(
             this.fire('leave');
 
             this.destroyEvents();
+
+            return this;
         };
 
         /**
@@ -334,7 +340,7 @@ define(
             }
         };
 
-        var Action = require('eoo').create(require('mini-event/EventTarget'), exports);
+        var Action = require('./inheritEventTarget')(exports);
         return Action;
     }
 );

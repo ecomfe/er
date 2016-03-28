@@ -11,7 +11,7 @@ define(
         var util = require('./util');
         var Deferred = require('./Deferred');
 
-        var SILENT = { silent: true };
+        var SILENT = {silent: true};
 
         /**
          * 加载一个数据
@@ -72,10 +72,9 @@ define(
                         }
                     );
                 }
-                else {
-                    var result = addDataToModel(value);
-                    return Deferred.resolved(result);
-                }
+
+                var result = addDataToModel(value);
+                return Deferred.resolved(result);
             }
             catch (ex) {
                 var error = buildError(ex);
@@ -121,10 +120,10 @@ define(
                     // 则需要加上对应的属性名。
                     // 其它情况下（值为嵌套的数组或对象），属性名将没有意义
                     if (typeof unit === 'function') {
-                        unit = { retrieve: unit, name: name };
+                        unit = {retrieve: unit, name: name};
                     }
                     else if (typeof unit.retrieve === 'function') {
-                        unit = util.mix({ name: name }, unit);
+                        unit = util.mix({name: name}, unit);
                     }
 
                     workers.push(load(model, unit));
@@ -153,7 +152,7 @@ define(
 
             // 是函数的话，函数即获取数据的函数，包装为数据获取配置项
             if (typeof datasource === 'function') {
-                var options = { retrieve: datasource, dump: true };
+                var options = {retrieve: datasource, dump: true};
                 return loadData(model, options);
             }
 
@@ -356,9 +355,8 @@ define(
                 if (Deferred.isPromise(preparing)) {
                     return preparing.fail(processError);
                 }
-                else {
-                    return preparing;
-                }
+
+                return preparing;
             }
             catch (ex) {
                 processError(ex);
@@ -552,9 +550,10 @@ define(
             if (!value || {}.toString.call(value) !== '[object Object]') {
                 return new Model();
             }
-            else {
-                return new Model(value);
-            }
+
+            /* eslint-disable no-use-before-define */
+            return new Model(value);
+            /* eslint-enable no-use-before-define */
         };
 
         /**
@@ -617,7 +616,9 @@ define(
          * @return {Model} 克隆后的新{@link Model}对象
          */
         exports.clone = function () {
+            /* eslint-disable no-use-before-define */
             return new Model(this.store);
+            /* eslint-enable no-use-before-define */
         };
 
         /**
@@ -655,7 +656,7 @@ define(
             }
         };
 
-        var Model = require('eoo').create(require('mini-event/EventTarget'), exports);
+        var Model = require('./inheritEventTarget')(exports);
 
         return Model;
     }

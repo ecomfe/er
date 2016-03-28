@@ -95,7 +95,7 @@ define(
                 return value;
             };
 
-            return { get: visit, relatedModel: model };
+            return {get: visit, relatedModel: model};
         };
 
         /**
@@ -137,7 +137,7 @@ define(
             container && (container.innerHTML = '');
         };
 
-        var View = require('eoo').create(require('mini-event/EventTarget'), exports);
+        var View = require('./inheritEventTarget')(exports);
         return View;
     }
 );

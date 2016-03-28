@@ -32,7 +32,7 @@ define(
             var html = '';
 
             try {
-                var html = template.render(tplName, model);
+                html = template.render(tplName, model);
             }
             catch (ex) {
             }

@@ -1043,7 +1043,7 @@ define(
             }, this);
         };
 
-        var Controller = require('eoo').create(require('mini-event/EventTarget'), exports);
+        var Controller = require('./inheritEventTarget')(exports);
         var instance = new Controller();
         instance.setLocator(require('./locator'));
         instance.setRouter(require('./router'));

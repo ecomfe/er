@@ -179,7 +179,7 @@ define(
         /**
          * 将当前枚举转换为数组，常用于下拉选择控件之类的数据源
          *
-         * @param {Mixed...} [hints] 用于生成数组的提示信息，数组中的每一项可以为字符串或者对象，
+         * @param {...Mixed} [hints] 用于生成数组的提示信息，数组中的每一项可以为字符串或者对象，
          * 为字符串时使用`alias`与字符串相同的{@link meta.EnumItem}对象，为对象时则直接将对象插入到当前位置。
          * 不提供此参数则直接将枚举按`value`属性进行排序生成数组返回
          * @return {meta.EnumItem[]} 每次返回一个全新的数组副本
@@ -199,12 +199,14 @@ define(
             }
             else {
                 // 必须做一次复制操作，不能让外部的修改影响枚举结构
+                /* eslint-disable no-redeclare */
                 for (var i = 0; i < this.valueIndex.length; i++) {
                     // 由于`value`不一定是连续的，所以一定要去除空项
                     if (this.valueIndex[i]) {
                         array.push(this.valueIndex[i]);
                     }
                 }
+                /* eslint-enable no-redeclare */
             }
             return array;
         };

@@ -24,13 +24,14 @@ define(
          * 通知一个错误的产生
          *
          * @param {Mixed} error 错误对象，如果是字符串则会被封装为一个Error对象
+         * @return {Error} 返回错误对象
          */
         exports.notifyError = function (error) {
             if (typeof error === 'string') {
                 error = new Error(error);
             }
 
-            this.fire('error', { error: error });
+            this.fire('error', {error: error});
 
             return error;
         };

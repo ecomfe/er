@@ -18,6 +18,7 @@ define(
          * @singleton
          */
         var permssion = {
+
             /**
              * 添加权限
              *

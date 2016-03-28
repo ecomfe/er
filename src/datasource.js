@@ -41,7 +41,7 @@ define(
         datasource.remote = function (url, options) {
             return function (model) {
                 options = require('./util').mix(
-                    { url: url, dataType: 'json' },
+                    {url: url, dataType: 'json'},
                     options
                 );
 
