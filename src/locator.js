@@ -47,6 +47,7 @@ define(
 
         /**
          * 执行hash变更的相关逻辑
+         *
          * @ignore
          */
         function forwardHash() {
@@ -141,6 +142,7 @@ define(
          * 根据输入的URL，进行处理后获取真实应该跳转的URL地址
          *
          * @param {string | URL} url 重定向的地址
+         * @return {string}
          */
         locator.resolveURL = function (url) {
             // 当类型为URL时，使用`toString`可转为正常的url字符串
@@ -163,6 +165,7 @@ define(
          *
          * @param {string | URL} url 重定向的地址
          * @param {meta.RedirectOption} options 额外附加的参数对象
+         * @return {boolean} 返回是否真正进行了跳转操作
          */
         locator.redirect = function (url, options) {
             options = options || {};

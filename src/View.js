@@ -95,7 +95,7 @@ define(
                 return value;
             };
 
-            return { get: visit, relatedModel: model };
+            return {get: visit, relatedModel: model};
         };
 
         /**

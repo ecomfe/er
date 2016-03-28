@@ -9,9 +9,8 @@
 define(
     function () {
         if (window.DEBUG) {
+
             /**
-             * @class assert
-             *
              * 断言函数
              *
              * 断言函数仅在开发期有效，当`window.DEBUG`属性为`true`时，
@@ -20,6 +19,7 @@ define(
              * 断言是[契约式编程](http://en.wikipedia.org/wiki/Design_by_contract)
              * 中很重要的一块，使用得当可以有效地提高程序的质量，因此ER提供了此功能
              *
+             * @class assert
              * @param {boolean} condition 断言结果
              * @param {string} message 断言结果为`false`时提示的信息
              * @singleton
@@ -116,16 +116,16 @@ define(
 
             return assert;
         }
-        else {
-            var assert = function () {};
-            assert.has = assert;
-            assert.equals = assert;
-            assert.hasProperty = assert;
-            assert.lessThan = assert;
-            assert.greaterThan = assert;
-            assert.lessThanOrEquals = assert;
-            assert.greaterThanOrEquals = assert;
-            return assert;
-        }
+
+
+        var noop = function () {};
+        noop.has = noop;
+        noop.equals = noop;
+        noop.hasProperty = noop;
+        noop.lessThan = noop;
+        noop.greaterThan = noop;
+        noop.lessThanOrEquals = noop;
+        noop.greaterThanOrEquals = noop;
+        return noop;
     }
 );

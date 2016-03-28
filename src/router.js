@@ -57,7 +57,7 @@ define(
                 this.backup(url);
             }
 
-            this.getEventBus().fire('route', { url: url, router: this });
+            this.getEventBus().fire('route', {url: url, router: this});
         }
 
         /**
@@ -67,7 +67,7 @@ define(
          * @param {Function} handler 匹配成功时执行的函数
          */
         exports.add = function (rule, handler) {
-            this.routes.push({ rule: rule, handler: handler });
+            this.routes.push({rule: rule, handler: handler});
         };
 
         /**

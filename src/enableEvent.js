@@ -9,7 +9,7 @@
 define(
     function (require) {
         function interopDefault(exports) {
-            return exports['__esModule'] ? exports.default : exports;
+            return exports.__esModule ? exports.default : exports;
         }
 
         var EventTarget = interopDefault(require('mini-event/EventTarget'));

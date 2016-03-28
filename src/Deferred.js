@@ -223,6 +223,7 @@ define(
              * @member Deferred
              * @static
              */
+            /* eslint-disable no-use-before-define */
             Deferred.fire(
                 'resolve',
                 {
@@ -231,6 +232,7 @@ define(
                     reason: this._args[0]
                 }
             );
+            /* eslint-enable no-use-before-define */
 
             tryFlush(this);
         };
@@ -257,6 +259,7 @@ define(
              * @member Deferred
              * @static
              */
+            /* eslint-disable no-use-before-define */
             Deferred.fire(
                 'reject',
                 {
@@ -265,6 +268,7 @@ define(
                     reason: this._args[0]
                 }
             );
+            /* eslint-enable no-use-before-define */
 
             tryFlush(this);
         };
@@ -288,7 +292,7 @@ define(
          */
         exports['catch'] = function (callback) {
             return this.then(null, callback);
-        }
+        };
 
         /**
          * @inheritdoc meta.Promise#ensure
@@ -301,7 +305,9 @@ define(
          * @inheritdoc meta.Promise#then
          */
         exports.then = function (done, fail) {
+            /* eslint-disable no-use-before-define */
             var deferred = new Deferred();
+            /* eslint-enable no-use-before-define */
             deferred.syncModeEnabled = this.syncModeEnabled;
 
             this._doneCallbacks.push(pipe(this, deferred, done, 'resolve'));
@@ -318,7 +324,7 @@ define(
         exports.thenGetProperty = function (propertyName) {
             var handler = function (result) {
                 return result[propertyName];
-            }
+            };
             return this.then(handler);
         };
 
@@ -380,7 +386,7 @@ define(
          *
          * 本方法对参数的方法与`Array.prototyp.concat`相同，任意一个参数是数组则会展开
          *
-         * @param {meta.Promise... | meta.Promise[]...} args 需要组合的对象
+         * @param {...meta.Promise} args 需要组合的对象
          * @return {meta.Promise}
          * @static
          */
@@ -435,7 +441,7 @@ define(
         /**
          * 返回一个已经处于`resolved`状态的{@link meta.Promise}对象
          *
-         * @param {Mixed...} args 用于调用{@link meta.Resolver#resolve}方法的参数
+         * @param {...Mixed} args 用于调用{@link meta.Resolver#resolve}方法的参数
          * @return {meta.Promise}
          * @static
          */
@@ -448,7 +454,7 @@ define(
         /**
          * 返回一个已经处于`rejected`状态的{@link meta.Promise}对象
          *
-         * @param {Mixed...} args 用于调用{@link meta.Resolver#reject}方法的参数
+         * @param {...Mixed} args 用于调用{@link meta.Resolver#reject}方法的参数
          * @return {meta.Promise}
          * @static
          */

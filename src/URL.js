@@ -38,9 +38,9 @@ define(
             searchSeparator = searchSeparator || '~';
 
             /**
-             * @method toString
-             *
              * 获取完整URL字符串
+             *
+             * @method toString
              *
              * @return {string} 当前URL的完整字符串表示
              * @override
@@ -50,9 +50,9 @@ define(
             };
 
             /**
-             * @method getPath
-             *
              * 获取path部分
+             *
+             * @method getPath
              *
              * @return {string} URL中的path部分
              */
@@ -61,9 +61,9 @@ define(
             };
 
             /**
-             * @method getSearch
-             *
              * 获取search部分
+             *
+             * @method getSearch
              *
              * @return {string} URL中的search部分
              */
@@ -74,9 +74,9 @@ define(
             var query = null;
 
             /**
-             * @method getQuery
-             *
              * 获取参数对象或指定参数的值
+             *
+             * @method getQuery
              *
              * @param {string} [key] 指定参数的名称，不传该参数则返回整个参数对象
              * @return {string | Object} 如果有`key`参数则返回对应值，
@@ -138,6 +138,7 @@ define(
                 }
             }
             // 再把`another`有的自身没有的加进去
+            /* eslint-disable no-redeclare */
             for (var key in anotherQuery) {
                 if (anotherQuery.hasOwnProperty(key) && !thisQuery.hasOwnProperty(key)) {
                     hasQueryDifference = true;
@@ -150,6 +151,7 @@ define(
                     queryDifferenceIndex[key] = diff;
                 }
             }
+            /* eslint-enable no-redeclare */
             result.queryDifference = queryDifference;
             result.query = hasQueryDifference ? queryDifferenceIndex : false;
 
@@ -170,7 +172,7 @@ define(
          * @static
          */
         URL.parse = function (url, options) {
-            var defaults = { querySeparator: '~' };
+            var defaults = {querySeparator: '~'};
             options = util.mix(defaults, options);
 
             // 考虑到未转义的参数的影响，此处不使用`split`函数
@@ -182,9 +184,8 @@ define(
                     options.querySeparator
                 );
             }
-            else {
-                return new URL(url, '', options.querySeparator);
-            }
+
+            return new URL(url, '', options.querySeparator);
         };
 
         /**
@@ -199,7 +200,7 @@ define(
          */
         URL.withQuery = function (path, query, options) {
             path = path + '';
-            var defaults = { querySeparator: '~' };
+            var defaults = {querySeparator: '~'};
             options = util.mix(defaults, options);
 
             var separator = path.indexOf(options.querySeparator) < 0

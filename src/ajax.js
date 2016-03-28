@@ -41,9 +41,11 @@ define(
                 case '[object Object]':
                     var result = [];
                     for (var name in data) {
-                        var propertyKey = getKey(name, prefix);
-                        var propertyValue = this.serializeData(propertyKey, data[name]);
-                        result.push(propertyValue);
+                        if (data.hasOwnProperty(name)) {
+                            var propertyKey = getKey(name, prefix);
+                            var propertyValue = this.serializeData(propertyKey, data[name]);
+                            result.push(propertyValue);
+                        }
                     }
                     return result.join('&');
                 default:
@@ -89,6 +91,7 @@ define(
             };
         };
 
+        /* eslint-disable fecs-max-statements */
         /**
          * 发起`XMLHttpRequest`请求
          *
@@ -119,10 +122,10 @@ define(
             if (typeof this.hooks.beforeCreate === 'function') {
                 var canceled = this.hooks.beforeCreate(options, requesting);
                 if (canceled === true) {
-                    var fakeXHR = requesting.promise;
-                    fakeXHR.abort = function () {};
-                    fakeXHR.setRequestHeader = function () {};
-                    return fakeXHR;
+                    var canceledFakeXHR = requesting.promise;
+                    canceledFakeXHR.abort = function () {};
+                    canceledFakeXHR.setRequestHeader = function () {};
+                    return canceledFakeXHR;
                 }
             }
 
@@ -167,7 +170,7 @@ define(
             };
             util.mix(fakeXHR, xhrWrapper);
 
-            var eventObject = { xhr: fakeXHR, options: options };
+            var eventObject = {xhr: fakeXHR, options: options};
             fakeXHR.then(
                 /**
                  * @event done
@@ -269,12 +272,12 @@ define(
             }
             else {
                 var contentType = options.contentType || 'application/x-www-form-urlencoded';
-                var query = this.hooks.serializeData('', options.data, contentType, fakeXHR);
+                var serializedData = this.hooks.serializeData('', options.data, contentType, fakeXHR);
                 if (options.charset) {
                     contentType += ';charset=' + options.charset;
                 }
                 xhr.setRequestHeader('Content-Type', contentType);
-                xhr.send(query);
+                xhr.send(serializedData);
             }
 
             if (options.timeout > 0) {
@@ -290,7 +293,7 @@ define(
                      */
                     this.fire(
                         'timeout',
-                        { xhr: fakeXHR, options: options }
+                        {xhr: fakeXHR, options: options}
                     );
                     fakeXHR.status = 408; // HTTP 408: Request Timeout
                     fakeXHR.abort();
@@ -304,6 +307,7 @@ define(
 
             return fakeXHR;
         };
+        /* eslint-enable fecs-max-statements */
 
         /**
          * 发起一个`GET`请求

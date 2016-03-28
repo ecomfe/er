@@ -32,8 +32,8 @@ define(
          * 混合多个对象
          *
          * @param {Object} source 源对象
-         * @param {Object...} destinations 用于混合的对象
-         * @return 返回混合了`destintions`属性的`source`对象
+         * @param {...Object} destinations 用于混合的对象
+         * @return {Object} 返回混合了`destintions`属性的`source`对象
          */
         util.mix = function (source) {
             for (var i = 1; i < arguments.length; i++) {
@@ -82,12 +82,11 @@ define(
         /**
          * 空函数
          *
-         * @property
-         * @type {Function}
+         * @property {Function} noop
          */
         util.noop = function () {};
 
-        var dontEnumBug = !(({ toString: 1 }).propertyIsEnumerable('toString'));
+        var dontEnumBug = !(({toString: 1}).propertyIsEnumerable('toString'));
 
         /**
          * 设置继承关系
@@ -104,9 +103,11 @@ define(
             var originalPrototype = type.prototype;
             type.prototype = proto;
 
+            /* eslint-disable guard-for-in */
             for (var key in originalPrototype) {
                 proto[key] = originalPrototype[key];
             }
+            /* eslint-enable guard-for-in */
             if (dontEnumBug) {
                 // 其实还有好多其它的，但应该不会撞上吧(╯‵□′)╯︵┻━┻
                 if (originalPrototype.hasOwnProperty('toString')) {
@@ -135,10 +136,9 @@ define(
             if (window.JSON && typeof JSON.parse === 'function') {
                 return JSON.parse(text);
             }
-            else {
-                /* jshint evil: true */
-                return new Function('return (' + text + ');')();
-            }
+
+            /* jshint evil: true */
+            return new Function('return (' + text + ');')();
         };
 
         var whitespace = /(^[\s\t\xa0\u3000]+)|([\u3000\xa0\s\t]+$)/g;
@@ -157,7 +157,7 @@ define(
          * 对字符中进行HTML编码
          *
          * @param {string} source 源字符串
-         * @param {string} HTML编码后的字符串
+         * @return {string} HTML编码后的字符串
          */
         util.encodeHTML = function (source) {
             source = source + '';
