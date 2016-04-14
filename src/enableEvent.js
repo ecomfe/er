@@ -13,7 +13,6 @@ define(
         }
 
         var EventTarget = interopDefault(require('mini-event/EventTarget'));
-        var util = require('./util');
 
         /**
          * 让一个对象拥有`mini-event.EventTarget`的功能
@@ -22,7 +21,12 @@ define(
          */
         return function enableEvent(target) {
             target.miniEventPool = {};
-            util.mix(target, EventTarget.prototype);
+            // 如果`mini-event`是使用ES6写的话，原型上的内容是不可遍历的，因此不能用`util.mix`，这里写死所有方法
+            target.on = EventTarget.prototype.on;
+            target.once = EventTarget.prototype.once;
+            target.un = EventTarget.prototype.un;
+            target.fire = EventTarget.prototype.fire;
+            target.destroyEvents = EventTarget.prototype.destroyEvents;
         };
     }
 );
