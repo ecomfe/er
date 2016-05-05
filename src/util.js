@@ -183,6 +183,38 @@ define(
             return element;
         };
 
+        util.isArray = function (target) {
+            return (Array.isArray
+                        ? Array.isArray(target)
+                        : Object.prototype.toString.call(target) === '[object Array]');
+        };
+
+        /**
+         * 复制property上的属性
+         * 只有当前属性和原型上的属性全等才clone一份
+         * 防止操作修改了原型上的内容 导致类型共享
+         *
+         * @param  {Object} context 对象
+         * @param  {string} proKey 属性名
+         */
+        util.cloneProtoProperty = function (context, proKey) {
+
+            /* eslint-disable */
+            var proValue = (context.__proto__ || context.constructor.prototype)[proKey];
+            /* eslint-enable */
+
+            if (proValue && context[proKey] === proValue) {
+                if (typeof proValue === 'object') {
+                    context[proKey] = util.isArray(proValue)
+                                        ? proValue.slice()
+                                        : util.mix({}, proValue);
+                }
+                else  {
+                    context[proKey] = proValue;
+                }
+            }
+        };
+
         return util;
     }
 );
