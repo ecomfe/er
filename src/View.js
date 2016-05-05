@@ -26,6 +26,12 @@ define(
         var exports = {};
 
         exports.constructor = function () {
+
+            // 如果prototype上的属性是引用类型，则复制一份，
+            // 防止因共享修改导致的问题
+            util.cloneProtoProperty(this, 'uiProperties');
+            util.cloneProtoProperty(this, 'uiEvents');
+
             this.initialize();
         };
 
