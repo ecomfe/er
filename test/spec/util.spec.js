@@ -96,23 +96,6 @@ define(function() {
 
         });
 
-        describe('`mix` method', function() {
-            it('should return the same object C', function() {
-                var a = {
-                    "a": 1
-                },
-                b = {
-                    "b" : 2
-                },
-                c = {
-                    "a" : 1,
-                    "b" : 2
-                };
-                expect(util.mix(a, b)).toEqual(c);
-                expect(util.mix(a, b)).not.toBe(c);
-            });
-        });
-
         describe('`bind` method', function() {
             it('should accept  a function', function() {
                 expect(function() { util.bind(function(){}) }).not.toThrow();
