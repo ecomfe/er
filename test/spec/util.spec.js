@@ -1,6 +1,6 @@
 define(function() {
     var util = require('er/util');
-    
+
     describe('util', function() {
         it('should export `guid` method', function() {
             expect(util.guid).toBeOfType('function');
@@ -33,7 +33,7 @@ define(function() {
         });
         describe('`mix` method', function() {
             it('should return the same object C', function() {
-                var a = { 
+                var a = {
                     "a": 1
                 },
                 b = {
@@ -47,13 +47,61 @@ define(function() {
                 expect(util.mix(a, b)).not.toBe(c);
             });
         });
-        
+
+        describe('`isArray` method', function () {
+            it('should be judge isArray', function () {
+                expect(util.isArray([])).toEqual(true);
+                expect(util.isArray({})).not.toBe(true);
+                expect(util.isArray(1)).not.toBe(true);
+                expect(util.isArray('111')).not.toBe(true);
+            });
+        });
+
+        describe('`cloneProtoProperty` method', function () {
+            it('object property clone not exists', function () {
+
+                function A() {}
+
+                A.prototype.a = {};
+
+                var instance = new A();
+                util.cloneProtoProperty(instance, 'a');
+                expect(instance.a === instance.constructor.prototype.a).toEqual(false);
+            });
+
+            it('object property clone exists', function () {
+
+                function A() {
+                    this.a = {a: 1};
+                }
+
+                A.prototype.a = {};
+
+                var instance = new A();
+                util.cloneProtoProperty(instance, 'a');
+                expect(instance.a.a === 1).toBeTruthy();
+            });
+
+            it('array property clone', function () {
+
+                function A() {}
+
+                A.prototype.a = [];
+
+                var instance = new A();
+                util.cloneProtoProperty(instance, 'a');
+                expect(instance.a === instance.constructor.prototype.a).toEqual(false);
+                expect(util.isArray(instance.a)).toBeTruthy();
+            });
+
+        });
+
         describe('`bind` method', function() {
             it('should accept  a function', function() {
                 expect(function() { util.bind(function(){}) }).not.toThrow();
             });
         });
-        
+
         describe('`inherits` method', function() {
             it('classA should be inherit superClassA', function() {
                 function SuperClassA() {}
