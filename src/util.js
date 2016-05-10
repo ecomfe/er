@@ -189,8 +189,7 @@ define(
         };
 
         /**
-         * 复制property上的属性
-         * 只有当前属性和原型上的属性全等才clone一份
+         * 复制prototype上的引用类型属性
          * 防止操作修改了原型上的内容 导致类型共享
          *
          * @param  {Object} context 对象
@@ -199,18 +198,17 @@ define(
         util.cloneProtoProperty = function (context, proKey) {
 
             /* eslint-disable */
-            var proValue = (context.__proto__ || context.constructor.prototype)[proKey];
+            var proValue = context[proKey];
             /* eslint-enable */
 
-            if (proValue && context[proKey] === proValue) {
-                if (typeof proValue === 'object') {
-                    context[proKey] = util.isArray(proValue)
-                                        ? proValue.slice()
-                                        : util.mix({}, proValue);
-                }
-                else  {
-                    context[proKey] = proValue;
-                }
+            if (!context.hasOwnProperty(proKey)
+                && proValue
+                && typeof proValue === 'object') {
+
+                context[proKey] = util.isArray(proValue)
+                                    ? proValue.slice()
+                                    : util.mix({}, proValue);
+
             }
         };
 
