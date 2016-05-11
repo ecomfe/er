@@ -182,36 +182,6 @@ define(
             return element;
         };
 
-        util.isArray = function (target) {
-            return (Array.isArray
-                        ? Array.isArray(target)
-                        : Object.prototype.toString.call(target) === '[object Array]');
-        };
-
-        /**
-         * 复制prototype上的引用类型属性
-         * 防止操作修改了原型上的内容 导致类型共享
-         *
-         * @param  {Object} context 对象
-         * @param  {string} proKey 属性名
-         */
-        util.cloneProtoProperty = function (context, proKey) {
-
-            /* eslint-disable */
-            var proValue = context[proKey];
-            /* eslint-enable */
-
-            if (!context.hasOwnProperty(proKey)
-                && proValue
-                && typeof proValue === 'object') {
-
-                context[proKey] = util.isArray(proValue)
-                                    ? proValue.slice()
-                                    : util.mix({}, proValue);
-
-            }
-        };
-
         return util;
     }
 );

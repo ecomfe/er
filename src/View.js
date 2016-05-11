@@ -29,8 +29,17 @@ define(
 
             // 如果prototype上的属性是引用类型，则复制一份，
             // 防止因共享修改导致的问题
-            util.cloneProtoProperty(this, 'uiProperties');
-            util.cloneProtoProperty(this, 'uiEvents');
+            if (!this.hasOwnProperty('uiProperties') && this.uiProperties) {
+                /* eslint-disable */
+                this.uiProperties = _.clone(this.uiProperties);
+                /* eslint-enable */
+            }
+
+            if (!this.hasOwnProperty('uiEvents') && this.uiEvents) {
+                /* eslint-disable */
+                this.uiEvents = _.clone(this.uiEvents);
+                /* eslint-enable */
+            }
 
             this.initialize();
         };
