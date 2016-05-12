@@ -1,6 +1,6 @@
 define(function() {
     var util = require('er/util');
-    
+
     describe('util', function() {
         it('should export `guid` method', function() {
             expect(util.guid).toBeOfType('function');
@@ -33,7 +33,7 @@ define(function() {
         });
         describe('`mix` method', function() {
             it('should return the same object C', function() {
-                var a = { 
+                var a = {
                     "a": 1
                 },
                 b = {
@@ -47,13 +47,13 @@ define(function() {
                 expect(util.mix(a, b)).not.toBe(c);
             });
         });
-        
+
         describe('`bind` method', function() {
             it('should accept  a function', function() {
                 expect(function() { util.bind(function(){}) }).not.toThrow();
             });
         });
-        
+
         describe('`inherits` method', function() {
             it('classA should be inherit superClassA', function() {
                 function SuperClassA() {}
