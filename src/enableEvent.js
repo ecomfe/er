@@ -8,11 +8,7 @@
  */
 define(
     function (require) {
-        function interopDefault(exports) {
-            return exports.__esModule ? exports.default : exports;
-        }
-
-        var EventTarget = interopDefault(require('mini-event/EventTarget'));
+        var EventTarget = require('./EventTarget');
 
         /**
          * 让一个对象拥有`mini-event.EventTarget`的功能

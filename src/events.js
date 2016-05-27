@@ -36,7 +36,7 @@ define(
             return error;
         };
 
-        var EventBus = require('eoo').create(require('mini-event/EventTarget'), exports);
+        var EventBus = require('eoo').create(require('./EventTarget'), exports);
         var instance = new EventBus();
         instance.EventBus = EventBus;
         return instance;

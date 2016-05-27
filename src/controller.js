@@ -813,7 +813,7 @@ define(
             };
             controller.childActionMapping[container.id] = info;
 
-            var EventTarget = require('mini-event/EventTarget');
+            var EventTarget = require('./EventTarget');
             if (action instanceof EventTarget) {
                 // 在Action销毁的时候要取消掉
                 action.on(

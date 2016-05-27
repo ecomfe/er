@@ -14,6 +14,6 @@ define(
          * @constructor
          * @deprecated 在4.0中移除，使用`mini-event.EventTarget`代替
          */
-        return require('mini-event/EventTarget');
+        return require('./EventTarget');
     }
 );
