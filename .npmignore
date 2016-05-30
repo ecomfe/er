@@ -1,0 +1,7 @@
+demo/
+dep/
+doc/
+jsduck/
+test/
+.fecsrc
+module.conf
