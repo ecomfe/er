@@ -200,7 +200,7 @@ define(
             // 如果prototype上的属性是引用类型，则复制一份，
             // 防止因共享修改导致的问题
             if (!this.hasOwnProperty('datasource') && this.datasource) {
-                this.datasource = Object.create ? Object.create(this.datasource) : u.clone(this.datasource);
+                this.datasource = u.clone(this.datasource);
             }
 
             if (context) {

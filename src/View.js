@@ -11,10 +11,6 @@ define(
         var util = require('./util');
         var u = require('underscore');
 
-        function create(oringin) {
-            return Object.create ? Object.create(oringin) : u.clone(oringin);
-        }
-
         /**
          * @class View
          *
@@ -35,11 +31,11 @@ define(
             // 如果prototype上的属性是引用类型，则复制一份，
             // 防止因共享修改导致的问题
             if (!this.hasOwnProperty('uiProperties') && this.uiProperties) {
-                this.uiProperties = create(this.uiProperties);
+                this.uiProperties = u.clone(this.uiProperties);
             }
 
             if (!this.hasOwnProperty('uiEvents') && this.uiEvents) {
-                this.uiEvents = create(this.uiEvents);
+                this.uiEvents = u.clone(this.uiEvents);
             }
 
             this.initialize();
