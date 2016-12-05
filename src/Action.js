@@ -314,7 +314,7 @@ define(
          * @param {meta.RedirectOption} [options] 额外附加的参数对象
          */
         exports.redirect = function (url, options) {
-            var locator = require('./locator');
+            var locator = require('./controller').getLocator();
             locator.redirect(url, options);
         };
 
@@ -322,7 +322,7 @@ define(
          * 重加载当前Action
          */
         exports.reload = function () {
-            var locator = require('./locator');
+            var locator = require('./controller').getLocator();
             locator.reload();
         };
 
