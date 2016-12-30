@@ -23,7 +23,7 @@ define(
                     window.setImmediate(fn);
                 }
                 : function (fn) {
-              ``      window.setTimeout(fn, 0);
+                    window.setTimeout(fn, 0);
                 };
         })();
 
