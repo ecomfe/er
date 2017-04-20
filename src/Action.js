@@ -125,7 +125,7 @@ define(
                     return require('./Deferred').resolved(this);
                 }
                 catch (e) {
-                    return require('./Deferred').reject(this);
+                    return require('./Deferred').rejected(this);
                 }
             }
         };
