@@ -119,9 +119,15 @@ define(
                     util.bind(reportErrors, this)
                 );
             }
-
-            this.forwardToView();
-            return require('./Deferred').resolved(this);
+            else {
+                try {
+                    this.forwardToView();
+                    return require('./Deferred').resolved(this);
+                }
+                catch (e) {
+                    return require('./Deferred').reject(this);
+                }
+            }
         };
 
         /**

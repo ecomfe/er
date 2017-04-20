@@ -102,6 +102,7 @@ define(
                         }
                     }
                     catch (error) {
+                        resolver.reject(error);
                         /**
                          * @event exception
                          *
@@ -122,7 +123,6 @@ define(
                                 reason: error
                             }
                         );
-                        resolver.reject(error);
                     }
                 }
                 // `.then()`及`.then(done, null)`时使用
