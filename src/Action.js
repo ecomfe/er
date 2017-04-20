@@ -294,6 +294,13 @@ define(
             }
 
             /**
+             * 如果Action本身也有dispose方法，则执行
+             */
+            if (typeof this.dispose === 'function') {
+                this.dispose();
+            }
+
+            /**
              * @event leave
              *
              * 离开Action后触发
