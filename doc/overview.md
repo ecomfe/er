@@ -1,6 +1,6 @@
 # ER框架
 
-ER是一个RIA（Rich Internet Application）框架，皆在提供一个单页式应用（OPOA）开发的核心解决方案。
+ER是一个RIA（Rich Internet Application）框架，旨在提供一个单页式应用（OPOA）开发的核心解决方案。
 
 ## 组件文档
 
