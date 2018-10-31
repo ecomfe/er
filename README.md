@@ -1,5 +1,6 @@
 # ER(Enterprise RIA) Framework
 
+
 ER 是一个富浏览器端web应用的框架，适用于并能很方便地构建一个整站式的AJAX web应用。
 
 ER具有如下特性：
